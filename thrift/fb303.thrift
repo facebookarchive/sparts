@@ -1,0 +1,1 @@
+../externals/thrift/contrib/fb303/if/fb303.thrift
