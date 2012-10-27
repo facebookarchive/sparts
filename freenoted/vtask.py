@@ -48,3 +48,7 @@ class VTask(object):
     @classmethod
     def _addArguments(cls, ap):
         pass
+
+
+class SkipTask(Exception):
+    pass

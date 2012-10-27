@@ -1,6 +1,7 @@
 import logging
 import sys
 from argparse import ArgumentParser
+from vtask import SkipTask
 
 class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
@@ -29,6 +30,8 @@ class VService(object):
             try:
                 if t.__name__ in tasks:
                     self.tasks.append(t(self))
+            except SkipTask:
+                pass
             except Exception as e:
                 self.logger.exception("Error creating task, %s", t.__name__)
                 exceptions.append(e)
