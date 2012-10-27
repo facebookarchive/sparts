@@ -4,6 +4,7 @@ from ..vtask import VTask
 
 from thrift.server.TNonblockingServer import TNonblockingServer
 from thrift.transport.TSocket import TServerSocket
+from thrift.Thrift import TProcessor
 
 class NBServerTask(VTask):
     DEFAULT_HOST = '0.0.0.0'
@@ -14,15 +15,26 @@ class NBServerTask(VTask):
 
     def initTask(self):
         super(NBServerTask, self).initTask()
-        self.socket = TServerSocket(self.getTaskOption('host'),
-                                    self.getTaskOption('port'))
+
+        self.socket = TServerSocket(
+            self.getTaskOption('host'), self.getTaskOption('port'))
         self.server = TNonblockingServer(
-            self, self.socket, threads=self.getTaskOption('threads'))
+            self.getProcessor(), self.socket,
+            threads=self.getTaskOption('threads'))
         self.server.prepare()
         self.bound_host, self.bound_port = \
             self.server.socket.handle.getsockname()
         self.logger.info("Server Started on %s:%s",
                          self.bound_host, self.bound_port)
+
+    def getProcessor(self):
+        if isinstance(self, TProcessor):
+            return self
+        elif isinstance(self.service, TProcessor):
+            return self.service
+        else:
+            raise Exception("Either %s or %s must subclass TProcessor" %
+                            (self.name, self.service.name))
 
     def stop(self):
         self.server.stop()
