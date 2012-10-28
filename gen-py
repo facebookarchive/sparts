@@ -1,4 +1,4 @@
 #!/bin/bash
-mkdir -p freenoted/gen
-touch freenoted/gen/__init__.py
-find ./thrift | xargs -n1 thrift -out freenoted/gen/ -v --gen py:new_style $1
+mkdir -p sparts/gen
+touch sparts/gen/__init__.py
+find ./thrift | xargs -n1 thrift -out sparts/gen/ -v --gen py:new_style $1

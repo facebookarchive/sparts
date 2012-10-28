@@ -1,1 +1,0 @@
-../externals/evernote-thrift/src/UserStore.thrift
