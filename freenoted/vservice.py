@@ -12,6 +12,7 @@ class VService(object):
         self.options = ns
         self.initLogging()
         self._stop = False
+        self._restart = False
         self.tasks = []
 
     def createTasks(self):
@@ -55,6 +56,15 @@ class VService(object):
                 return t
         raise Exception("Task %s not found in service" % name)
 
+    def shutdown(self):
+        self.logger.info("Received graceful shutdown request")
+        self.stop()
+
+    def reinitialize(self):
+        self.logger.info("Received graceful restart request")
+        self._restart = True
+        self.stop()
+
     def stop(self):
         self._stop = True
         for t in self.tasks:
@@ -76,12 +86,12 @@ class VService(object):
         for t in cls.TASKS:
             t._addArguments(ap)
         ns = ap.parse_args()
-        cls.initFromOptions(ns)
+        return cls.initFromOptions(ns)
 
     @classmethod
     def initFromOptions(cls, ns):
         instance = cls(ns)
-        cls.runloop(instance)
+        return cls.runloop(instance)
 
     @classmethod
     def runloop(cls, instance):
@@ -89,6 +99,9 @@ class VService(object):
             instance.createTasks()
             instance.startTasks()
             instance.join()
+
+            if instance._restart:
+                instance = cls(instance.options)
 
     @property
     def name(self):

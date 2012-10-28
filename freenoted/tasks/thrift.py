@@ -6,6 +6,8 @@ from thrift.server.TNonblockingServer import TNonblockingServer
 from thrift.transport.TSocket import TServerSocket
 from thrift.Thrift import TProcessor
 
+import time
+
 class NBServerTask(VTask):
     DEFAULT_HOST = '0.0.0.0'
     DEFAULT_PORT = 0
@@ -16,6 +18,7 @@ class NBServerTask(VTask):
     def initTask(self):
         super(NBServerTask, self).initTask()
 
+        self._stopped = False
         self.socket = TServerSocket(
             self.getTaskOption('host'), self.getTaskOption('port'))
         self.server = TNonblockingServer(
@@ -37,11 +40,15 @@ class NBServerTask(VTask):
                             (self.name, self.service.name))
 
     def stop(self):
+        self.server.close()
         self.server.stop()
+        self._stopped = True
 
     def _runloop(self):
         while not self.server._stop:
             self.server.serve()
+        while not self._stopped:
+            time.sleep(0.1)
 
     @classmethod
     def _addArguments(cls, ap):
