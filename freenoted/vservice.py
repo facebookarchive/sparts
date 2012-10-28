@@ -26,21 +26,22 @@ class VService(object):
         elif tasks is None:
             tasks = [t.__name__ for t in self.TASKS]
 
-        created = []
         for t in self.TASKS:
             if t.__name__ in tasks:
-                created.append(t(self))
+                self.tasks.append(t(self))
 
         exceptions = []
-        for t in created:
+        required = []
+        for t in self.tasks:
             try:
                 t.initTask()
-                self.tasks.append(t)
+                required.append(t)
             except SkipTask:
                 pass
             except Exception as e:
                 self.logger.exception("Error creating task, %s", t.name)
                 exceptions.append(e)
+        self.tasks = required
 
         if len(exceptions):
             raise Exception("Unable to start service (%d task start errors)" %
