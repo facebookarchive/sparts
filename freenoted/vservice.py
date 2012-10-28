@@ -107,6 +107,10 @@ class VService(object):
     def name(self):
         return self.__class__.__name__
 
+    @name.setter
+    def name(self, value):
+        pass
+
     def initLogging(self):
         logging.basicConfig(level=self.loglevel, stream=sys.stderr)
 
