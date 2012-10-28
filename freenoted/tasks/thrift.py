@@ -27,8 +27,8 @@ class NBServerTask(VTask):
         self.server.prepare()
         self.bound_host, self.bound_port = \
             self.server.socket.handle.getsockname()
-        self.logger.info("Server Started on %s:%s",
-                         self.bound_host, self.bound_port)
+        self.logger.info("%s Server Started on %s:%s",
+                         self.name, self.bound_host, self.bound_port)
 
     def makeProcessor(self):
         for inst in [self, self.service]:

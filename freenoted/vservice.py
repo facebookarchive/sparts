@@ -74,11 +74,13 @@ class VService(object):
         try:
             for t in self.tasks:
                 t.join()
+                self.logger.info("%s stopped", t.name)
         except KeyboardInterrupt:
             self.logger.info('KeyboardInterrupt Received!  Stopping Tasks...')
             self.stop()
             for t in self.tasks:
                 t.join()
+                self.logger.info("%s stopped", t.name)
 
     @classmethod
     def initFromCLI(cls):
