@@ -36,8 +36,8 @@ class VService(object):
             try:
                 t.initTask()
                 required.append(t)
-            except SkipTask:
-                pass
+            except SkipTask as e:
+                self.logger.info("Skipping %s (%s)", t.name, e)
             except Exception as e:
                 self.logger.exception("Error creating task, %s", t.name)
                 exceptions.append(e)
