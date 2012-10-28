@@ -22,7 +22,7 @@ class NBServerTask(VTask):
         self.socket = TServerSocket(
             self.getTaskOption('host'), self.getTaskOption('port'))
         self.server = TNonblockingServer(
-            self.getProcessor(), self.socket,
+            self.makeProcessor(), self.socket,
             threads=self.getTaskOption('threads'))
         self.server.prepare()
         self.bound_host, self.bound_port = \
@@ -30,14 +30,15 @@ class NBServerTask(VTask):
         self.logger.info("Server Started on %s:%s",
                          self.bound_host, self.bound_port)
 
-    def getProcessor(self):
-        if isinstance(self, TProcessor):
-            return self
-        elif isinstance(self.service, TProcessor):
-            return self.service
-        else:
-            raise Exception("Either %s or %s must subclass TProcessor" %
-                            (self.name, self.service.name))
+    def makeProcessor(self):
+        for inst in [self, self.service]:
+            module = getattr(inst, 'THRIFT', None)
+            if module is not None:
+                if issubclass(module.Processor, TProcessor):
+                    return module.Processor(inst)
+
+        raise Exception("Either %s or %s must define THRIFT as a TProcessor" %
+                        (self.name, self.service.name))
 
     def stop(self):
         self.server.close()
