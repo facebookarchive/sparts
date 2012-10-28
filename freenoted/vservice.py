@@ -49,6 +49,12 @@ class VService(object):
         for t in self.tasks:
             t.start()
 
+    def requireTask(self, name):
+        for t in self.tasks:
+            if t.name == name:
+                return t
+        raise Exception("Task %s not found in service" % name)
+
     def stop(self):
         self._stop = True
         for t in self.tasks:
