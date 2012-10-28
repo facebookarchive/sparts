@@ -12,7 +12,6 @@ class VTask(object):
     def __init__(self, service):
         self.service = service
         self.logger = logging.getLogger('%s.%s' % (service.name, self.name))
-        self.initTask()
 
     def initTask(self):
         self.thread = threading.Thread(target=self._runloop)

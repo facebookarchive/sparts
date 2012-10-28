@@ -25,15 +25,20 @@ class VService(object):
         elif tasks is None:
             tasks = [t.__name__ for t in self.TASKS]
 
-        exceptions = []
+        created = []
         for t in self.TASKS:
+            if t.__name__ in tasks:
+                created.append(t(self))
+
+        exceptions = []
+        for t in created:
             try:
-                if t.__name__ in tasks:
-                    self.tasks.append(t(self))
+                t.initTask()
+                self.tasks.append(t)
             except SkipTask:
                 pass
             except Exception as e:
-                self.logger.exception("Error creating task, %s", t.__name__)
+                self.logger.exception("Error creating task, %s", t.name)
                 exceptions.append(e)
 
         if len(exceptions):
