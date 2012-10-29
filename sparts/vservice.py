@@ -51,6 +51,7 @@ class VService(object):
     def startTasks(self):
         for t in self.tasks:
             t.start()
+        self.logger.debug("All tasks started")
 
     def requireTask(self, name):
         for t in self.tasks:
@@ -111,6 +112,8 @@ class VService(object):
 
             if instance._restart:
                 instance = cls(instance.options)
+
+        instance.logger.info("Instance shut down gracefully")
 
     @property
     def name(self):
