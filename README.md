@@ -28,7 +28,7 @@ Simply put, just subclass VService, and run initFromCLI() and you are done.
 
 For example, myservice.py:
 
-```
+```python
 from sparts.vservice import VService
 class MyService(VService):
     pass
@@ -64,7 +64,7 @@ or whatever.
 
 Here's a simple example of a service with tasks (requires tornado installed):
 
-```
+```python
 from sparts.vservice import VService
 from sparts.tasks.tornado import TornadoIOLoopTask, TornadoHTTPTask
 
