@@ -26,6 +26,7 @@ class TornadoIOLoopTask(VTask):
 
     def stop(self):
         self.ioloop.stop()
+        super(TornadoIOLoopTask, self).stop()
 
 
 class TornadoTask(VTask):
