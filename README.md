@@ -5,19 +5,22 @@ sparts is a python library that aims to eliminate as much of the boiler
 plate as possible, making it as dead simple to write new services with
 little to no code.
 
-= Design Goals =
+Design Goals
+============
 
 * Be able to implement services using sparts with as little code as possible
 * Support as many RPC transports as possible (thrift, http, dbus, etc)
 * Make it painless to integrate services that require custom IO loops
   (twisted, tornado, glib, etc)
 
-= Architecture =
+HOWTO
+=====
 
 A sparts service typically consists of two parts, the "service" definition, and
 its tasks.
 
-== Service ==
+Service
+-------
 
 `sparts.vtask.VService` - This is the meat of any service implemented on sparts.
 
@@ -49,7 +52,8 @@ INFO:VService:Instance shut down gracefully
 
 This is pretty damn useless.  That's where Tasks come into play
 
-== Tasks ==
+Tasks
+-----
 
 `sparts.vtask.VTask` - This is the base class for all tasks
 
