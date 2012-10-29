@@ -2,6 +2,7 @@ import logging
 import sys
 from argparse import ArgumentParser
 from vtask import SkipTask
+import time
 
 class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
@@ -76,6 +77,11 @@ class VService(object):
             for t in self.tasks:
                 t.join()
                 self.logger.info("%s stopped", t.name)
+
+            # If there are no remaining tasks (or this service has no tasks)
+            # just sleep until ^C is pressed
+            while not self._stop:
+                time.sleep(0.1)
         except KeyboardInterrupt:
             self.logger.info('KeyboardInterrupt Received!  Stopping Tasks...')
             self.stop()
