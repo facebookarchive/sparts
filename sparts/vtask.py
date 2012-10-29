@@ -52,7 +52,11 @@ class VTask(object):
 
     @classmethod
     def _addArguments(cls, ap):
-        pass
+        for k in dir(cls):
+            v = getattr(cls, k)
+            regfunc = getattr(v, '_addToArgumentParser', None)
+            if regfunc is not None:
+                regfunc(cls, ap)
 
 
 class SkipTask(Exception):
