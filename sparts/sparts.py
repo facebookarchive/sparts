@@ -15,8 +15,8 @@ class option(object):
             return self
 
         value = self._getter(obj)(self.name)
-        if type is not None:
-            value = type(value)
+        if self.type is not None:
+            value = self.type(value)
         return value
 
     def __set__(self, obj, value):
