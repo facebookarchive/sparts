@@ -43,7 +43,7 @@ class VTask(object):
     def _optName(cls, *args):
         name = cls.OPT_PREFIX or cls.__name__
         parts = [name]
-        parts.extend((p.lower() for p in args))
+        parts.extend((p.lower().replace('-', '_') for p in args))
         return '_'.join(parts)
 
     def getTaskOption(self, opt, default=None):
