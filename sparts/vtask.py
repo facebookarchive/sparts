@@ -19,7 +19,12 @@ class VTask(object):
         self.threads = []
         if not self.LOOPLESS:
             for i in xrange(self.workers):
-                self.threads.append(threading.Thread(target=self._runloop))
+                if self.workers == 1:
+                    name = self.name
+                else:
+                    name = '%s-%d' % (self.name, i + 1)
+                self.threads.append(
+                    threading.Thread(target=self._runloop, name=name))
 
     def start(self):
         if not self.LOOPLESS:
