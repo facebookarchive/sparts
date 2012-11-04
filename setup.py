@@ -6,10 +6,17 @@ import imp
 import pandoc.core
 
 
-pandoc.core.PANDOC_PATH = find_executable('pandoc')
-assert pandoc.core.PANDOC_PATH is not None, \
-    "'pandoc' is a required system binary to generate documentation.\n" \
-    "Please install it somewhere in your PATH to run this command."
+def require_binary(name):
+    path = find_executable(name)
+    assert path is not None, \
+        "'%s' is a required binary for building sparts.\n" \
+        "Please install it somewhere in your PATH to run this command." \
+        % (name)
+    return path
+
+
+pandoc.core.PANDOC_PATH = require_binary('pandoc')
+THRIFT = require_binary('thrift')
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -34,7 +41,7 @@ class gen_thrift(Command):
     def run(self):
         self.mkpath(os.path.join(ROOT, 'sparts', 'gen'))
         for f in os.listdir(os.path.join(ROOT, 'thrift')):
-            self.spawn(['thrift', '-out', os.path.join(ROOT, 'sparts', 'gen'),
+            self.spawn([THRIFT, '-out', os.path.join(ROOT, 'sparts', 'gen'),
                         '-v', '--gen', 'py:new_style',
                         os.path.join(ROOT, 'thrift', f)])
 
