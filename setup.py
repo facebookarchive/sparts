@@ -7,6 +7,10 @@ import pandoc.core
 
 
 pandoc.core.PANDOC_PATH = find_executable('pandoc')
+assert pandoc.core.PANDOC_PATH is not None, \
+    "'pandoc' is a required system binary to generate documentation.\n" \
+    "Please install it somewhere in your PATH to run this command."
+
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 def read(fname):
@@ -47,6 +51,7 @@ setup(
     long_description=read_md_as_rest("README.md"),
 
     install_requires=[],
+    setup_requires=['pyandoc'],
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
     license='ISC',
