@@ -58,7 +58,7 @@ setup(
     long_description=read_md_as_rest("README.md"),
 
     install_requires=[],
-    setup_requires=['pyandoc'],
+    setup_requires=['pyandoc', 'unittest2'],
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
     license='ISC',
