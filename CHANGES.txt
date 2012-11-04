@@ -5,6 +5,7 @@ CHANGES
 -----
 * task "workers" attribute to set number of worker threads
 * new task, sparts.tasks.queue.QueueTask
+* tweak thread name based on number of workers, worker id
 
 0.1.2
 -----

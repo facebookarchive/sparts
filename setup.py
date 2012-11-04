@@ -1,22 +1,21 @@
 from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py as _build_py
+from distutils.spawn import find_executable
 import os.path
-import re
 import imp
+import pandoc.core
 
 
+pandoc.core.PANDOC_PATH = find_executable('pandoc')
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 def read(fname):
     return open(os.path.join(ROOT, fname)).read()
 
-def read_md_summary(fname):
-    contents = read(fname)
-    m = re.match('(.*?)\n[^\n]+\n===', contents,
-                 flags=(re.DOTALL | re.MULTILINE))
-    if m:
-        return m.group(1)
-    return contents
+def read_md_as_rest(fname):
+    doc = pandoc.Document()
+    doc.markdown = read(fname)
+    return doc.rst
 
 def version():
     file, pathname, description = imp.find_module('sparts', [ROOT])
@@ -45,7 +44,7 @@ setup(
     version=version(),
     packages=find_packages(),
     description="Build services in python with as little code as possible",
-    long_description=read_md_summary("README.md"),
+    long_description=read_md_as_rest("README.md"),
 
     install_requires=[],
     author='Peter Ruibal',
