@@ -61,11 +61,13 @@ class TornadoHTTPTask(TornadoTask):
         self.server = tornado.httpserver.HTTPServer(self.app)
         self.server.listen(self.getTaskOption('port'),
                            self.getTaskOption('host'))
+        self.bound_addrs = []
         assert len(self.server._sockets) == 1
-        for socket in self.server._sockets.itervalues():
-            self.bound_host, self.bound_port = socket.getsockname()
-        self.logger.info("%s Server Started on %s:%s",
-                         self.name, self.bound_host, self.bound_port)
+        for sock in self.server._sockets.itervalues():
+            sockaddr = sock.getsockname()
+            self.bound_addrs.append(sockaddr)
+            self.logger.info("%s Server Started on %s (port %s)",
+                             self.name, sockaddr[0], sockaddr[1])
 
     def stop(self):
         super(TornadoHTTPTask, self).stop()
