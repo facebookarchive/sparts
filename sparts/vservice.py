@@ -71,7 +71,7 @@ class VService(object):
 
     def stop(self):
         self._stop = True
-        for t in self.tasks:
+        for t in reversed(self.tasks):
             t.stop()
 
     def join(self):
