@@ -1,0 +1,12 @@
+CHANGES
+=======
+
+0.1.2
+-----
+* reverse task stop order
+* improved ipv6 / multi-if support for HTTP
+* twisted reactor, base twisted tasks
+* re-generate (fb303) thrift bindings during setup.py build
+* argparse instantiation tweaks
+* serveBG() service method
+* added unittests
