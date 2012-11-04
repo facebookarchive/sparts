@@ -1,4 +1,0 @@
-#!/bin/bash
-mkdir -p sparts/gen
-touch sparts/gen/__init__.py
-find ./thrift -type f -or -type l | xargs -n1 thrift -out sparts/gen/ -v --gen py:new_style
