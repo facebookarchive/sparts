@@ -3,6 +3,7 @@ import sys
 from argparse import ArgumentParser
 from vtask import SkipTask
 import time
+import threading
 
 class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
@@ -93,8 +94,6 @@ class VService(object):
     @classmethod
     def initFromCLI(cls):
         ap = cls._makeArgumentParser()
-        for t in cls.TASKS:
-            t._addArguments(ap)
         ns = ap.parse_args()
         return cls.initFromOptions(ns)
 
@@ -115,6 +114,13 @@ class VService(object):
 
         instance.logger.info("Instance shut down gracefully")
 
+    def startBG(self):
+        self.createTasks()
+        self.startTasks()
+        t = threading.Thread(target=self.join)
+        t.start()
+        return t
+
     @property
     def name(self):
         return self.__class__.__name__
@@ -129,6 +135,13 @@ class VService(object):
     @classmethod
     def _makeArgumentParser(cls):
         ap = ArgumentParser()
+        cls._addArguments(ap)
+        for t in cls.TASKS:
+            t._addArguments(ap)
+        return ap
+
+    @classmethod
+    def _addArguments(cls, ap):
         ap.add_argument('--tasks', default=None, nargs='*', metavar='TASK',
                         help='Tasks to run.  Pass without args to see the '
                              'list.  If not passed, all tasks will be started') 

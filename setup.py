@@ -31,5 +31,7 @@ setup(
     author_email='ruibalp@gmail.com',
     license='ISC',
     keywords='service boostrap daemon thrift tornado',
-    url='http://github.com/fmoo/sparts'
+    url='http://github.com/fmoo/sparts',
+
+    test_suite="tests",
 )
