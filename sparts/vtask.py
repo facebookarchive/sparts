@@ -5,6 +5,7 @@ import threading
 class VTask(object):
     OPT_PREFIX = None
     LOOPLESS = False
+    workers = 1
 
     @property
     def name(self):
@@ -15,22 +16,24 @@ class VTask(object):
         self.logger = logging.getLogger('%s.%s' % (service.name, self.name))
 
     def initTask(self):
+        self.threads = []
         if not self.LOOPLESS:
-            self.thread = threading.Thread(target=self._runloop)
-        else:
-            self.thread = None
+            for i in xrange(self.workers):
+                self.threads.append(threading.Thread(target=self._runloop))
 
     def start(self):
         if not self.LOOPLESS:
-            self.thread.start()
+            for thread in self.threads:
+                thread.start()
 
     def stop(self):
         pass
 
     def join(self):
         if not self.LOOPLESS:
-            while self.thread.isAlive():
-                self.thread.join(0.5)
+            for thread in self.threads:
+                while thread.isAlive():
+                    thread.join(0.5)
 
     def _runloop(self):
         raise NotImplementedError()
