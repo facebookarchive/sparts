@@ -4,6 +4,7 @@ CHANGES
 0.1.3
 -----
 * task "workers" attribute to set number of worker threads
+* new task, sparts.tasks.queue.QueueTask
 
 0.1.2
 -----

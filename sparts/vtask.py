@@ -64,3 +64,13 @@ class VTask(object):
 
 class SkipTask(Exception):
     pass
+
+
+class TryLater(Exception):
+    pass
+
+
+class ExecuteContext(object):
+    def __init__(self, attempt=1, item=None):
+        self.attempt = attempt
+        self.item = item
