@@ -119,7 +119,7 @@ class DBusServiceTask(DBusTask):
             "You must pass a --{task}-bus-name"
 
     def start(self):
-        self.bus = dbus.SessionBus()
+        self.bus = dbus.SessionBus(private=True)
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
         self.dbus_options = VServiceDBusObject(self)
@@ -127,5 +127,5 @@ class DBusServiceTask(DBusTask):
 
     def stop(self):
         del(self.dbus_service)
-        self.bus.close()
+        #self.bus.close()
         super(DBusServiceTask, self).stop()
