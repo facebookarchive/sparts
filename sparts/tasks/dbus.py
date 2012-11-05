@@ -49,10 +49,10 @@ class VServiceDBusObject(dbus.service.Object):
     def shutdown(self):
         self.service.shutdown()
 
-    #@dbus.service.method(dbus_interface='org.sparts.Service',
-    #                     in_signature='', out_signature='')
-    #def restart(self):
-    #    self.service.reinitialize()
+    @dbus.service.method(dbus_interface='org.sparts.Service',
+                         in_signature='', out_signature='')
+    def restart(self):
+        self.service.reinitialize()
 
     @dbus.service.method(dbus_interface='org.sparts.Service',
                          in_signature='', out_signature='as')
