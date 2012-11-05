@@ -48,6 +48,8 @@ class option(object):
         if callable(default):
             default = default(task_cls)
 
-        ap.add_argument(name, type=self.type, default=default,
-                        help=self.help, action=self.action,
-                        metavar=self.metavar)
+        kwargs = dict(default=default, help=self.help, action=self.action)
+        if self.action is None:
+            kwargs['metavar'] = self.metavar
+            kwargs['type'] = self.type
+        ap.add_argument(name, **kwargs)

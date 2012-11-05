@@ -154,3 +154,12 @@ class VService(object):
     @property
     def loglevel(self):
         return getattr(logging, self.options.level)
+
+    def getOption(self, name):
+        return getattr(self.options, name)
+
+    def setOption(self, name, value):
+        setattr(self.options, name, value)
+
+    def getOptions(self):
+        return self.options.__dict__
