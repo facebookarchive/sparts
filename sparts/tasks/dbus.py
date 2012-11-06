@@ -62,6 +62,7 @@ class VServiceDBusObject(dbus.service.Object):
 
 class DBusMainLoopTask(VTask):
     THREADS_INITED = False
+    mainloop = None
 
     def initTask(self):
         super(DBusMainLoopTask, self).initTask()
@@ -84,8 +85,17 @@ class DBusMainLoopTask(VTask):
 
     def stop(self):
         super(DBusMainLoopTask, self).stop()
+
+        if self.mainloop is None:
+            return
+
         self.mainloop.quit()
 
+        # OK!  Apparently, there is some wonky destructor event handling that
+        # seems to work better than just calling .quit() in order to properly
+        # return full control of signal handling, threads, etc to the actual
+        # main process.
+        self.mainloop = None
 
 class DBusTask(VTask):
     def initTask(self):
