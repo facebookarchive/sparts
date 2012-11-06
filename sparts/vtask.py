@@ -24,7 +24,7 @@ class VTask(object):
                 else:
                     name = '%s-%d' % (self.name, i + 1)
                 self.threads.append(
-                    threading.Thread(target=self._runloop, name=name))
+                    threading.Thread(target=self._run, name=name))
 
     def start(self):
         if not self.LOOPLESS:
@@ -39,6 +39,13 @@ class VTask(object):
             for thread in self.threads:
                 while thread.isAlive():
                     thread.join(0.5)
+
+    def _run(self):
+        try:
+            self._runloop()
+        finally:
+            self.logger.debug('Thread %s exited',
+                              threading.currentThread().name)
 
     def _runloop(self):
         raise NotImplementedError()
