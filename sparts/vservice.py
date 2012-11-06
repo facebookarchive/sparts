@@ -78,7 +78,6 @@ class VService(object):
         try:
             for t in reversed(self.tasks):
                 t.join()
-                self.logger.info("%s stopped", t.name)
 
             # If there are no remaining tasks (or this service has no tasks)
             # just sleep until ^C is pressed
@@ -89,7 +88,6 @@ class VService(object):
             self.stop()
             for t in reversed(self.tasks):
                 t.join()
-                self.logger.info("%s stopped", t.name)
 
     @classmethod
     def initFromCLI(cls):
