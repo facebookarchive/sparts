@@ -86,6 +86,7 @@ class VService(object):
         self._stop = True
         for t in reversed(self.tasks):
             t.stop()
+            t.join()
 
     def join(self):
         try:
