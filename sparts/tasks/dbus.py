@@ -60,11 +60,11 @@ class VServiceDBusObject(dbus.service.Object):
         return [t.name for t in self.service.tasks]
 
 
-class DBusIOLoopTask(VTask):
+class DBusMainLoopTask(VTask):
     THREADS_INITED = False
 
     def initTask(self):
-        super(DBusIOLoopTask, self).initTask()
+        super(DBusMainLoopTask, self).initTask()
         needed = getattr(self.service, 'REQUIRE_DBUS', False)
         for t in self.service.tasks:
             if isinstance(t, DBusTask):
@@ -77,24 +77,24 @@ class DBusIOLoopTask(VTask):
         glib.threads_init()
         gobject.threads_init()
         dbus.mainloop.glib.threads_init()
-        self.ioloop = gobject.MainLoop()
+        self.mainloop = gobject.MainLoop()
 
     def _runloop(self):
-        self.ioloop.run()
+        self.mainloop.run()
 
     def stop(self):
-        super(DBusIOLoopTask, self).stop()
-        self.ioloop.quit()
+        super(DBusMainLoopTask, self).stop()
+        self.mainloop.quit()
 
 
 class DBusTask(VTask):
     def initTask(self):
         super(DBusTask, self).initTask()
-        self.ioloop_task = self.service.requireTask('DBusIOLoopTask')
+        self.mainloop_task = self.service.requireTask('DBusMainLoopTask')
 
     @property
-    def ioloop(self):
-        return self.ioloop_task.ioloop
+    def mainloop(self):
+        return self.mainloop_task.mainloop
 
 
 class DBusServiceTask(DBusTask):
