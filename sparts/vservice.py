@@ -76,7 +76,7 @@ class VService(object):
 
     def join(self):
         try:
-            for t in self.tasks:
+            for t in reversed(self.tasks):
                 t.join()
                 self.logger.info("%s stopped", t.name)
 
@@ -87,7 +87,7 @@ class VService(object):
         except KeyboardInterrupt:
             self.logger.info('KeyboardInterrupt Received!  Stopping Tasks...')
             self.stop()
-            for t in self.tasks:
+            for t in reversed(self.tasks):
                 t.join()
                 self.logger.info("%s stopped", t.name)
 
