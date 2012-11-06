@@ -4,6 +4,7 @@ from argparse import ArgumentParser
 from vtask import SkipTask
 import time
 import threading
+import signal
 
 class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
@@ -49,7 +50,16 @@ class VService(object):
             raise Exception("Unable to start service (%d task start errors)" %
                             len(exceptions))
 
+    def handleSigInt(self, signum, frame):
+        assert signum == signal.SIGINT
+        self.logger.info('SIGINT received')
+        self.shutdown()
+
     def startTasks(self):
+        # Things seem to fail more gracefully if we trigger the stop
+        # out of band (with a signal handler) instead of catching the
+        # KeyboardInterrupt...
+        signal.signal(signal.SIGINT,self.handleSigInt)
         for t in self.tasks:
             t.start()
         self.logger.debug("All tasks started")
