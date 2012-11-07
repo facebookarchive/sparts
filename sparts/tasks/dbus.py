@@ -2,6 +2,8 @@ from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
 from ..sparts import option
+from ..fb303.dbus import FacebookDbusService
+from .fb303 import FB303ProcessorTask
 
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
@@ -15,7 +17,8 @@ class VServiceDBusObject(dbus.service.Object):
         self.dbus_service = dbus_service
         self.service = self.dbus_service.service
         self.logger = self.dbus_service.logger
-        dbus.service.Object.__init__(self, self.dbus_service.bus, '/')
+        path = '/'.join(['', self.service.name, 'sparts'])
+        dbus.service.Object.__init__(self, self.dbus_service.bus, path)
 
     @dbus.service.method(dbus_interface='org.sparts.Service',
                          in_signature='s', out_signature='v')
@@ -132,7 +135,12 @@ class DBusServiceTask(DBusTask):
         self.bus = dbus.SessionBus(private=True)
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
-        self.dbus_options = VServiceDBusObject(self)
+
+        self.sparts_dbus = VServiceDBusObject(self)
+        task = self.service.getTask(FB303ProcessorTask)
+        if task is not None:
+            self.fb303_dbus = FacebookDbusService(
+                self.dbus_service, task.processor, self.service.name)
         super(DBusServiceTask, self).start()
 
     def stop(self):
