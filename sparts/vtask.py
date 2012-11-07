@@ -14,9 +14,9 @@ class VTask(object):
     def __init__(self, service):
         self.service = service
         self.logger = logging.getLogger('%s.%s' % (service.name, self.name))
+        self.threads = []
 
     def initTask(self):
-        self.threads = []
         if not self.LOOPLESS:
             for i in xrange(self.workers):
                 if self.workers == 1:

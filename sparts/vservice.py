@@ -10,6 +10,7 @@ class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
+    VERSION = ''
 
     def __init__(self, ns):
         super(VService, self).__init__()
@@ -19,6 +20,7 @@ class VService(object):
         self._stop = False
         self._restart = False
         self.tasks = []
+        self.start_time = time.time()
 
     def createTasks(self):
         tasks = self.options.tasks
@@ -70,8 +72,12 @@ class VService(object):
 
     def getTask(self, name):
         for t in self.tasks:
-            if t.name == name:
-                return t
+            if isinstance(name, str):
+                if t.name == name:
+                    return t
+            else:
+                if isinstance(t, name):
+                    return t
         return None
 
     def requireTask(self, name):
@@ -84,7 +90,7 @@ class VService(object):
         self.logger.info("Received graceful shutdown request")
         self.stop()
 
-    def reinitialize(self):
+    def restart(self):
         self.logger.info("Received graceful restart request")
         self._restart = True
         self.stop()

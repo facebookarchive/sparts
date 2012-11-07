@@ -4,9 +4,19 @@ from ..vtask import VTask
 
 from thrift.server.TNonblockingServer import TNonblockingServer
 from thrift.transport.TSocket import TServerSocket
-from thrift.Thrift import TProcessor
 
 import time
+
+
+class ThriftProcessorTask(VTask):
+    LOOPLESS = True
+    PROCESSOR = None 
+
+    def __init__(self, service):
+        super(ThriftProcessorTask, self).__init__(service)
+        assert self.PROCESSOR is not None
+        self.processor = self.PROCESSOR(self.service)
+
 
 class NBServerTask(VTask):
     DEFAULT_HOST = '0.0.0.0'
@@ -15,6 +25,16 @@ class NBServerTask(VTask):
 
     bound_host = bound_port = None
 
+    def getProcessor(self):
+        found = None
+        for task in self.service.tasks:
+            if isinstance(task, ThriftProcessorTask):
+                assert found is None, "Multiple processor tasks! (%s, %s)" % \
+                    (found.name, task.name)
+                found = task
+        assert found is not None, "No ThriftProcessorTask's found!"
+        return found.processor
+
     def initTask(self):
         super(NBServerTask, self).initTask()
 
@@ -22,23 +42,13 @@ class NBServerTask(VTask):
         self.socket = TServerSocket(
             self.getTaskOption('host'), self.getTaskOption('port'))
         self.server = TNonblockingServer(
-            self.makeProcessor(), self.socket,
+            self.getProcessor(), self.socket,
             threads=self.getTaskOption('threads'))
         self.server.prepare()
         self.bound_host, self.bound_port = \
             self.server.socket.handle.getsockname()
         self.logger.info("%s Server Started on %s:%s",
                          self.name, self.bound_host, self.bound_port)
-
-    def makeProcessor(self):
-        for inst in [self, self.service]:
-            module = getattr(inst, 'THRIFT', None)
-            if module is not None:
-                if issubclass(module.Processor, TProcessor):
-                    return module.Processor(inst)
-
-        raise Exception("Either %s or %s must define THRIFT as a TProcessor" %
-                        (self.name, self.service.name))
 
     def stop(self):
         self.server.close()
