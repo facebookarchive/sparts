@@ -1,6 +1,12 @@
 CHANGES
 =======
 
+0.2.0
+-----
+* Export FB303 over dbus
+* Implemented various other sparts-specific services for dbus
+* Some dbus API changes since 0.1.4 (forcing a minor version update)
+
 0.1.4
 -----
 * dbus tasks

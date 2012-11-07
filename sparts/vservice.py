@@ -102,6 +102,7 @@ class VService(object):
             t.join()
 
     def join(self):
+        self.logger.debug('VService Active.  Awaiting graceful shutdown.')
         try:
             for t in reversed(self.tasks):
                 t.join()
