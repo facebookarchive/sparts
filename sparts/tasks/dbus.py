@@ -10,6 +10,7 @@ import dbus
 import dbus.service
 import gobject
 import glib
+import time
 
 
 class VServiceDBusObject(dbus.service.Object):
@@ -61,6 +62,11 @@ class VServiceDBusObject(dbus.service.Object):
                          in_signature='', out_signature='as')
     def listTasks(self):
         return [t.name for t in self.service.tasks]
+
+    @dbus.service.method(dbus_interface='org.sparts.Service',
+                         in_signature='', out_signature='x')
+    def uptime(self):
+        return int(time.time() - self.service.start_time)
 
 
 class DBusMainLoopTask(VTask):
