@@ -6,7 +6,7 @@ from ..sparts import option
 class PeriodicTask(VTask):
     INTERVAL = None
 
-    interval = option('interval', type=int, metavar='SECONDS',
+    interval = option('interval', type=float, metavar='SECONDS',
                       default=lambda cls: cls.INTERVAL,
                       help='How often this task should run [%(default)s] (s)')
 
