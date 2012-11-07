@@ -87,3 +87,8 @@ And as you can see, you can curl the webserver:
 > curl localhost:8000
 Hello, world
 ```
+
+HALP
+====
+If you have any questions, comments, feedback, suggestions, etc, please feel free
+to contact me at any time at ruibalp@gmail.com or on irc.freenode in ##sparts
