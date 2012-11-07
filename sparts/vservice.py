@@ -12,6 +12,7 @@ class VService(object):
     TASKS = []
 
     def __init__(self, ns):
+        super(VService, self).__init__()
         self.logger = logging.getLogger(self.name)
         self.options = ns
         self.initLogging()
@@ -67,11 +68,17 @@ class VService(object):
             t.start()
         self.logger.debug("All tasks started")
 
-    def requireTask(self, name):
+    def getTask(self, name):
         for t in self.tasks:
             if t.name == name:
                 return t
-        raise Exception("Task %s not found in service" % name)
+        return None
+
+    def requireTask(self, name):
+        t = self.getTask(name)
+        if t is None:
+            raise Exception("Task %s not found in service" % name)
+        return t
 
     def shutdown(self):
         self.logger.info("Received graceful shutdown request")
