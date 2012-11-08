@@ -1,6 +1,7 @@
 from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py as _build_py
 from distutils.spawn import find_executable
+from glob import glob
 import os.path
 import imp
 import pandoc.core
@@ -40,7 +41,7 @@ class gen_thrift(Command):
         pass
     def run(self):
         self.mkpath(os.path.join(ROOT, 'sparts', 'gen'))
-        for f in os.listdir(os.path.join(ROOT, 'thrift')):
+        for f in glob(os.path.join(ROOT, 'thrift', '*.thrift')):
             self.spawn([THRIFT, '-out', os.path.join(ROOT, 'sparts', 'gen'),
                         '-v', '--gen', 'py:new_style',
                         os.path.join(ROOT, 'thrift', f)])
