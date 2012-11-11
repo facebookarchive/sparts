@@ -120,6 +120,7 @@ class DBusServiceTask(DBusTask):
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
     LOOPLESS = True
+    BUS_CLASS = VServiceDBusObject
 
     bus_name = option('bus-name', default=lambda cls: cls.BUS_NAME,
                       metavar='NAME',
@@ -142,7 +143,7 @@ class DBusServiceTask(DBusTask):
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
 
-        self.sparts_dbus = VServiceDBusObject(self)
+        self.sparts_dbus = self.BUS_CLASS(self)
         task = self.service.getTask(FB303ProcessorTask)
         if task is not None:
             self.fb303_dbus = FacebookDbusService(
