@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+0.2.1
+-----
+* Hooks to improve dbus extensibility
+
 0.2.0
 -----
 * Export FB303 over dbus
