@@ -69,4 +69,11 @@ setup(
     test_suite="tests",
     cmdclass={'gen_thrift': gen_thrift,
               'build_py': build_py},
+
+    classifiers=[
+        "Development Status :: 3 - Alpha",
+        "Topic :: Utilities",
+        "Topic :: Software Development :: Libraries :: Application Frameworks",
+        "License :: OSI Approved :: ISC License (ISCL)",
+    ],
 )
