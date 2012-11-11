@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+0.2.2
+-----
+* Add new DBusServiceTask::addHandlers() to make it easier to add handlers 
+
 0.2.1
 -----
 * Hooks to improve dbus extensibility

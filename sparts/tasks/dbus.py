@@ -134,7 +134,7 @@ class DBusServiceTask(DBusTask):
 
     def initTask(self):
         super(DBusServiceTask, self).initTask()
-        
+
         assert self.bus_name is not None, \
             "You must pass a --{task}-bus-name"
 
@@ -142,13 +142,15 @@ class DBusServiceTask(DBusTask):
         self.bus = dbus.SessionBus(private=True)
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
+        self.addHandlers()
+        super(DBusServiceTask, self).start()
 
+    def addHandlers(self):
         self.sparts_dbus = self.BUS_CLASS(self)
         task = self.service.getTask(FB303ProcessorTask)
         if task is not None:
             self.fb303_dbus = FacebookDbusService(
                 self.dbus_service, task.processor, self.service.name)
-        super(DBusServiceTask, self).start()
 
     def stop(self):
         del(self.dbus_service)
