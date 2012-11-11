@@ -18,8 +18,8 @@ class VServiceDBusObject(dbus.service.Object):
         self.dbus_service = dbus_service
         self.service = self.dbus_service.service
         self.logger = self.dbus_service.logger
-        path = '/'.join(['', self.service.name, 'sparts'])
-        dbus.service.Object.__init__(self, self.dbus_service.bus, path)
+        self.path = '/'.join(['', self.service.name, 'sparts'])
+        dbus.service.Object.__init__(self, self.dbus_service.bus, self.path)
 
     @dbus.service.method(dbus_interface='org.sparts.Service',
                          in_signature='s', out_signature='v')
