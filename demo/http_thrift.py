@@ -1,8 +1,8 @@
 from sparts.vservice import VService
 from sparts.tasks.thrift import NBServerTask
+from sparts.tasks.fb303 import FB303ProcessorTask
 from sparts.tasks.tornado import TornadoHTTPTask, TornadoIOLoopTask
 from sparts.tasks.tornado_thrift import TornadoThriftHandler
-from sparts.vfb303 import FacebookBase
 
 
 class MyHTTPTask(TornadoHTTPTask):
@@ -11,12 +11,8 @@ class MyHTTPTask(TornadoHTTPTask):
             ('/thrift', TornadoThriftHandler, dict(processor=self.service)),
         ]
 
-class MyHTTPThriftService(VService, FacebookBase):
-    TASKS=[NBServerTask, MyHTTPTask, TornadoIOLoopTask]
-
-    def __init__(self, *args, **kwargs):
-        VService.__init__(self, *args, **kwargs)
-        FacebookBase.__init__(self)
+class MyHTTPThriftService(VService):
+    TASKS=[NBServerTask, MyHTTPTask, TornadoIOLoopTask, FB303ProcessorTask]
 
 
 if __name__ == '__main__':
