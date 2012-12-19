@@ -16,6 +16,9 @@ class BaseSpartsTestCase(unittest2.TestCase):
         cls.logger = logging.getLogger('sparts.%s' % cls.__name__)
         super(BaseSpartsTestCase, cls).setUpClass()
 
+    def assertContains(self, item, arr, msg=''):
+        return self.assertIn(item, arr, msg)
+
 class MultiTaskTestCase(BaseSpartsTestCase):
     def requireTask(self, task_name):
         self.assertNotNone(self.service)

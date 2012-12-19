@@ -8,6 +8,10 @@ class QueueTask(VTask):
                      help='Number of threads to spawn to work on items from '
                           'its queue. [%(default)s]')
 
+    def execute(self, item, context):
+        """Implement this in your QueueTask subclasses"""
+        raise NotImplementedError()
+
     def initTask(self):
         super(QueueTask, self).initTask()
         self.queue = Queue()
@@ -25,12 +29,26 @@ class QueueTask(VTask):
             else:
                 context = ExecuteContext(item=item)
             try:
-                self.execute(item, context)
+                result = self.execute(item, context)
+                if context.deferred is not None:
+                    context.deferred.callback(result)
             except TryLater:
                 context.attempt += 1
                 self.queue.put(context)
+            except Exception as ex:
+                if context.deferred is not None:
+                    self.unhandled = None
+                    context.deferred.addErrback(self.unhandledErrback)
+                    context.deferred.errback(ex)
+                    if self.unhandled is not None:
+                        self.unhandled.raiseException()
+                else:
+                    raise
             finally:
                 self.queue.task_done()
 
-    def execute(self, item, context):
-        raise NotImplementedError()
+    def unhandledErrback(self, error):
+        self.unhandled = error
+        return None
+
+

@@ -83,6 +83,7 @@ class TryLater(Exception):
 
 
 class ExecuteContext(object):
-    def __init__(self, attempt=1, item=None):
+    def __init__(self, attempt=1, item=None, deferred=None):
         self.attempt = attempt
         self.item = item
+        self.deferred = deferred
