@@ -62,7 +62,6 @@ class TornadoHTTPTask(TornadoTask):
         self.server.listen(self.getTaskOption('port'),
                            self.getTaskOption('host'))
         self.bound_addrs = []
-        assert len(self.server._sockets) == 1
         for sock in self.server._sockets.itervalues():
             sockaddr = sock.getsockname()
             self.bound_addrs.append(sockaddr)
