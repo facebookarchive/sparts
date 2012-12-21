@@ -4,7 +4,6 @@ from distutils.spawn import find_executable
 from glob import glob
 import os.path
 import imp
-import pandoc.core
 
 
 def require_binary(name):
@@ -16,7 +15,10 @@ def require_binary(name):
     return path
 
 
-pandoc.core.PANDOC_PATH = require_binary('pandoc')
+pandoc_path = require_binary('pandoc')
+import pandoc.core
+pandoc.core.PANDOC_PATH = pandoc_path
+
 THRIFT = require_binary('thrift')
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
