@@ -4,12 +4,12 @@ from ..base import SingleTaskTestCase
 from twisted.internet.defer import Deferred
 
 
-class IncrementCounterTask(QueueTask):
+class NoopTask(QueueTask):
     def execute(self, item, context):
         return item
 
 class TestDeferredSuccess(SingleTaskTestCase):
-    TASK = IncrementCounterTask
+    TASK = NoopTask
 
     def setUp(self):
         super(TestDeferredSuccess, self).setUp()
