@@ -1,4 +1,5 @@
 import unittest2
+import unittest
 import logging
 
 from sparts.vservice import VService
@@ -16,6 +17,24 @@ class BaseSpartsTestCase(unittest2.TestCase):
         cls.logger = logging.getLogger('sparts.%s' % cls.__name__)
         super(BaseSpartsTestCase, cls).setUpClass()
 
+    def setUp(self):
+        if not hasattr(unittest.TestCase, 'setUpClass'):
+            cls = self.__class__
+            if not hasattr(cls, '_unittest2_setup'):
+                cls.setUpClass()
+                cls._unittest2_setup = 0
+            cls._unittest2_setup += 1
+
+    def tearDown(self):
+        if not hasattr(unittest.TestCase, 'tearDownClass'):
+            cls = self.__class__
+            if not hasattr(cls, '_unittest2_setup'):
+                cls._unittest2_setup = 0
+            else:
+                cls._unittest2_setup -= 1
+            if cls._unittest2_setup == 0:
+                cls.tearDownClass()
+
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
 
@@ -26,6 +45,7 @@ class MultiTaskTestCase(BaseSpartsTestCase):
 
     TASKS = []
     def setUp(self):
+        super(MultiTaskTestCase, self).setUp()
         self.assertNotEmpty(self.TASKS)
 
         class TestService(VService):
@@ -48,11 +68,11 @@ class SingleTaskTestCase(MultiTaskTestCase):
 
     @classmethod
     def setUpClass(cls):
+        super(SingleTaskTestCase, cls).setUpClass()
         if cls.TASK:
             cls.TASKS = [cls.TASK]
-        super(SingleTaskTestCase, cls).setUpClass()
 
     def setUp(self):
         self.assertNotNone(self.TASK)
-        MultiTaskTestCase.setUp(self)
+        super(SingleTaskTestCase, self).setUp()
         self.task = self.service.requireTask(self.TASK.__name__)
