@@ -1,10 +1,16 @@
 from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
+from ..sparts import option
 
 import tornado.ioloop
 import tornado.web
 import tornado.httpserver
+import tornado.netutil
+
+import grp
+import os
+
 
 class TornadoIOLoopTask(VTask):
     OPT_PREFIX = 'tornado'
@@ -44,23 +50,44 @@ class TornadoHTTPTask(TornadoTask):
     OPT_PREFIX = 'http'
     DEFAULT_PORT = 0
     DEFAULT_HOST = ''
+    DEFAULT_SOCK = ''
 
-    @classmethod
-    def _addArguments(cls, ap):
-        super(TornadoHTTPTask, cls)._addArguments(ap)
-        ap.add_argument(cls._loptName('host'), default=cls.DEFAULT_HOST,
-                        metavar='HOST',
-                        help='Address to bind server to [%(default)s]')
-        ap.add_argument(cls._loptName('port'), type=int, metavar='PORT',
-                        default=cls.DEFAULT_PORT,
-                        help='Port to run server on [%(default)s]')
+    host = option('host', metavar='HOST', default=lambda cls: cls.DEFAULT_HOST,
+                  help='Address to bind server to [%(default)s]')
+    port = option('port', metavar='PORT', default=lambda cls: cls.DEFAULT_PORT,
+                  help='Port to run server on [%(default)s]')
+    sock = option('sock', metavar='PATH', default=lambda cls: cls.DEFAULT_SOCK,
+                  help='Default path to use for local file socket '
+                       '[%(default)s]')
+    group = option('sock-group', metavar='GROUP', default='',
+                   help='Group to create unix files as [%(default)s]')
 
     def initTask(self):
         super(TornadoHTTPTask, self).initTask()
+
         self.app = tornado.web.Application(self.getApplicationConfig())
         self.server = tornado.httpserver.HTTPServer(self.app)
-        self.server.listen(self.getTaskOption('port'),
-                           self.getTaskOption('host'))
+
+        if self.sock:
+            assert self.host == self.DEFAULT_HOST, \
+                "Do not specify host *and* sock (%s, %s)" % \
+                (self.host, self.sock)
+            assert int(self.port) == self.DEFAULT_PORT, \
+                "Do not specify port *and* sock (%s, %s)" % \
+                (self.port, self.DEFAULT_PORT)
+
+            gid, mode = -1, 0600
+            if self.group != '':
+                e = grp.getgrnam(self.group)
+                gid, mode = e.gr_gid, 0660
+
+            sock = tornado.netutil.bind_unix_socket(self.sock, mode=mode)
+            if gid != -1:
+                os.chown(self.sock, -1, gid)
+            self.server.add_sockets([sock])
+        else:
+            self.server.listen(self.port, self.host)
+
         self.bound_addrs = []
         for sock in self.server._sockets.itervalues():
             sockaddr = sock.getsockname()
