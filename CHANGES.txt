@@ -4,6 +4,9 @@ CHANGES
 0.2.2
 -----
 * Add new DBusServiceTask::addHandlers() to make it easier to add handlers 
+* Fix TornadoTask to support binding multiple interfaces properly
+* Add deferred / callback support to QueueTask
+* Support binding TornadoTask to a UNIX socket
 
 0.2.1
 -----
