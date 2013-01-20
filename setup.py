@@ -15,21 +15,12 @@ def require_binary(name):
     return path
 
 
-pandoc_path = require_binary('pandoc')
-import pandoc.core
-pandoc.core.PANDOC_PATH = pandoc_path
-
 THRIFT = require_binary('thrift')
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 def read(fname):
     return open(os.path.join(ROOT, fname)).read()
-
-def read_md_as_rest(fname):
-    doc = pandoc.Document()
-    doc.markdown = read(fname)
-    return doc.rst
 
 def version():
     file, pathname, description = imp.find_module('sparts', [ROOT])
@@ -53,15 +44,16 @@ class build_py(_build_py):
         self.run_command('gen_thrift')
         _build_py.run(self)
 
+
 setup(
     name="sparts",
     version=version(),
     packages=find_packages(),
     description="Build services in python with as little code as possible",
-    long_description=read_md_as_rest("README.md"),
+    long_description=read("README.rst"),
 
     install_requires=[],
-    setup_requires=['pyandoc', 'unittest2'],
+    setup_requires=['unittest2'],
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
     license='ISC',
