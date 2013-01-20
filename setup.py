@@ -43,9 +43,10 @@ if THRIFT is not None:
     cmdclass = {'gen_thrift': gen_thrift,
                 'build_py': build_py}
 
+VERSION = version()
 setup(
     name="sparts",
-    version=version(),
+    version=VERSION,
     packages=find_packages(),
     description="Build services in python with as little code as possible",
     long_description=read("README.rst"),
@@ -57,6 +58,7 @@ setup(
     license='ISC',
     keywords='service boostrap daemon thrift tornado',
     url='http://github.com/fmoo/sparts',
+    download_url='https://github.com/fmoo/sparts/archive/%s.tar.gz' % VERSION,
 
     test_suite="tests",
     cmdclass=cmdclass,
