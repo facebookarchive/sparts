@@ -6,16 +6,7 @@ import os.path
 import imp
 
 
-def require_binary(name):
-    path = find_executable(name)
-    assert path is not None, \
-        "'%s' is a required binary for building sparts.\n" \
-        "Please install it somewhere in your PATH to run this command." \
-        % (name)
-    return path
-
-
-THRIFT = require_binary('thrift')
+THRIFT = find_executable('thrift')
 
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
@@ -45,6 +36,13 @@ class build_py(_build_py):
         _build_py.run(self)
 
 
+cmdclass = {}
+# If we have a thrift compiler installed, let's use it to re-generate
+# the .py files.  If not, we'll use the pre-generated ones.
+if THRIFT is not None:
+    cmdclass = {'gen_thrift': gen_thrift,
+                'build_py': build_py}
+
 setup(
     name="sparts",
     version=version(),
@@ -61,8 +59,7 @@ setup(
     url='http://github.com/fmoo/sparts',
 
     test_suite="tests",
-    cmdclass={'gen_thrift': gen_thrift,
-              'build_py': build_py},
+    cmdclass=cmdclass,
 
     classifiers=[
         "Development Status :: 3 - Alpha",
