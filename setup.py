@@ -105,6 +105,9 @@ setup(
 
     install_requires=[],
     setup_requires=['unittest2'],
+    extras_require={
+        'thrift': ['thrift'],
+    },
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
     license='ISC',
