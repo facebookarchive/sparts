@@ -99,7 +99,7 @@ VERSION = version()
 setup(
     name="sparts",
     version=VERSION,
-    packages=find_packages(),
+    packages=find_packages(exclude=['tests', 'tests.*']),
     description="Build services in python with as little code as possible",
     long_description=read("README.rst"),
 
