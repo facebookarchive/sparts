@@ -1,6 +1,10 @@
 CHANGES
 =======
 
+0.2.2.2
+-------
+* Remove unittests from distro
+
 0.2.2.1
 -------
 * Support building/installing via pip
