@@ -24,10 +24,13 @@ class PeriodicTask(VTask):
         while not self.service._stop:
             t0 = time.time()
             self.execute()
-            to_sleep = time.time() - (t0 + self.interval)
+            to_sleep = (t0 + self.interval) - time.time()
             if to_sleep > 0:
                 if self.stop_event.wait(to_sleep):
                     return
+            else:
+                #self.incrementCounter('n_slow_intervals')
+                pass
 
     def execute(self, context=None):
         self.logger.debug('execute')
