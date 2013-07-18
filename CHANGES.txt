@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.2.3
+-----
+* Fix a bad bug in PeriodicTask
+* Support runit installation if psutil is installed
+
 0.2.2.2
 -------
 * Remove unittests from distro
