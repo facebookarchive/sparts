@@ -21,3 +21,7 @@ class PollerTask(PeriodicTask):
     def fetch(self):
         self.logger.debug('fetch')
         return None
+
+    def getValue(self, timeout=None):
+        self.fetched.wait(timeout)
+        return self.current_value
