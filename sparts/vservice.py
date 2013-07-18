@@ -1,10 +1,13 @@
+from __future__ import absolute_import
 import logging
 import sys
 from argparse import ArgumentParser
-from vtask import SkipTask
+from .vtask import SkipTask
 import time
 import threading
 import signal
+from .deps import HAS_PSUTIL
+
 
 class VService(object):
     DEFAULT_LOGLEVEL = 'DEBUG'
@@ -23,6 +26,9 @@ class VService(object):
         self.start_time = time.time()
 
     def createTasks(self):
+        if self.getOption('install'):
+            self.install()
+
         tasks = self.options.tasks
         if tasks == []:
             print "Available Tasks:"
@@ -168,6 +174,9 @@ class VService(object):
 
     @classmethod
     def _addArguments(cls, ap):
+        if HAS_PSUTIL:
+            ap.add_argument('--runit-install', action='store_true',
+                            help='Install this service under runit.')
         ap.add_argument('--tasks', default=None, nargs='*', metavar='TASK',
                         help='Tasks to run.  Pass without args to see the '
                              'list.  If not passed, all tasks will be started') 
@@ -181,11 +190,19 @@ class VService(object):
     def loglevel(self):
         return getattr(logging, self.options.level)
 
-    def getOption(self, name):
-        return getattr(self.options, name)
+    def getOption(self, name, default=None):
+        return getattr(self.options, name, default)
 
     def setOption(self, name, value):
         setattr(self.options, name, value)
 
     def getOptions(self):
         return self.options.__dict__
+
+    def install(self):
+        if not HAS_PSUTIL:
+            raise NotImplementedError("You need psutil installed to install "
+                                      "under runit")
+        import sparts.runit
+        sparts.runit.install(self.name)
+        sys.exit(0)
