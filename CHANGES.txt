@@ -5,6 +5,8 @@ CHANGES
 -------
 * Add blocking getValue(timeout=None) to PollerTask
 * Fix --runit-install bug
+* Implement DEPS for VTask declarative dependencies
+* Fix subclass bug in VService.requireTask() and .getTask()
 
 0.2.3
 -----

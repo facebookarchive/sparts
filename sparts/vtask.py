@@ -5,6 +5,7 @@ import threading
 class VTask(object):
     OPT_PREFIX = None
     LOOPLESS = False
+    DEPS = []
     workers = 1
 
     @property
@@ -87,3 +88,16 @@ class ExecuteContext(object):
         self.attempt = attempt
         self.item = item
         self.deferred = deferred
+
+
+def resolve_dependencies(task_classes):
+    result = []
+    for t in task_classes:
+        assert issubclass(t, VTask)
+        for dep in resolve_dependencies(t.DEPS):
+            if dep not in result:
+                result.append(dep)
+
+        if t not in result:
+            result.append(t)
+    return result
