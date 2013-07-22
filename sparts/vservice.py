@@ -26,7 +26,7 @@ class VService(object):
         self.start_time = time.time()
 
     def createTasks(self):
-        if self.getOption('install'):
+        if self.getOption('runit_install'):
             self.install()
 
         tasks = self.options.tasks

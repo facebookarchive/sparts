@@ -4,6 +4,7 @@ CHANGES
 0.2.3.1
 -------
 * Add blocking getValue(timeout=None) to PollerTask
+* Fix --runit-install bug
 
 0.2.3
 -----

@@ -84,7 +84,7 @@ def make_run_script_for_args(args):
     # TODO - unittest this
     parts = []
     for arg in args:
-        if arg == '--install':
+        if arg == '--runit-install':
             continue
 
         if os.path.exists(arg):
