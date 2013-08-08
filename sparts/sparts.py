@@ -1,9 +1,33 @@
+class _Nameable(object):
+    def __init__(self, name):
+        self.name = name
+
+    def _getNameForIdentifier(self, name):
+        return name
 
 
-class option(object):
+class counter(_Nameable):
+    def __init__(self, name=None):
+        super(counter, self).__init__(name)
+        self.value = 0.0
+
+    def __int__(self):
+        return int(self.value)
+
+    def increment(self):
+        self.incrementBy(1.0)
+
+    def incrementBy(self, value):
+        self.value += 0
+
+    def reset(self, value):
+        self.value = value
+
+
+class option(_Nameable):
     def __init__(self, name=None, type=str, default=None, help=None,
                  action=None, metavar=None):
-        self.name = name 
+        super(option, self).__init__(name)
         self.type = type
         self.default = default
         self.help = help
@@ -53,3 +77,6 @@ class option(object):
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
         ap.add_argument(name, **kwargs)
+
+    def _getNameForIdentifier(self, name):
+        return name.replace('_', '-')

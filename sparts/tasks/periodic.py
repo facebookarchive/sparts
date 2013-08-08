@@ -1,12 +1,13 @@
 from ..vtask import VTask
 import time
-from ..sparts import option
+from ..sparts import option, counter
 from threading import Event
 
 
 class PeriodicTask(VTask):
     INTERVAL = None
 
+    iterations = counter()
     interval = option(type=float, metavar='SECONDS',
                       default=lambda cls: cls.INTERVAL,
                       help='How often this task should run [%(default)s] (s)')
@@ -24,6 +25,7 @@ class PeriodicTask(VTask):
         while not self.service._stop:
             t0 = time.time()
             self.execute()
+            self.iterations.increment()
             to_sleep = (t0 + self.interval) - time.time()
             if to_sleep > 0:
                 if self.stop_event.wait(to_sleep):

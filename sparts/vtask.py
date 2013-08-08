@@ -1,17 +1,17 @@
 import logging
 import threading
-from .sparts import option
+from .sparts import _Nameable
 
 
 class _NameHelper(type):
     def __new__(cls, name, bases, attrs):
         for k, v in attrs.iteritems():
             # Assign `name` for options
-            if not isinstance(v, option):
+            if not isinstance(v, _Nameable):
                 continue
             if v.name is not None:
                 continue
-            v.name = k.replace('_', '-')
+            v.name = v._getNameForIdentifier(k)
         return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
 
 
