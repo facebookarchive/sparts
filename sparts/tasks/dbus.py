@@ -108,9 +108,11 @@ class DBusMainLoopTask(VTask):
         self.mainloop = None
 
 class DBusTask(VTask):
+    DEPS = [DBusMainLoopTask]
+
     def initTask(self):
         super(DBusTask, self).initTask()
-        self.mainloop_task = self.service.requireTask('DBusMainLoopTask')
+        self.mainloop_task = self.service.requireTask(DBusMainLoopTask)
 
     @property
     def mainloop(self):
