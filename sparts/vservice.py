@@ -176,6 +176,7 @@ class VService(object):
 
     @classmethod
     def _addArguments(cls, ap):
+        # TODO: Use declarative options, like we do on tasks
         if HAS_PSUTIL:
             ap.add_argument('--runit-install', action='store_true',
                             help='Install this service under runit.')

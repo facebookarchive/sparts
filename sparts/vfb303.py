@@ -36,9 +36,11 @@ class VServiceFB303Processor(FacebookService.Processor):
         return ''
 
     def getCounters(self):
+        # TODO: Implement counters
         return {}
 
-    def getCounter(self):
+    def getCounter(self, name):
+        # TODO: Implement counters
         return 0
 
     def setOption(self, name, value):

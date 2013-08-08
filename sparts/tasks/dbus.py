@@ -38,6 +38,7 @@ class VServiceDBusObject(dbus.service.Object):
     def getOptions(self):
         result = {}
         for k, v in self.service.getOptions().iteritems():
+            # dbus doesn't support serializing None as a variant
             if v is None:
                 v = '__None__'
             result[k] = v
