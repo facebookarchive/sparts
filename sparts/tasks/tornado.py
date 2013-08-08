@@ -52,14 +52,14 @@ class TornadoHTTPTask(TornadoTask):
     DEFAULT_HOST = ''
     DEFAULT_SOCK = ''
 
-    host = option('host', metavar='HOST', default=lambda cls: cls.DEFAULT_HOST,
+    host = option(metavar='HOST', default=lambda cls: cls.DEFAULT_HOST,
                   help='Address to bind server to [%(default)s]')
-    port = option('port', metavar='PORT', default=lambda cls: cls.DEFAULT_PORT,
+    port = option(metavar='PORT', default=lambda cls: cls.DEFAULT_PORT,
                   help='Port to run server on [%(default)s]')
-    sock = option('sock', metavar='PATH', default=lambda cls: cls.DEFAULT_SOCK,
+    sock = option(metavar='PATH', default=lambda cls: cls.DEFAULT_SOCK,
                   help='Default path to use for local file socket '
                        '[%(default)s]')
-    group = option('sock-group', metavar='GROUP', default='',
+    group = option(name='sock-group', metavar='GROUP', default='',
                    help='Group to create unix files as [%(default)s]')
 
     def initTask(self):

@@ -35,9 +35,8 @@ class SpamClientFactory(ClientFactory):
 class SpamTask(TwistedTask):
     """Spams a user with a random number every 10 seconds"""
     LOOPLESS = True
-    host = option('host', default='irc.ubuntu.com', help='[%(default)s]')
-    port = option('port', default=6667, type=int,
-                  help='[%(default)s]')
+    host = option(default='irc.ubuntu.com', help='[%(default)s]')
+    port = option(default=6667, type=int, help='[%(default)s]')
 
     spamuser = option('spamuser', default=None, type=str,
                       help='user to spam every n seconds')

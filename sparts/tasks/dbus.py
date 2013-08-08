@@ -122,13 +122,12 @@ class DBusServiceTask(DBusTask):
     LOOPLESS = True
     BUS_CLASS = VServiceDBusObject
 
-    bus_name = option('bus-name', default=lambda cls: cls.BUS_NAME,
-                      metavar='NAME',
+    bus_name = option(default=lambda cls: cls.BUS_NAME, metavar='NAME',
                       help='Bus Name.  Should be something like '
                            '"com.sparts.AwesomeService"')
-    replace = option('replace', action='store_true', type=bool,
+    replace = option(action='store_true', type=bool,
         default=False, help='Replace, and enable replacing of this service')
-    queue = option('queue', action='store_true', type=bool,
+    queue = option(action='store_true', type=bool,
         default=False, help='If not --{task}-replace, will wait to take '
                             'this bus name')
 

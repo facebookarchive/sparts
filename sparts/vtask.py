@@ -1,5 +1,18 @@
 import logging
 import threading
+from .sparts import option
+
+
+class _NameHelper(type):
+    def __new__(cls, name, bases, attrs):
+        for k, v in attrs.iteritems():
+            # Assign `name` for options
+            if not isinstance(v, option):
+                continue
+            if v.name is not None:
+                continue
+            v.name = k.replace('_', '-')
+        return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
 
 
 class VTask(object):
@@ -7,6 +20,7 @@ class VTask(object):
     LOOPLESS = False
     DEPS = []
     workers = 1
+    __metaclass__ = _NameHelper
 
     @property
     def name(self):

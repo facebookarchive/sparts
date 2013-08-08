@@ -4,7 +4,7 @@ from Queue import Queue, Empty
 
 class QueueTask(VTask):
     WORKERS = 1
-    workers = option('workers', type=int, default=lambda cls: cls.WORKERS,
+    workers = option(type=int, default=lambda cls: cls.WORKERS,
                      help='Number of threads to spawn to work on items from '
                           'its queue. [%(default)s]')
 

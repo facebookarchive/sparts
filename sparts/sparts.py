@@ -1,9 +1,9 @@
 
 
 class option(object):
-    def __init__(self, name, type=str, default=None, help=None,
+    def __init__(self, name=None, type=str, default=None, help=None,
                  action=None, metavar=None):
-        self.name = name
+        self.name = name 
         self.type = type
         self.default = default
         self.help = help

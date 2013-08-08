@@ -5,7 +5,7 @@ import socket
 
 class HostCheckTask(PeriodicTask):
     INTERVAL=5
-    check_name = option('check-name', default=socket.getfqdn(), type=str,
+    check_name = option(default=socket.getfqdn(), type=str,
                         help='Name to check [%(default)s]')
     def execute(self, *args, **kwargs):
         self.logger.info("LOOKUP %s => %s", self.check_name,
