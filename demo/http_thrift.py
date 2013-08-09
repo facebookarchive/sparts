@@ -10,10 +10,14 @@ FB303ProcessorTask.register()
 
 
 class MyHTTPTask(TornadoHTTPTask):
+    DEPS = [FB303ProcessorTask]
+
     def getApplicationConfig(self):
         return [
-            ('/thrift', TornadoThriftHandler, dict(processor=self.service)),
+            ('/thrift', TornadoThriftHandler,
+                dict(processor=self.service.requireTask(FB303ProcessorTask))),
         ]
+
 MyHTTPTask.register()
 
 

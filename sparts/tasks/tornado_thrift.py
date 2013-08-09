@@ -7,6 +7,8 @@ from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
 class TornadoThriftHandler(tornado.web.RequestHandler):
     def initialize(self, processor):
+        if hasattr(processor, 'processor'):
+            processor = processor.processor
         self.processor = processor
     
     def post(self):
