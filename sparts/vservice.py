@@ -7,9 +7,10 @@ import time
 import threading
 import signal
 from .deps import HAS_PSUTIL
+from .sparts import _SpartsObject
 
 
-class VService(object):
+class VService(_SpartsObject):
     DEFAULT_LOGLEVEL = 'DEBUG'
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
@@ -213,3 +214,6 @@ class VService(object):
         import sparts.runit
         sparts.runit.install(self.name)
         sys.exit(0)
+
+    def getChildren(self):
+        return dict((t.name, t) for t in self.tasks)

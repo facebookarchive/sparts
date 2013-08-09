@@ -1,27 +1,15 @@
 import logging
 import threading
-from .sparts import _Nameable
+from .sparts import _SpartsObject
 
-
-class _NameHelper(type):
-    def __new__(cls, name, bases, attrs):
-        for k, v in attrs.iteritems():
-            # Assign `name` for options
-            if not isinstance(v, _Nameable):
-                continue
-            if v.name is not None:
-                continue
-            v.name = v._getNameForIdentifier(k)
-        return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
 
 _REGISTERED_TASKS = set()
 
-class VTask(object):
+class VTask(_SpartsObject):
     OPT_PREFIX = None
     LOOPLESS = False
     DEPS = []
     workers = 1
-    __metaclass__ = _NameHelper
 
     @property
     def name(self):

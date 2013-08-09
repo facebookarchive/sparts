@@ -1,6 +1,7 @@
 from collections import deque
 import time
 
+
 class SampleType:
     """Pass an array of these in the `types` paremeter to `sample()`"""
     COUNT = 'count'
@@ -58,6 +59,9 @@ class _BaseCounter(_Nameable, _Bindable):
 
     def add(self, value):
         raise NotImplementedError()
+
+    def __call__(self):
+        return self.getvalue()
 
     def __int__(self):
         return int(self.getvalue())
@@ -245,6 +249,15 @@ class samples(_Nameable, _Bindable):
         self.dirty = False
         return result
 
+    def getCounter(self, name, default=None):
+        return self.getCounters().get(name, default)
+
+    def iterkeys(self):
+        for type in self.types:
+            for window in self.windows:
+                yield self.name + '.' + type + '.' + str(window)
+        # TODO: Infinite Windows
+            
 
 class option(_Nameable):
     def __init__(self, name=None, type=str, default=None, help=None,
@@ -302,3 +315,51 @@ class option(_Nameable):
 
     def _getNameForIdentifier(self, name):
         return name.replace('_', '-')
+
+
+class _NameHelper(type):
+    def __new__(cls, name, bases, attrs):
+
+        for k, v in attrs.iteritems():
+            # Assign `name` for options
+            if not isinstance(v, _Nameable):
+                continue
+            if v.name is not None:
+                continue
+            v.name = v._getNameForIdentifier(k)
+        return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
+
+
+class _SpartsObject(object):
+    __metaclass__ = _NameHelper
+
+    def __new__(cls, *args, **kwargs):
+        inst = super(_SpartsObject, cls).__new__(cls, *args, **kwargs)
+        inst.counters = {}
+        #for k, v in cls.__dict__.iteritems():
+        for k in dir(cls):
+            v = getattr(cls, k)
+            if isinstance(v, _BaseCounter):
+                inst.counters[v.name] = v
+            elif isinstance(v, samples):
+                for subcounter in v.iterkeys():
+                    inst.counters[subcounter] = \
+                        lambda: v.getCounter(subcounter) 
+        return inst
+
+    def getCounters(self):
+        result = {}
+        for k in self.counters:
+            result[k] = self.getCounter(k)
+
+        for cn, c in self.getChildren().iteritems():
+            for k in c.counters:
+                result[cn + '.' + k] = c.getCounter(k)
+
+        return result
+
+    def getCounter(self, name):
+        return self.counters.get(name, lambda: None)
+
+    def getChildren(self):
+        return {}
