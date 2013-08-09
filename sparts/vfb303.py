@@ -2,7 +2,6 @@ from .fb303 import FacebookService
 from .fb303.ttypes import fb_status
 
 
-
 class VServiceFB303Processor(FacebookService.Processor):
     def __init__(self, service):
         FacebookService.Processor.__init__(self, self)

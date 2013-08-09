@@ -10,7 +10,7 @@ class TornadoThriftHandler(tornado.web.RequestHandler):
         if hasattr(processor, 'processor'):
             processor = processor.processor
         self.processor = processor
-    
+
     def post(self):
         iprot = TBinaryProtocol(TMemoryBuffer(self.request.body))
         oprot = TBinaryProtocol(TMemoryBuffer())

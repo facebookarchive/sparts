@@ -26,6 +26,7 @@ class NBServerTask(VTask):
     bound_host = bound_port = None
 
     def getProcessor(self):
+        """Automatically find the ThriftProcessorTask subclass"""
         found = None
         for task in self.service.tasks:
             if isinstance(task, ThriftProcessorTask):
