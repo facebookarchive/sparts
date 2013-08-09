@@ -1,7 +1,7 @@
 from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
-from ..sparts import option
+from ..sparts import option, counter  #, samples, SampleType
 
 import tornado.ioloop
 import tornado.web
@@ -52,6 +52,10 @@ class TornadoHTTPTask(TornadoTask):
     DEFAULT_HOST = ''
     DEFAULT_SOCK = ''
 
+    requests = counter()
+    #latency = samples(windows=[60, 3600],
+    #                  types=[SampleType.AVG, SampleType.MIN, SampleType.MAX])
+
     host = option(metavar='HOST', default=lambda cls: cls.DEFAULT_HOST,
                   help='Address to bind server to [%(default)s]')
     port = option(metavar='PORT', default=lambda cls: cls.DEFAULT_PORT,
@@ -65,7 +69,10 @@ class TornadoHTTPTask(TornadoTask):
     def initTask(self):
         super(TornadoHTTPTask, self).initTask()
 
-        self.app = tornado.web.Application(self.getApplicationConfig())
+        self.app = tornado.web.Application(
+            self.getApplicationConfig(),
+            log_function=self.tornadoRequestLog)
+
         self.server = tornado.httpserver.HTTPServer(self.app)
 
         if self.sock:
@@ -94,6 +101,9 @@ class TornadoHTTPTask(TornadoTask):
             self.bound_addrs.append(sockaddr)
             self.logger.info("%s Server Started on %s (port %s)",
                              self.name, sockaddr[0], sockaddr[1])
+
+    def tornadoRequestLog(self, handler):
+        self.requests.increment()
 
     def stop(self):
         super(TornadoHTTPTask, self).stop()
