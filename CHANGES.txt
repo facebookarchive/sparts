@@ -1,17 +1,21 @@
 CHANGES
 =======
 
-0.2.3.1
--------
-* Add blocking getValue(timeout=None) to PollerTask
-* Fix --runit-install bug
+0.3.0
+-----
 * Implement DEPS for VTask declarative dependencies
-* Fix subclass bug in VService.requireTask() and .getTask()
+* Declarative Counters and Samples support
+* "name" is no longer required for declarative options
+* Add blocking getValue(timeout=None) to PollerTask
+* bugfix for subclasses in VService.requireTask() and .getTask()
+* bugfix in runit support
 
 0.2.3
 -----
-* Fix a bad bug in PeriodicTask
+* Implemented PollerTask
 * Support runit installation if psutil is installed
+* bugfix in PeriodicTask when calculating sleep times
+
 
 0.2.2.2
 -------
@@ -20,7 +24,6 @@ CHANGES
 0.2.2.1
 -------
 * Support building/installing via pip
-
 
 0.2.2
 -----

@@ -36,7 +36,7 @@ class VService(object):
             for t in all_tasks:
                 print " - %s" % t.__name__
             sys.exit(1)
-            
+
         if selected_tasks is None:
             selected_tasks = [t.__name__ for t in all_tasks]
 
@@ -182,7 +182,7 @@ class VService(object):
                             help='Install this service under runit.')
         ap.add_argument('--tasks', default=None, nargs='*', metavar='TASK',
                         help='Tasks to run.  Pass without args to see the '
-                             'list.  If not passed, all tasks will be started') 
+                             'list.  If not passed, all tasks will be started')
         ap.add_argument('--level', default=cls.DEFAULT_LOGLEVEL,
                         help='Log Level [%(default)s]')
         ap.add_argument('--dryrun', action='store_true',
