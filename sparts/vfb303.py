@@ -35,12 +35,19 @@ class VServiceFB303Processor(FacebookService.Processor):
         return ''
 
     def getCounters(self):
-        # TODO: Implement counters
-        return {}
+        result = {}
+        for k, v in self.service.getCounters().iteritems():
+            v = v()
+            if v is None:
+                continue
+            result[k] = int(v)
+        return result
 
     def getCounter(self, name):
-        # TODO: Implement counters
-        return 0
+        result = self.service.getCounter(name)()
+        if result is None:
+            raise ValueError("%s is None" % (name))
+        return int(result)
 
     def setOption(self, name, value):
         if value == '__None__':
