@@ -3,11 +3,14 @@ CHANGES
 
 0.3.0
 -----
-* Declarative Counters and Samples support
+* Declarative heirarchical Counters and Samples support
+* FB303 integration with sparts counters
 * "name" is no longer required for declarative options
 * Support global Task registry as an alternetive to VService subclassing
 * Implement DEPS for VTask declarative dependencies
 * Add blocking getValue(timeout=None) to PollerTask
+* Minor logging improvements, new counter for TornadoHTTPTask
+* bugfix in http_thrift demo
 * bugfix for subclasses in VService.requireTask() and .getTask()
 * bugfix in runit support
 
