@@ -36,6 +36,8 @@ class TornadoIOLoopTask(VTask):
 
 
 class TornadoTask(VTask):
+    DEPS = [TornadoIOLoopTask]
+
     def initTask(self):
         super(TornadoTask, self).initTask()
         self.ioloop_task = self.service.requireTask('TornadoIOLoopTask')
