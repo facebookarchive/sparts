@@ -3,9 +3,10 @@ CHANGES
 
 0.3.0
 -----
-* Implement DEPS for VTask declarative dependencies
 * Declarative Counters and Samples support
 * "name" is no longer required for declarative options
+* Support global Task registry as an alternetive to VService subclassing
+* Implement DEPS for VTask declarative dependencies
 * Add blocking getValue(timeout=None) to PollerTask
 * bugfix for subclasses in VService.requireTask() and .getTask()
 * bugfix in runit support

@@ -2,7 +2,7 @@ from __future__ import absolute_import
 import logging
 import sys
 from argparse import ArgumentParser
-from .vtask import SkipTask, resolve_dependencies
+from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
 import time
 import threading
 import signal
@@ -29,7 +29,9 @@ class VService(object):
         if self.getOption('runit_install'):
             self.install()
 
-        all_tasks = resolve_dependencies(self.TASKS)
+        all_tasks = set(self.TASKS).union(get_registered_tasks())
+        all_tasks = resolve_dependencies(all_tasks)
+
         selected_tasks = self.options.tasks
         if selected_tasks == []:
             print "Available Tasks:"
@@ -169,7 +171,9 @@ class VService(object):
     def _makeArgumentParser(cls):
         ap = ArgumentParser()
         cls._addArguments(ap)
-        for t in resolve_dependencies(cls.TASKS):
+
+        all_tasks = set(cls.TASKS).union(get_registered_tasks())
+        for t in resolve_dependencies(all_tasks):
             # TODO: Add each tasks' arguments to an argument group
             t._addArguments(ap)
         return ap

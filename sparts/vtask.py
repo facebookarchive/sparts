@@ -14,6 +14,7 @@ class _NameHelper(type):
             v.name = v._getNameForIdentifier(k)
         return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
 
+_REGISTERED_TASKS = set()
 
 class VTask(object):
     OPT_PREFIX = None
@@ -87,6 +88,14 @@ class VTask(object):
             regfunc = getattr(v, '_addToArgumentParser', None)
             if regfunc is not None:
                 regfunc(cls, ap)
+
+    @classmethod
+    def register(cls):
+        _REGISTERED_TASKS.add(cls)
+
+
+def get_registered_tasks():
+    return _REGISTERED_TASKS.copy()
 
 
 class SkipTask(Exception):
