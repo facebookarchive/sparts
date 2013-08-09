@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+0.3.1
+-----
+
 0.3.0
 -----
 * Declarative heirarchical Counters and Samples support
