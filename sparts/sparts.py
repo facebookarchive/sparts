@@ -261,13 +261,14 @@ class samples(_Nameable, _Bindable):
 
 class option(_Nameable):
     def __init__(self, name=None, type=str, default=None, help=None,
-                 action=None, metavar=None):
+                 action=None, metavar=None, required=False):
         super(option, self).__init__(name)
         self.type = type
         self.default = default
         self.help = help
         self.action = action
         self.metavar = metavar
+        self.required = required
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -307,7 +308,8 @@ class option(_Nameable):
         if callable(default):
             default = default(task_cls)
 
-        kwargs = dict(default=default, help=self.help, action=self.action)
+        kwargs = dict(default=default, help=self.help, action=self.action,
+                      required=self.required)
         if self.action is None:
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
