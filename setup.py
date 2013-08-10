@@ -107,6 +107,7 @@ setup(
     setup_requires=['unittest2'],
     extras_require={
         'thrift': ['thrift'],
+        'tornado': ['tornado'],
     },
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
