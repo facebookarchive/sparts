@@ -125,5 +125,7 @@ setup(
         "Topic :: Utilities",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "License :: OSI Approved :: ISC License (ISCL)",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 2 :: Only"
     ],
 )
