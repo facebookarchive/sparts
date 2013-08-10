@@ -108,6 +108,7 @@ setup(
     extras_require={
         'thrift': ['thrift'],
         'tornado': ['tornado'],
+        'twisted': ['Twisted'],
     },
     author='Peter Ruibal',
     author_email='ruibalp@gmail.com',
