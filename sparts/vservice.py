@@ -15,6 +15,7 @@ class VService(_SpartsObject):
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
     VERSION = ''
+    _name = None
 
     def __init__(self, ns):
         super(VService, self).__init__()
@@ -128,10 +129,13 @@ class VService(_SpartsObject):
                 t.join()
 
     @classmethod
-    def initFromCLI(cls):
+    def initFromCLI(cls, name=None):
         ap = cls._makeArgumentParser()
         ns = ap.parse_args()
-        return cls.initFromOptions(ns)
+        instance = cls.initFromOptions(ns)
+        if name is not None:
+            instance.name = name
+        return instance
 
     @classmethod
     def initFromOptions(cls, ns):
@@ -159,11 +163,13 @@ class VService(_SpartsObject):
 
     @property
     def name(self):
-        return self.__class__.__name__
+        if self._name is None:
+            self._name = self.__class__.__name__
+        return self._name
 
     @name.setter
     def name(self, value):
-        pass
+        self._name = value
 
     def initLogging(self):
         logging.basicConfig(level=self.loglevel, stream=sys.stderr)
