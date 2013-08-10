@@ -1,6 +1,11 @@
 CHANGES
 =======
 
+0.3.2
+-----
+* Support for `required` option()s
+* Make TornadoTask (subclasses) implicitly DEP TornadoIOLoopTask
+
 0.3.1
 -----
 * Declarative heirarchical Counters and Samples support
