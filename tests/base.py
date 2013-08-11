@@ -38,24 +38,37 @@ class BaseSpartsTestCase(unittest2.TestCase):
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
 
-class MultiTaskTestCase(BaseSpartsTestCase):
-    def requireTask(self, task_name):
-        self.assertNotNone(self.service)
-        return self.service.requireTask(task_name)
 
-    TASKS = []
+class ServiceTestCase(BaseSpartsTestCase):
+    def getServiceClass(self):
+        return VService
+
     def setUp(self):
-        super(MultiTaskTestCase, self).setUp()
-        self.assertNotEmpty(self.TASKS)
+        super(ServiceTestCase, self).setUp()
 
-        class TestService(VService):
-            TASKS=self.TASKS
+        TestService = self.getServiceClass()
 
         ap = TestService._makeArgumentParser()
         ns = ap.parse_args(['--level', 'DEBUG'])
         self.service = TestService(ns)
         self.runloop = self.service.startBG()
 
+
+class MultiTaskTestCase(ServiceTestCase):
+    TASKS = []
+
+    def requireTask(self, task_name):
+        self.assertNotNone(self.service)
+        return self.service.requireTask(task_name)
+
+    def getServiceClass(self):
+        self.assertNotEmpty(self.TASKS)
+        class TestService(VService):
+            TASKS=self.TASKS
+        return TestService
+
+    def setUp(self):
+        super(MultiTaskTestCase, self).setUp()
         for t in self.TASKS:
             self.service.requireTask(t.__name__)
 
