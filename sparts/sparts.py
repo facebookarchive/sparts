@@ -261,7 +261,7 @@ class samples(_Nameable, _Bindable):
 
 class option(_Nameable):
     def __init__(self, name=None, type=str, default=None, help=None,
-                 action=None, metavar=None, required=False):
+                 action=None, metavar=None, required=False, choices=None):
         super(option, self).__init__(name)
         self.type = type
         self.default = default
@@ -269,6 +269,7 @@ class option(_Nameable):
         self.action = action
         self.metavar = metavar
         self.required = required
+        self.choices = choices
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -313,6 +314,7 @@ class option(_Nameable):
         if self.action is None:
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
+            kwargs['choices'] = self.choices
         ap.add_argument(name, **kwargs)
 
     def _getNameForIdentifier(self, name):
