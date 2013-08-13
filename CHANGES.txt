@@ -6,6 +6,7 @@ CHANGES
 * Support for `required`, `choices` in option()s
 * Make TornadoTask (subclasses) implicitly DEP TornadoIOLoopTask
 * initFromCLI() takes an optional `name` kwarg for using VService directly
+* bugfix in 'store_true' options always returning True even when False
 
 0.3.1
 -----

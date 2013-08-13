@@ -260,9 +260,17 @@ class samples(_Nameable, _Bindable):
             
 
 class option(_Nameable):
-    def __init__(self, name=None, type=str, default=None, help=None,
+    def __init__(self, name=None, type=None, default=None, help=None,
                  action=None, metavar=None, required=False, choices=None):
         super(option, self).__init__(name)
+
+        # Set defaults for action=storeX to bool (otherwise, str)
+        if type is None:
+            if action in ['store_true', 'store_false']:
+                type = bool
+            else:
+                type = str
+
         self.type = type
         self.default = default
         self.help = help
