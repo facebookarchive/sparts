@@ -23,6 +23,12 @@ class TwistedReactorTask(VTask):
 
         self.reactor = twisted.internet.reactor
 
+    def start(self):
+        # TODO: register signals manually using some 'clean' signal handler
+        # chaining stuff
+        self.reactor._handleSignals()
+        super(TwistedReactorTask, self).start()
+
     def _runloop(self):
         self.reactor.run(installSignalHandlers=0)
 

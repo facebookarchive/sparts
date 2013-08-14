@@ -7,6 +7,7 @@ CHANGES
 * Make TornadoTask (subclasses) implicitly DEP TornadoIOLoopTask
 * initFromCLI() takes an optional `name` kwarg for using VService directly
 * bugfix in 'store_true' options always returning True even when False
+* bugfix in TwistedReactorTask for failed worker processes: may interfere with signal handlers
 
 0.3.1
 -----
