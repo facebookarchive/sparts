@@ -37,6 +37,8 @@ class TwistedReactorTask(VTask):
 
 
 class TwistedTask(VTask):
+    DEPS = [TwistedReactorTask]
+
     def initTask(self):
         super(TwistedTask, self).initTask()
         self.reactor_task = self.service.requireTask('TwistedReactorTask')
