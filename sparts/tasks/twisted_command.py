@@ -77,7 +77,7 @@ class CommandTask(TwistedTask):
         # TERM, we might still need to set some kill timeouts
         super(CommandTask, self).stop()
 
-        for trans, kill_timeout in self.outstanding.iteritems():
+        for trans, kill_timeout in self.outstanding.items():
             if kill_timeout is None:
                 kill_timeout = self.kill_timeout
 
