@@ -132,14 +132,14 @@ class VService(_SpartsObject):
     def initFromCLI(cls, name=None):
         ap = cls._makeArgumentParser()
         ns = ap.parse_args()
-        instance = cls.initFromOptions(ns)
-        if name is not None:
-            instance.name = name
+        instance = cls.initFromOptions(ns, name=name)
         return instance
 
     @classmethod
-    def initFromOptions(cls, ns):
+    def initFromOptions(cls, ns, name=None):
         instance = cls(ns)
+        if name is not None:
+            instance.name = name
         return cls.runloop(instance)
 
     @classmethod
