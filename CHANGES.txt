@@ -3,6 +3,7 @@ CHANGES
 
 0.3.2
 -----
+* New tasks.twisted_command.CommandTask for executing and tailing commands in subprocesses
 * Support for `required`, `choices` in option()s
 * Make TornadoTask (subclasses) implicitly DEP TornadoIOLoopTask
 * initFromCLI() takes an optional `name` kwarg for using VService directly
