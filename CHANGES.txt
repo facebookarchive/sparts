@@ -5,6 +5,7 @@ CHANGES
 -----
 * New tasks.twisted_command.CommandTask for executing and tailing commands in subprocesses
 * Support for `required`, `choices` in option()s
+* PeriodicTask (and subclasses) now handle thrown TryLater correctly
 * Make TornadoTask (subclasses) implicitly DEP TornadoIOLoopTask
 * initFromCLI() takes an optional `name` kwarg for using VService directly
 * bugfix in 'store_true' options always returning True even when False

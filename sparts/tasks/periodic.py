@@ -1,4 +1,4 @@
-from ..vtask import VTask
+from ..vtask import VTask, TryLater
 import time
 from ..sparts import option, counter, samples, SampleType
 from threading import Event
@@ -11,6 +11,7 @@ class PeriodicTask(VTask):
        types=[SampleType.AVG, SampleType.MAX, SampleType.MIN])
     n_iterations = counter()
     n_slow_iterations = counter()
+    n_try_later = counter()
 
     interval = option(type=float, metavar='SECONDS',
                       default=lambda cls: cls.INTERVAL,
@@ -28,7 +29,12 @@ class PeriodicTask(VTask):
     def _runloop(self):
         while not self.service._stop:
             t0 = time.time()
-            self.execute()
+            try:
+                self.execute()
+            except TryLater:
+                self.n_try_later.increment()
+                continue
+                
             self.n_iterations.increment()
             self.execute_duration.add(time.time() - t0)
             to_sleep = (t0 + self.interval) - time.time()
