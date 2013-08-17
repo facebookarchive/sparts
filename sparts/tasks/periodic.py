@@ -27,14 +27,14 @@ class PeriodicTask(VTask):
         super(PeriodicTask, self).stop()
 
     def _runloop(self):
+        t0 = time.time()
         while not self.service._stop:
-            t0 = time.time()
             try:
                 self.execute()
             except TryLater:
                 self.n_try_later.increment()
                 continue
-                
+
             self.n_iterations.increment()
             self.execute_duration.add(time.time() - t0)
             to_sleep = (t0 + self.interval) - time.time()
@@ -43,6 +43,8 @@ class PeriodicTask(VTask):
                     return
             else:
                 self.n_slow_iterations.increment()
+
+            t0 = time.time()
 
     def execute(self, context=None):
         self.logger.debug('execute')
