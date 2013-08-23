@@ -104,6 +104,14 @@ class TornadoHTTPTask(TornadoTask):
             self.logger.info("%s Server Started on %s (port %s)",
                              self.name, sockaddr[0], sockaddr[1])
 
+    @property
+    def bound_v4_addrs(self):
+        return [a[0] for a in self.bound_addrs if len(a) == 2]
+
+    @property
+    def bound_v6_addrs(self):
+        return [a[0] for a in self.bound_addrs if len(a) == 4]
+
     def tornadoRequestLog(self, handler):
         self.requests.increment()
 
