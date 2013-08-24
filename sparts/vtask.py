@@ -47,6 +47,17 @@ class VTask(_SpartsObject):
     def _run(self):
         try:
             self._runloop()
+        except Exception:
+            # In general, you should not get here.  So, we will shutdown the
+            # server.  It is better for your service to *completely* crash in
+            # response to an unhandled error, than to continue on in some sort
+            # of half-alive zombie state.  Please catch your exceptions.
+            # Consider throwing a TryLater if this task is a subclass of 
+            # QueueTask or PeriodicTask.
+            #
+            # I hate zombies.
+            self.logger.exception("Unhandled exception in %s", self.name)
+            self.service.shutdown()
         finally:
             self.logger.debug('Thread %s exited',
                               threading.currentThread().name)

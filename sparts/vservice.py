@@ -154,8 +154,13 @@ class VService(_SpartsObject):
     @classmethod
     def runloop(cls, instance):
         while not instance._stop:
-            instance.createTasks()
-            instance.startTasks()
+            try:
+                instance.createTasks()
+                instance.startTasks()
+            except Exception:
+                instance.logger.exception("Unexpected Exception during init")
+                instance.shutdown()
+
             instance._wait()
 
             if instance._restart:
