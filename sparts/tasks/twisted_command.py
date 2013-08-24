@@ -89,6 +89,8 @@ class CommandTask(TwistedTask):
             else:
                 self.reactor.callFromThread(self.reactor.callLater, *args)
 
+    def isDoneWithReactor(self):
+        return len(self.outstanding) == 0
 
 class _ProcessProtocolAdapter(ProcessProtocol):
     def __init__(self, on_stdout=None, on_stderr=None, on_exit=None,

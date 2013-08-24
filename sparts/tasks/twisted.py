@@ -33,8 +33,21 @@ class TwistedReactorTask(VTask):
         self.reactor.run(installSignalHandlers=0)
 
     def stop(self):
-        self.reactor.callFromThread(self.reactor.stop)
+        self._tryShutdown()
 
+    def _tryShutdown(self):
+        can_shutdown = True
+        self.logger.debug('_tryShutdown with %d tasks', len(self.service.tasks))
+        for t in self.service.tasks:
+            if isinstance(t, TwistedTask):
+                if not t.isDoneWithReactor():
+                    self.logger.debug("%s is not done with the reactor", t.name)
+                    can_shutdown = False
+        if can_shutdown:
+            self.reactor.callFromThread(self.reactor.stop)
+        else:
+            self.reactor.callFromThread(self.reactor.callLater, 0.3,
+                                        self._tryShutdown)
 
 class TwistedTask(VTask):
     DEPS = [TwistedReactorTask]
@@ -46,3 +59,7 @@ class TwistedTask(VTask):
     @property
     def reactor(self):
         return self.reactor_task.reactor
+
+    def isDoneWithReactor(self):
+        """Override this to handle shutdowns more gracefully"""
+        return True
