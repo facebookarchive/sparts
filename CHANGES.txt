@@ -1,6 +1,9 @@
 CHANGES
 =======
 
+0.4.1
+-----
+
 0.4.0
 -----
 * New tasks.twisted_command.CommandTask for executing and tailing commands in subprocesses
