@@ -108,15 +108,10 @@ class VService(_SpartsObject):
 
     def stop(self):
         self._stop = True
-        for t in reversed(self.tasks):
-            t.stop()
-            t.join()
 
-    def join(self):
-        self.logger.debug('VService Active.  Awaiting graceful shutdown.')
+    def _wait(self):
         try:
-            for t in reversed(self.tasks):
-                t.join()
+            self.logger.debug('VService Active.  Awaiting graceful shutdown.')
 
             # If there are no remaining tasks (or this service has no tasks)
             # just sleep until ^C is pressed
@@ -124,9 +119,23 @@ class VService(_SpartsObject):
                 time.sleep(0.1)
         except KeyboardInterrupt:
             self.logger.info('KeyboardInterrupt Received!  Stopping Tasks...')
-            self.stop()
+
+        for t in reversed(self.tasks):
+            t.stop()
+
+        try:
+            self.logger.info('Waiting for tasks to shutdown gracefully...')
             for t in reversed(self.tasks):
+                self.logger.debug('Waiting for %s to stop...', t)
                 t.join()
+        except KeyboardInterrupt:
+            self.logger.warning('Abandon all hope ye who enter here')
+
+    def join(self):
+        while not self._stop:
+            time.sleep(0.1)
+        for t in reversed(self.tasks):
+            t.join()
 
     @classmethod
     def initFromCLI(cls, name=None):
@@ -147,7 +156,7 @@ class VService(_SpartsObject):
         while not instance._stop:
             instance.createTasks()
             instance.startTasks()
-            instance.join()
+            instance._wait()
 
             if instance._restart:
                 instance = cls(instance.options)
@@ -157,7 +166,7 @@ class VService(_SpartsObject):
     def startBG(self):
         self.createTasks()
         self.startTasks()
-        t = threading.Thread(target=self.join)
+        t = threading.Thread(target=self._wait)
         t.start()
         return t
 
