@@ -44,6 +44,13 @@ class VTask(_SpartsObject):
                 while thread.isAlive():
                     thread.join(0.5)
 
+    @property
+    def running(self):
+        for thread in self.threads:
+            if thread.isAlive():
+                return True
+        return False
+
     def _run(self):
         try:
             self._runloop()
