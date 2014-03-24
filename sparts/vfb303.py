@@ -14,7 +14,7 @@ class VServiceFB303Processor(FacebookService.Processor):
         return str(self.service.VERSION)
 
     def getStatus(self):
-        # TODO: DEAD?  STARTING?  STOPPED? 
+        # TODO: DEAD?  STARTING?  STOPPED?
         if self.service._stop:
             return fb_status.STOPPING
         for task in self.service.tasks:
@@ -23,7 +23,7 @@ class VServiceFB303Processor(FacebookService.Processor):
                     if not thread.isAlive():
                         return fb_status.WARNING
         return fb_status.ALIVE
-    
+
     def getStatusDetails(self):
         if self.service._stop:
             return '%s is shutting down' % (self.getName())
