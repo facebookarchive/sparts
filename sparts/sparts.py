@@ -1,4 +1,5 @@
 from collections import deque
+from functools import partial
 import time
 
 
@@ -355,8 +356,8 @@ class _SpartsObject(object):
                 inst.counters[v.name] = v
             elif isinstance(v, samples):
                 for subcounter in v.iterkeys():
-                    inst.counters[subcounter] = \
-                        lambda: v.getCounter(subcounter) 
+                    inst.counters[subcounter] = partial(
+                        v.getCounter, subcounter)
         return inst
 
     def getCounters(self):
