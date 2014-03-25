@@ -52,8 +52,8 @@ class NBServerTask(VTask):
                          self.name, self.bound_host, self.bound_port)
 
     def stop(self):
-        self.server.close()
         self.server.stop()
+        self.server.close()
         self._stopped = True
 
     def _runloop(self):
