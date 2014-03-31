@@ -56,9 +56,9 @@ class BaseSpartsTestCase(unittest.TestCase):
     def mock(self, *args, **kwargs):
         try:
             import mock
+            return mock
         except ImportError:
             raise Skip("the mock module is required to run this test")
-            return mock
 
 
 class ServiceTestCase(BaseSpartsTestCase):
