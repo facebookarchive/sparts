@@ -1,3 +1,7 @@
+try:
+    import tornado
+except ImportError:
+    raise AssertionError("Tornado must be installed to run this test")
 from sparts.tasks.tornado import TornadoIOLoopTask, TornadoHTTPTask
 from ..base import MultiTaskTestCase 
 import urllib2

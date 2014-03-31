@@ -1,4 +1,7 @@
-import unittest2
+try:
+    import unittest2
+except ImportError:
+    import unittest as unittest2
 import unittest
 import logging
 
@@ -53,6 +56,11 @@ class ServiceTestCase(BaseSpartsTestCase):
         self.service = TestService(ns)
         self.runloop = self.service.startBG()
 
+    def tearDown(self):
+        self.service.stop()
+        self.runloop.join()
+        super(ServiceTestCase, self).tearDown()
+
 
 class MultiTaskTestCase(ServiceTestCase):
     TASKS = []
@@ -71,10 +79,6 @@ class MultiTaskTestCase(ServiceTestCase):
         super(MultiTaskTestCase, self).setUp()
         for t in self.TASKS:
             self.service.requireTask(t.__name__)
-
-    def tearDown(self):
-        self.service.stop()
-        self.runloop.join()
 
 class SingleTaskTestCase(MultiTaskTestCase):
     TASK = None
