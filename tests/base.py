@@ -52,6 +52,14 @@ class BaseSpartsTestCase(unittest.TestCase):
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
 
+    @property
+    def mock(self, *args, **kwargs):
+        try:
+            import mock
+        except ImportError:
+            raise Skip("the mock module is required to run this test")
+            return mock
+
 
 class ServiceTestCase(BaseSpartsTestCase):
     def getServiceClass(self):

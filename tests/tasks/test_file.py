@@ -1,11 +1,7 @@
 from sparts.tasks.file import DirectoryWatcherTask
-from ..base import SingleTaskTestCase, Skip
+from ..base import SingleTaskTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
-try:
-    from mock import Mock
-except ImportError:
-    raise Skip("mock required to run this test")
 
 import os.path
 import time
@@ -14,9 +10,9 @@ import time
 class MyTask(DirectoryWatcherTask):
     def __init__(self, *args, **kwargs):
         super(MyTask, self).__init__(*args, **kwargs) 
-        self.onFileCreated = Mock()
-        self.onFileDeleted = Mock()
-        self.onFileChanged = Mock()
+        self.onFileCreated = self.service.test.mock.Mock()
+        self.onFileDeleted = self.service.test.mock.Mock()
+        self.onFileChanged = self.service.test.mock.Mock()
 
 class TestMyTask(SingleTaskTestCase):
     TASK = MyTask
