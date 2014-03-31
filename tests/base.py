@@ -1,14 +1,13 @@
 try:
-    import unittest2
+    import unittest2 as unittest
 except ImportError:
-    import unittest as unittest2
-import unittest
+    import unittest
 import logging
 
 from sparts.vservice import VService
 
 
-class BaseSpartsTestCase(unittest2.TestCase):
+class BaseSpartsTestCase(unittest.TestCase):
     def assertNotNone(self, o, msg=''):
         self.assertTrue(o is not None, msg)
 
@@ -79,6 +78,7 @@ class MultiTaskTestCase(ServiceTestCase):
         super(MultiTaskTestCase, self).setUp()
         for t in self.TASKS:
             self.service.requireTask(t.__name__)
+
 
 class SingleTaskTestCase(MultiTaskTestCase):
     TASK = None
