@@ -1,9 +1,12 @@
 from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py as _build_py
+from setuptools.command.test import test as TestCommand
+
 from distutils.spawn import find_executable
 from glob import glob
 import os.path
 import imp
+import sys
 
 
 THRIFT = find_executable('thrift')
@@ -95,6 +98,21 @@ class build_py(_build_py):
 
 cmdclass['build_py'] = build_py
 
+
+# Custom PyTest Test command, per https://pytest.org/latest/goodpractises.html
+class PyTest(TestCommand):
+    def finalize_options(self):
+        TestCommand.finalize_options(self)
+        self.test_args = ['tests']
+        self.test_suite = True
+    def run_tests(self):
+        #import here, cause outside the eggs aren't loaded
+        import pytest
+        errno = pytest.main(self.test_args)
+        sys.exit(errno)
+
+cmdclass['test'] = PyTest
+
 VERSION = version()
 setup(
     name="sparts",
@@ -104,7 +122,7 @@ setup(
     long_description=read("README.rst"),
 
     install_requires=[],
-    setup_requires=['unittest2', 'mock'],
+    tests_require=['pytest', 'mock', 'unittest2'],
     extras_require={
         'thrift': ['thrift'],
         'tornado': ['tornado'],
