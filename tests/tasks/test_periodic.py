@@ -1,21 +1,29 @@
 from sparts.tasks.periodic import PeriodicTask
 from ..base import SingleTaskTestCase 
 import time
+import threading
 
 
 class MyTask(PeriodicTask):
     INTERVAL = 0.1
     counter = 0
 
+    def initTask(self):
+        super(MyTask, self).initTask()
+        self.visit_threads = set()
+
     def execute(self):
         self.counter += 1
+        self.visit_threads.add(threading.current_thread().ident)
 
 class TestMyTask(SingleTaskTestCase):
     TASK = MyTask
 
     def test_execute_happens(self):
-        time.sleep(0.5)
-        self.assertGreater(self.task.counter, 3)
+        t0 = time.time()
+        while self.task.counter <= 0 and time.time() - t0 < 3.0:
+            time.sleep(0.101)
+        self.assertGreater(self.task.counter, 0)
 
 
 class MyMultiTask(MyTask):
@@ -24,5 +32,7 @@ class MyMultiTask(MyTask):
 class TestMultiTask(SingleTaskTestCase):
     TASK = MyMultiTask
     def test_multi_execute(self):
-        time.sleep(0.5)
-        self.assertGreater(self.task.counter, 15)
+        t0 = time.time()
+        while len(self.task.visit_threads) < 5 and time.time() - t0 < 3.0:
+            time.sleep(0.101)
+        self.assertGreaterEqual(self.task.counter, 5)
