@@ -32,8 +32,6 @@ class TestMyTask(SingleTaskTestCase):
         fn = os.path.join(self.testpath, 'foo')
         with open(fn, mode='w'):
             pass
-        # Sleep one second so that mtime/atime will change appropriately
-        time.sleep(1.0)
         os.utime(fn, None)
         self.task.execute()
         self.assertTrue(self.task.onFileCreated.called)
@@ -53,6 +51,8 @@ class TestMyTask(SingleTaskTestCase):
 
     def test_file_update(self):
         self.test_file_create()
+        # Sleep one second so that mtime/atime will change appropriately
+        time.sleep(1.0)
         os.utime(os.path.join(self.testpath, 'foo'), None)
         self.task.execute()
         self.assertTrue(self.task.onFileChanged.called)
