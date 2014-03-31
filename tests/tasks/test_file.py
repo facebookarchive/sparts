@@ -1,8 +1,12 @@
 from sparts.tasks.file import DirectoryWatcherTask
-from ..base import SingleTaskTestCase 
+from ..base import SingleTaskTestCase, Skip
 from tempfile import mkdtemp
 from shutil import rmtree
-from mock import Mock
+try:
+    from mock import Mock
+except ImportError:
+    raise Skip("mock required to run this test")
+
 import os.path
 import time
 

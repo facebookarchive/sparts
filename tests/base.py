@@ -7,6 +7,18 @@ import logging
 from sparts.vservice import VService
 
 
+# Import a Skip exception class that works with both pytest and unittest2
+try:
+    from _pytest.runner import Skipped
+    class Skip(Skipped, unittest.SkipTest):
+        pass
+
+except ImportError:
+    class Skip(unittest.SkipTest):
+        pass
+
+
+# Base test case for all sparts jonx
 class BaseSpartsTestCase(unittest.TestCase):
     def assertNotNone(self, o, msg=''):
         self.assertTrue(o is not None, msg)

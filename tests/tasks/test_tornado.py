@@ -1,9 +1,11 @@
+from ..base import MultiTaskTestCase, Skip
+
 try:
     import tornado
 except ImportError:
-    raise AssertionError("Tornado must be installed to run this test")
+    raise Skip("Tornado must be installed to run this test")
+
 from sparts.tasks.tornado import TornadoIOLoopTask, TornadoHTTPTask
-from ..base import MultiTaskTestCase 
 import urllib2
 
 class TestURLFetchDemo(MultiTaskTestCase):
