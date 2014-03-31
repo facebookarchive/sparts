@@ -61,6 +61,7 @@ class ServiceTestCase(BaseSpartsTestCase):
         super(ServiceTestCase, self).setUp()
 
         TestService = self.getServiceClass()
+        TestService.test = self
 
         ap = TestService._makeArgumentParser()
         ns = ap.parse_args(['--level', 'DEBUG'])
