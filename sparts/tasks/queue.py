@@ -15,11 +15,19 @@ class QueueTask(VTask):
     def initTask(self):
         super(QueueTask, self).initTask()
         self.queue = Queue()
+        self._shutdown_sentinel = object()
+
+    def stop(self):
+        super(QueueTask, self).stop()
+        self.queue.put(self._shutdown_sentinel)
 
     def _runloop(self):
         while not self.service._stop:
             try:
-                item = self.queue.get(timeout=0.600)
+                item = self.queue.get(timeout=1.0)
+                if item is self._shutdown_sentinel:
+                    self.queue.put(item)
+                    break
             except Empty:
                 continue
 
