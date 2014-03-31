@@ -15,8 +15,11 @@ class DirectoryWatcherTask(PollerTask):
         root = self.path
         contents = os.listdir(root)
         for name in contents:
-            d[name] = os.stat(os.path.join(root, name))
+            d[name] = self.stat(os.path.join(root, name))
         return sorted(d.items())
+
+    def stat(self, path):
+        return os.stat(path)
 
     def onFileCreated(self, filename, stat):
         self.logger.debug('onFileCreated(%s, %s)', filename, stat)
