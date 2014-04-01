@@ -1,10 +1,14 @@
 CHANGES
 =======
 
+0.4.2
+-----
+
 0.4.1
 -----
 * Fixed a major bug that prevents mixing tasks that have both samples and standard counters
 * Fixed logspew in (thrift) NBServerTask shutdown
+* Improved unittest usability and performance significantly
 
 0.4.0
 -----
