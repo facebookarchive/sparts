@@ -122,14 +122,6 @@ class VTask(_SpartsObject):
                        self._optName(opt), default)
 
     @classmethod
-    def _addArguments(cls, ap):
-        for k in dir(cls):
-            v = getattr(cls, k)
-            regfunc = getattr(v, '_addToArgumentParser', None)
-            if regfunc is not None:
-                regfunc(cls, ap)
-
-    @classmethod
     def register(cls):
         _REGISTERED_TASKS.add(cls)
 

@@ -308,8 +308,11 @@ class option(_Nameable):
         assert setter is not None
         return setter
 
-    def _addToArgumentParser(self, task_cls, ap):
-        name = task_cls._loptName(self.name)
+    def _addToArgumentParser(self, task_cls, ap, main=False):
+        if main:
+            name = '--{}'.format(self.name.replace('_', '-'))
+        else:
+            name = task_cls._loptName(self.name)
 
         # This is kinda funky.  I want to support some form of shorthand
         # notation for overridable default values.  Doing it this way means we
@@ -376,3 +379,11 @@ class _SpartsObject(object):
 
     def getChildren(self):
         return {}
+
+    @classmethod
+    def _addArguments(cls, ap):
+        for k in dir(cls):
+            v = getattr(cls, k)
+            regfunc = getattr(v, '_addToArgumentParser', None)
+            if regfunc is not None:
+                regfunc(cls, ap)
