@@ -25,7 +25,6 @@ class VService(_SpartsObject):
         self._stop = False
         self._restart = False
         self.tasks = []
-        self.initService()
         self.start_time = time.time()
 
     def initService(self):
@@ -51,6 +50,10 @@ class VService(_SpartsObject):
         for t in all_tasks:
             if t.__name__ in selected_tasks:
                 self.tasks.append(t(self))
+
+        # Call service initialization hook after tasks have been instantiated,
+        # but before they've been initialized.
+        self.initService()
 
         exceptions = []
         required = []
