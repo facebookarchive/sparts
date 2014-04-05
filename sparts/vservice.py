@@ -25,7 +25,11 @@ class VService(_SpartsObject):
         self._stop = False
         self._restart = False
         self.tasks = []
+        self.initService()
         self.start_time = time.time()
+
+    def initService(self):
+        """Override this to do any service-specific initialization"""
 
     def createTasks(self):
         if self.getOption('runit_install'):
