@@ -178,6 +178,7 @@ class VService(_SpartsObject):
         instance = cls(ns)
         if name is not None:
             instance.name = name
+        instance.preprocessOptions()
         return cls._runloop(instance)
 
     @classmethod
