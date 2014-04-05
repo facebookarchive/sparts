@@ -1,3 +1,9 @@
+"""Base Task and related helper classes for sparts' task system
+
+Tasks in sparts are a way to organize and delegate some sort of
+background or other synchronized processing.  This module defines
+the most common features.
+"""
 import logging
 import threading
 from .sparts import _SpartsObject
@@ -6,6 +12,16 @@ from .sparts import _SpartsObject
 _REGISTERED_TASKS = set()
 
 class VTask(_SpartsObject):
+    """The base class for all tasks.  Needs to be subclassed to be useful.
+
+    Attributes:
+        OPT_PREFIX - Overrides the prefix for any associated options
+        LOOPLESS - True indicates this task should not spawn any threads
+        DEPS - List of `VTask` subclasses that must be initialized first
+        workers - Number of Threads that should execute the `_runloop`
+
+    """
+
     OPT_PREFIX = None
     LOOPLESS = False
     DEPS = []
@@ -21,6 +37,10 @@ class VTask(_SpartsObject):
         self.threads = []
 
     def initTask(self):
+        """Override this to do any task-specific initialization
+
+        Don't forget to call super(...).initTask(), or things may not
+        run properly."""
         if not self.LOOPLESS:
             for i in xrange(self.workers):
                 if self.workers == 1:
@@ -36,6 +56,10 @@ class VTask(_SpartsObject):
                 thread.start()
 
     def stop(self):
+        """Custom stopping logic for this task.
+
+        This is called by the main VService thread, after a graceful shutdown
+        request has been received."""
         pass
 
     def join(self):
@@ -46,6 +70,9 @@ class VTask(_SpartsObject):
 
     @property
     def running(self):
+        """Returns True if task is still doing work.
+
+        This base implementation returns True if any child threads are alive"""
         for thread in self.threads:
             if thread.isAlive():
                 return True
@@ -59,7 +86,7 @@ class VTask(_SpartsObject):
             # server.  It is better for your service to *completely* crash in
             # response to an unhandled error, than to continue on in some sort
             # of half-alive zombie state.  Please catch your exceptions.
-            # Consider throwing a TryLater if this task is a subclass of 
+            # Consider throwing a TryLater if this task is a subclass of
             # QueueTask or PeriodicTask.
             #
             # I hate zombies.
@@ -70,6 +97,9 @@ class VTask(_SpartsObject):
                               threading.currentThread().name)
 
     def _runloop(self):
+        """For normal (non-LOOPLESS) tasks, this MUST be implemented"""
+        # TODO: May require some janky metaprogramming to make ABC enforce
+        # this in a cleaner way.
         raise NotImplementedError()
 
     @classmethod
@@ -105,14 +135,28 @@ def get_registered_tasks():
 
 
 class SkipTask(Exception):
+    """Throw during initTask() to skip execution of this task.
+
+    Useful in case the task is missing configuration critical to its operation,
+    but not critical to the overall program.
+
+    A good example might be a network-based logging task."""
     pass
 
 
 class TryLater(Exception):
+    """Throw this in overridden tasks to defer execution.
+
+    Can be used to temporarily suspend and restart execution, which is useful
+    for handling unexpected error conditions, or re-scheduling work."""
     pass
 
 
 class ExecuteContext(object):
+    """An abstraction used internally by various tasks to track work
+
+    Encapsulates common metrics for work that can be retried later, hooks for
+    signalling completion, etc"""
     def __init__(self, attempt=1, item=None, deferred=None):
         self.attempt = attempt
         self.item = item
@@ -120,6 +164,12 @@ class ExecuteContext(object):
 
 
 def resolve_dependencies(task_classes):
+    """Returns a flattened dependency chain for `task_classes`.
+
+    Turns a short list of `Task` subclasses into a longer list of `Task`
+    subclasses.  This is useful for tasks that depend on other tasks, such as
+    TwistedTask subclasses that must initialize and run after the Twisted
+    reactor has been started."""
     result = []
     for t in task_classes:
         assert issubclass(t, VTask)

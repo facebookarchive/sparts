@@ -1,3 +1,8 @@
+"""vservice defines the base service class, `VService`
+
+VService can be used directly, for example with `VService.initFromCLI()`,
+or it can be subclassed and used similarly.
+"""
 from __future__ import absolute_import
 import logging
 import sys
@@ -11,6 +16,7 @@ from .sparts import _SpartsObject
 
 
 class VService(_SpartsObject):
+    """Core class for implementing services."""
     DEFAULT_LOGLEVEL = 'DEBUG'
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
@@ -31,22 +37,23 @@ class VService(_SpartsObject):
         """Override this to do any service-specific initialization"""
 
     @classmethod
-    def resolveDependencies(cls):
+    def _resolveDependencies(cls):
         tasks = set(cls.TASKS).union(get_registered_tasks())
         return resolve_dependencies(tasks)
 
     def preprocessOptions(self):
+        """Processes "action" oriented options."""
         if self.getOption('runit_install'):
-            self.install()
+            self._install()
 
         if self.options.tasks == []:
             print "Available Tasks:"
-            for t in self.resolveDependencies():
+            for t in self._resolveDependencies():
                 print " - %s" % t.__name__
             sys.exit(1)
 
-    def createTasks(self):
-        all_tasks = self.resolveDependencies()
+    def _createTasks(self):
+        all_tasks = self._resolveDependencies()
 
         selected_tasks = self.options.tasks
         if selected_tasks is None:
@@ -77,23 +84,24 @@ class VService(_SpartsObject):
             raise Exception("Unable to start service (%d task start errors)" %
                             len(exceptions))
 
-    def handleShutdownSignals(self, signum, frame):
+    def _handleShutdownSignals(self, signum, frame):
         assert signum in (signal.SIGINT, signal.SIGTERM)
         self.logger.info('signal -%d received', signum)
         self.shutdown()
 
-    def startTasks(self):
+    def _startTasks(self):
         if self.REGISTER_SIGNAL_HANDLERS:
             # Things seem to fail more gracefully if we trigger the stop
             # out of band (with a signal handler) instead of catching the
             # KeyboardInterrupt...
-            signal.signal(signal.SIGINT, self.handleShutdownSignals)
-            signal.signal(signal.SIGTERM, self.handleShutdownSignals)
+            signal.signal(signal.SIGINT, self._handleShutdownSignals)
+            signal.signal(signal.SIGTERM, self._handleShutdownSignals)
         for t in self.tasks:
             t.start()
         self.logger.debug("All tasks started")
 
     def getTask(self, name):
+        """Returns a task for the given class `name` or type, or None."""
         for t in self.tasks:
             if isinstance(name, str):
                 if t.name == name:
@@ -104,16 +112,19 @@ class VService(_SpartsObject):
         return None
 
     def requireTask(self, name):
+        """Returns a task for the given class `name` or type, or throws."""
         t = self.getTask(name)
         if t is None:
             raise Exception("Task %s not found in service" % name)
         return t
 
     def shutdown(self):
+        """Request a graceful shutdown.  Does not block."""
         self.logger.info("Received graceful shutdown request")
         self.stop()
 
     def restart(self):
+        """Request a graceful restart.  Does not block."""
         self.logger.info("Received graceful restart request")
         self._restart = True
         self.stop()
@@ -144,6 +155,7 @@ class VService(_SpartsObject):
             self.logger.warning('Abandon all hope ye who enter here')
 
     def join(self):
+        """Blocks until a stop is requested, waits for all tasks to shutdown"""
         while not self._stop:
             time.sleep(0.1)
         for t in reversed(self.tasks):
@@ -151,6 +163,7 @@ class VService(_SpartsObject):
 
     @classmethod
     def initFromCLI(cls, name=None):
+        """Starts this service, processing command line arguments."""
         ap = cls._makeArgumentParser()
         ns = ap.parse_args()
         instance = cls.initFromOptions(ns, name=name)
@@ -158,17 +171,18 @@ class VService(_SpartsObject):
 
     @classmethod
     def initFromOptions(cls, ns, name=None):
+        """Starts this service, arguments from `ns`"""
         instance = cls(ns)
         if name is not None:
             instance.name = name
-        return cls.runloop(instance)
+        return cls._runloop(instance)
 
     @classmethod
-    def runloop(cls, instance):
+    def _runloop(cls, instance):
         while not instance._stop:
             try:
-                instance.createTasks()
-                instance.startTasks()
+                instance._createTasks()
+                instance._startTasks()
             except Exception:
                 instance.logger.exception("Unexpected Exception during init")
                 instance.shutdown()
@@ -181,8 +195,11 @@ class VService(_SpartsObject):
         instance.logger.info("Instance shut down gracefully")
 
     def startBG(self):
-        self.createTasks()
-        self.startTasks()
+        """Starts this service in the background
+
+        Returns a thread that will join() on graceful shutdown."""
+        self._createTasks()
+        self._startTasks()
         t = threading.Thread(target=self._wait)
         t.start()
         return t
@@ -198,6 +215,7 @@ class VService(_SpartsObject):
         self._name = value
 
     def initLogging(self):
+        """Basic stderr logging.  Override this to do something else."""
         logging.basicConfig(level=self.loglevel, stream=sys.stderr)
 
     @classmethod
@@ -228,6 +246,7 @@ class VService(_SpartsObject):
 
     @property
     def loglevel(self):
+        # TODO: Deprecate this after proting args to proper option()s
         return getattr(logging, self.options.level)
 
     def getOption(self, name, default=None):
@@ -239,7 +258,7 @@ class VService(_SpartsObject):
     def getOptions(self):
         return self.options.__dict__
 
-    def install(self):
+    def _install(self):
         if not HAS_PSUTIL:
             raise NotImplementedError("You need psutil installed to install "
                                       "under runit")
