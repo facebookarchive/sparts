@@ -4,13 +4,16 @@ VService can be used directly, for example with `VService.initFromCLI()`,
 or it can be subclassed and used similarly.
 """
 from __future__ import absolute_import
+
 import logging
-import sys
-from argparse import ArgumentParser
-from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
-import time
-import threading
 import signal
+import sys
+import threading
+import time
+
+from argparse import ArgumentParser
+
+from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
 from .deps import HAS_PSUTIL
 from .sparts import _SpartsObject
 
