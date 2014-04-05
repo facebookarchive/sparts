@@ -5,6 +5,7 @@ CHANGES
 -----
 * Fix some bugs in DirectoryWatcherTask
 * Add an initService() hook to VService
+* Added a hook to do per-thread Task-specific initialization, initTaskThread()
 
 0.4.1
 -----

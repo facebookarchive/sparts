@@ -50,6 +50,9 @@ class VTask(_SpartsObject):
                 self.threads.append(
                     threading.Thread(target=self._run, name=name))
 
+    def initTaskThread(self):
+        """Override thread-specific initialization for multi-threaded tasks"""
+
     def start(self):
         if not self.LOOPLESS:
             for thread in self.threads:
@@ -80,6 +83,7 @@ class VTask(_SpartsObject):
 
     def _run(self):
         try:
+            self.initTaskThread()
             self._runloop()
         except Exception:
             # In general, you should not get here.  So, we will shutdown the
