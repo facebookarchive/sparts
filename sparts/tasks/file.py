@@ -1,4 +1,5 @@
 from .poller import PollerTask
+import errno
 import os
 
 from ..sparts import option
@@ -13,10 +14,21 @@ class DirectoryWatcherTask(PollerTask):
     def fetch(self):
         d = {}
         root = self.path
-        contents = os.listdir(root)
+        contents = self.listdir(root)
         for name in contents:
-            d[name] = self.stat(os.path.join(root, name))
+            try:
+                d[name] = self.stat(os.path.join(root, name))
+            except OSError as e:
+                # There is a race condition between listdir() and stat() where
+                # files might be deleted.  On ENOENT from a stat call, assume
+                # the file is gone.  Raise non-ENOENT exceptions
+                if e.errno != errno.ENOENT:
+                    raise
+
         return sorted(d.items())
+
+    def listdir(self, path):
+        return os.listdir(path)
 
     def stat(self, path):
         return os.stat(path)

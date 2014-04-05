@@ -3,13 +3,13 @@ from ..base import SingleTaskTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
 
+import errno
 import os.path
-import time
 
 
 class MyTask(DirectoryWatcherTask):
     def __init__(self, *args, **kwargs):
-        super(MyTask, self).__init__(*args, **kwargs) 
+        super(MyTask, self).__init__(*args, **kwargs)
         self.onFileCreated = self.service.test.mock.Mock()
         self.onFileDeleted = self.service.test.mock.Mock()
         self.onFileChanged = self.service.test.mock.Mock()
@@ -63,3 +63,12 @@ class TestMyTask(SingleTaskTestCase):
         self.assertEquals(self.task.onFileChanged.call_count, 1)
         self.assertEquals(self.task.onFileChanged.call_args[0][0], 'foo',
                           self.task.onFileChanged.call_args)
+
+    def test_file_delete_race_condition(self):
+        self.test_file_create()
+
+        self.task.stat = self.mock.Mock()
+        self.task.stat.side_effect = OSError(errno.ENOENT, 'Fake ENOENT')
+        self.task.execute()
+
+        self.assertTrue(self.task.onFileDeleted.called)

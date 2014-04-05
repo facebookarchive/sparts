@@ -3,6 +3,7 @@ CHANGES
 
 0.4.2
 -----
+* Fix some bugs in DirectoryWatcherTask
 
 0.4.1
 -----
