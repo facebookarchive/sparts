@@ -30,20 +30,25 @@ class VService(_SpartsObject):
     def initService(self):
         """Override this to do any service-specific initialization"""
 
-    def createTasks(self):
+    @classmethod
+    def resolveDependencies(cls):
+        tasks = set(cls.TASKS).union(get_registered_tasks())
+        return resolve_dependencies(tasks)
+
+    def preprocessOptions(self):
         if self.getOption('runit_install'):
             self.install()
 
-        all_tasks = set(self.TASKS).union(get_registered_tasks())
-        all_tasks = resolve_dependencies(all_tasks)
-
-        selected_tasks = self.options.tasks
-        if selected_tasks == []:
+        if self.options.tasks == []:
             print "Available Tasks:"
-            for t in all_tasks:
+            for t in self.resolveDependencies():
                 print " - %s" % t.__name__
             sys.exit(1)
 
+    def createTasks(self):
+        all_tasks = self.resolveDependencies()
+
+        selected_tasks = self.options.tasks
         if selected_tasks is None:
             selected_tasks = [t.__name__ for t in all_tasks]
 
