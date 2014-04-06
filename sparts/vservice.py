@@ -16,7 +16,7 @@ from collections import OrderedDict
 
 from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
 from .deps import HAS_PSUTIL
-from .sparts import _SpartsObject
+from .sparts import _SpartsObject, option
 
 
 class VService(_SpartsObject):
@@ -26,6 +26,16 @@ class VService(_SpartsObject):
     TASKS = []
     VERSION = ''
     _name = None
+    dryrun = option(action='store_true', help='Run in "dryrun" mode')
+    level = option(default=DEFAULT_LOGLEVEL, help='Log Level [%(default)s]')
+    register_tasks = option(name='tasks', default=None,
+                            metavar='TASK', nargs='*',
+                            help='Tasks to run.  Pass without args to see the '
+                                 'list. If not passed, all tasks will be '
+                                 'started')
+    if HAS_PSUTIL:
+        runit_install = option(action='store_true',
+                               help='Install this service under runit.')
 
     def __init__(self, ns):
         super(VService, self).__init__()
@@ -249,21 +259,6 @@ class VService(_SpartsObject):
         for t in resolve_dependencies(all_tasks):
             # TODO: Add each tasks' arguments to an argument group
             t._addArguments(ap)
-        return ap
-
-    @classmethod
-    def _addArguments(cls, ap):
-        # TODO: Use declarative options, like we do on tasks
-        if HAS_PSUTIL:
-            ap.add_argument('--runit-install', action='store_true',
-                            help='Install this service under runit.')
-        ap.add_argument('--tasks', default=None, nargs='*', metavar='TASK',
-                        help='Tasks to run.  Pass without args to see the '
-                             'list.  If not passed, all tasks will be started')
-        ap.add_argument('--level', default=cls.DEFAULT_LOGLEVEL,
-                        help='Log Level [%(default)s]')
-        ap.add_argument('--dryrun', action='store_true',
-                        help='Run in "dryrun" mode')
         return ap
 
     @property
