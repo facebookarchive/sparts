@@ -55,6 +55,7 @@ class BaseSpartsTestCase(unittest.TestCase):
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
 
+    @property
     def mock(self, *args, **kwargs):
         try:
             import mock
