@@ -1,3 +1,4 @@
+"""Helpers for easily creating thrift clients"""
 from __future__ import absolute_import
 
 from thrift.transport.TSocket import TSocket
@@ -8,12 +9,44 @@ from functools import partial
 
 
 class ThriftClient(object):
+    """Base Class for easy interfacing with thrift services.
+
+    `ThriftClient` can be used directly, or subclassed.  If subclassed,
+    you can override a variety of attributes in order to make instantiation
+    more natural:
+
+        MODULE - The generated thrift module.  Should include Iface and Client
+        HOST - A default host to connect to.  Possibly a vip.
+        PORT - A default port to connect to.
+        TRANSPORT_CLASS - By default, `TFramedTransport`
+        PROTOCOL_CLASS - By default, `TBinaryProtocol`
+        CONNECT_TIMEOUT - By default, 3.0 seconds
+
+    Instantiation should be done via the class methods, `for_hostport()`, and
+    `for_localhost()` as appropriate.  These helpers more aggressively require
+    `port` and `host` arguments as appropriate.  Generic construction arguments
+    override the class attribute defaults:
+
+        `module` - Generated thrift module.
+        `host` - IP address to connect to.
+        `port` - Port to connect to.
+        `connect_Timeout` - Socket connection timeout
+        `transport_class` - Thrift transport class
+        `protocol_class` - Thrift protocol class
+
+    Additional features are configurable with other arguments:
+
+        `lazy` - Default: True, connect on first RPC invocation, instead of
+                 at construction time.
+
+    Connections are made lazily, when the first rpc invocation occurs, so you
+    do need to wrap client instantiation with a try-catch.
+    """
     MODULE = None
     HOST = None
     PORT = None
     TRANSPORT_CLASS = TFramedTransport
     PROTOCOL_CLASS = TBinaryProtocol
-    SOCKET = TSocket
     CONNECT_TIMEOUT = 3.0
 
     @classmethod

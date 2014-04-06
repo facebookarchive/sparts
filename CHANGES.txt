@@ -6,6 +6,7 @@ CHANGES
 * Fix some bugs in DirectoryWatcherTask
 * Add an initService() hook to VService
 * Added a hook to do per-thread Task-specific initialization, initTaskThread()
+* New sparts.thrift.ThriftClient helper to reduce synchronous thrift client boilerplate
 
 0.4.1
 -----
