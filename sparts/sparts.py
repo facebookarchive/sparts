@@ -1,4 +1,4 @@
-from collections import deque
+from collections import deque, namedtuple
 from functools import partial
 import time
 
@@ -308,7 +308,9 @@ class option(_Nameable):
         assert setter is not None
         return setter
 
-    def _addToArgumentParser(self, task_cls, ap, main=False):
+    def _prepareForArgumentParser(self, task_cls, main=False):
+        """Convert inst properties to *args, **kwargs for ap.add_argument().
+        """
         if main:
             name = '--{}'.format(self.name.replace('_', '-'))
         else:
@@ -327,7 +329,11 @@ class option(_Nameable):
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
             kwargs['choices'] = self.choices
-        ap.add_argument(name, **kwargs)
+        add_arg_args = namedtuple('add_arg_args', 'opts kwargs')
+        return add_arg_args([name], kwargs)
+
+    def _addToArgumentParser(self, optargs, ap):
+        ap.add_argument(*optargs.opts, **optargs.kwargs)
 
     def _getNameForIdentifier(self, name):
         return name.replace('_', '-')
@@ -382,8 +388,42 @@ class _SpartsObject(object):
 
     @classmethod
     def _addArguments(cls, ap):
-        for k in dir(cls):
-            v = getattr(cls, k)
-            regfunc = getattr(v, '_addToArgumentParser', None)
-            if regfunc is not None:
-                regfunc(cls, ap)
+        options = get_options(cls)
+        for opt in options:
+            opt.regfunc(ap)
+
+
+def get_options(clazz):
+    """Get argparse options for a class.
+
+    Look for class level attributes of type option and
+    convert them into the arguments  necessary for calling
+    parser.add_argument().
+
+    Arguments:
+        subclass of VTask or Vservice - clazz
+
+    Returns:
+        list(namedtuple) -
+            .opt - namedtuple
+                   .args - list of argument string names
+                          (e.g. ['--help', '-h'])
+                   .kwargs - dict of kwargs for add_argument()
+                          (e.g. default=False, action='store_true' etc)
+            .regfunc - callable that takes the ArgumentParser as an argument
+                       and adds the option to it.
+                       (e.g. "foo.regfunc(ap)" registers the foo option on ap)
+    """
+    from vservice import VService
+    opt_regfunc = namedtuple('opt_regfunc', 'opt regfunc')
+    main = issubclass(clazz, VService)
+    ret = []
+    for k in dir(clazz):
+        v = getattr(clazz, k)
+        preparefunc = getattr(v, '_prepareForArgumentParser', None)
+        if not preparefunc:
+            continue
+        opt = preparefunc(clazz, main=main)
+        regfunc = partial(getattr(v, '_addToArgumentParser'), opt)
+        ret.append(opt_regfunc(opt, regfunc))
+    return ret
