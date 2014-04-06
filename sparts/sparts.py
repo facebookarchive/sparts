@@ -264,7 +264,8 @@ _AddArgArgs = namedtuple('_AddArgArgs', ['opts', 'kwargs'])
 
 class option(_Nameable):
     def __init__(self, name=None, type=None, default=None, help=None,
-                 action=None, metavar=None, required=False, choices=None):
+                 action=None, metavar=None, required=False, choices=None,
+                 nargs=None):
         super(option, self).__init__(name)
 
         # Set defaults for action=storeX to bool (otherwise, str)
@@ -281,6 +282,7 @@ class option(_Nameable):
         self.metavar = metavar
         self.required = required
         self.choices = choices
+        self.nargs = nargs
 
     def __get__(self, obj, type=None):
         if obj is None:
@@ -328,6 +330,8 @@ class option(_Nameable):
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
             kwargs['choices'] = self.choices
+        if self.nargs is not None:
+            kwargs['nargs'] = self.nargs
         return _AddArgArgs([name], kwargs)
 
     def _addToArgumentParser(self, optargs, ap):
