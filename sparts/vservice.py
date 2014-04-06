@@ -174,7 +174,7 @@ class VService(_SpartsObject):
     @classmethod
     def initFromCLI(cls, name=None):
         """Starts this service, processing command line arguments."""
-        ap = cls._makeArgumentParser()
+        ap = cls._buildArgumentParser()
         ns = ap.parse_args()
         instance = cls.initFromOptions(ns, name=name)
         return instance
@@ -231,7 +231,18 @@ class VService(_SpartsObject):
 
     @classmethod
     def _makeArgumentParser(cls):
-        ap = ArgumentParser()
+        """Create an argparse.ArgumentParser instance.
+
+        Override this method if you already have an ArgumentParser instance to use
+        or you simply want to specify some of the optional arguments to
+        argparse.ArgumentParser.__init__
+        (e.g. "fromfile_prefix_chars" or "conflict_handler"...)
+        """
+        return ArgumentParser()
+
+    @classmethod
+    def _buildArgumentParser(cls):
+        ap = cls._makeArgumentParser()
         cls._addArguments(ap)
 
         all_tasks = set(cls.TASKS).union(get_registered_tasks())

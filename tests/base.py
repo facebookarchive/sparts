@@ -74,7 +74,7 @@ class ServiceTestCase(BaseSpartsTestCase):
         TestService = self.getServiceClass()
         TestService.test = self
 
-        ap = TestService._makeArgumentParser()
+        ap = TestService._buildArgumentParser()
         ns = ap.parse_args(['--level', 'DEBUG'])
         self.service = TestService(ns)
         self.runloop = self.service.startBG()
