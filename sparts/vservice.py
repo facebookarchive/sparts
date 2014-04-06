@@ -12,6 +12,7 @@ import threading
 import time
 
 from argparse import ArgumentParser
+from collections import OrderedDict
 
 from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
 from .deps import HAS_PSUTIL
@@ -34,6 +35,8 @@ class VService(_SpartsObject):
         self._stop = False
         self._restart = False
         self.tasks = []
+        self.warnings = OrderedDict()
+        self.warning_id = 0
         self.start_time = time.time()
 
     def initService(self):
@@ -272,3 +275,21 @@ class VService(_SpartsObject):
 
     def getChildren(self):
         return dict((t.name, t) for t in self.tasks)
+
+    def getWarnings(self):
+        return self.warnings
+
+    def registerWarning(self, message):
+        wid = self.warning_id
+        self.warning_id += 1
+        self.warnings[wid] = message
+        return wid
+
+    def clearWarnings(self):
+        self.warnings = OrderedDict()
+
+    def clearWarning(self, id):
+        if id not in self.warnings:
+            return False
+        del self.warnings[id]
+        return True

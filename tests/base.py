@@ -23,6 +23,9 @@ class BaseSpartsTestCase(unittest.TestCase):
     def assertNotNone(self, o, msg=''):
         self.assertTrue(o is not None, msg)
 
+    def assertEmpty(self, arr, msg=''):
+        return self.assertEquals(len(arr), 0, msg)
+
     def assertNotEmpty(self, o, msg=''):
         self.assertTrue(len(o) > 0, msg)
 
@@ -52,7 +55,6 @@ class BaseSpartsTestCase(unittest.TestCase):
     def assertContains(self, item, arr, msg=''):
         return self.assertIn(item, arr, msg)
 
-    @property
     def mock(self, *args, **kwargs):
         try:
             import mock

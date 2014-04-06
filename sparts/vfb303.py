@@ -18,21 +18,32 @@ class VServiceFB303Processor(FacebookService.Processor):
         if self.service._stop:
             return fb_status.STOPPING
         for task in self.service.tasks:
+            # Only check LOOPLESS tasks for "dead" threads
             if not task.LOOPLESS:
                 for thread in task.threads:
                     if not thread.isAlive():
                         return fb_status.WARNING
+
+        # Return WARNING if there are any registered warnings
+        if self.service.getWarnings():
+            return fb_status.WARNING
         return fb_status.ALIVE
 
     def getStatusDetails(self):
+        messages = []
         if self.service._stop:
-            return '%s is shutting down' % (self.getName())
+            messages.append('%s is shutting down' % (self.getName()))
+
+        # Check for dead threads
         for task in self.service.tasks:
             if not task.LOOPLESS:
                 for thread in task.threads:
                     if not thread.isAlive():
-                        return '%s has dead threads!' % task.name
-        return ''
+                        messages.append('%s has dead threads!' % task.name)
+
+        # Append any registered warnings
+        messages.extend(self.service.getWarnings().values())
+        return '\n'.join(messages)
 
     def getCounters(self):
         result = {}
