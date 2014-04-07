@@ -3,7 +3,11 @@ from ..sparts import option
 from Queue import Queue, Empty
 
 class QueueTask(VTask):
+    MAX_ITEMS = 0
     WORKERS = 1
+    max_items = option(type=int, default=lambda cls: cls.MAX_ITEMS,
+                       help='Set a bounded queue length.  This may '
+                            'cause unexpected deadlocks. [%(default)s]')
     workers = option(type=int, default=lambda cls: cls.WORKERS,
                      help='Number of threads to spawn to work on items from '
                           'its queue. [%(default)s]')
@@ -14,7 +18,7 @@ class QueueTask(VTask):
 
     def initTask(self):
         super(QueueTask, self).initTask()
-        self.queue = Queue()
+        self.queue = Queue(maxsize=self.max_items)
         self._shutdown_sentinel = object()
 
     def stop(self):
