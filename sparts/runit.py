@@ -36,8 +36,15 @@ def get_runsvdir_dirs():
 def get_runsvdir_dir_from_cmdline(cmdline):
     # TODO - unittest this
     for i, arg in enumerate(cmdline):
-        if arg == '-P' and len(cmdline) > i + 1:
-            return cmdline[i + 1]
+        # Skip the process name
+        if i == 0:
+            continue
+
+        # Skip the -P, -H flags
+        if arg in ['-P', '-H']:
+            continue
+
+        return arg
     return None
 
 def on_same_filesystem(path1, path2):
