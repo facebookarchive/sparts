@@ -1,3 +1,9 @@
+# Copyright (c) 2014, Facebook, Inc.  All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+#
 from __future__ import absolute_import
 from twisted.internet.protocol import ProcessProtocol
 from twisted.protocols.basic import LineReceiver
@@ -62,7 +68,7 @@ class CommandTask(TwistedTask):
 
     def join(self):
         """Override to wait for process workers to shutdown / be killed"""
-        # TODO: Conditions instead of sleep polling? 
+        # TODO: Conditions instead of sleep polling?
         while len(self.outstanding) > 0:
             time.sleep(0.250)
 

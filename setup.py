@@ -1,3 +1,9 @@
+# Copyright (c) 2014, Facebook, Inc.  All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+#
 from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.test import test as TestCommand
@@ -34,9 +40,9 @@ cmdclass = {}
 # sure you have the latest/greatest fb303 from thrift.
 WANT_COPY = {
     'externals/thrift/contrib/fb303/if/fb303.thrift':
-        'thrift/fb303.thrift', 
+        'thrift/fb303.thrift',
     'externals/thrift/contrib/fb303/py/fb303/FacebookBase.py':
-        'sparts/fb303/FacebookBase.py', 
+        'sparts/fb303/FacebookBase.py',
 }
 
 # Let's figure out which files exist in which submodules...

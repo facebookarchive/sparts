@@ -1,3 +1,9 @@
+# Copyright (c) 2014, Facebook, Inc.  All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+#
 from collections import deque, namedtuple
 from functools import partial
 import time
@@ -174,7 +180,7 @@ _SampleMethod = {
 
 class samples(_Nameable, _Bindable):
     """`samples` are used to generate series of counters dynamically
-    
+
     This is so you can say, keep track of the average duration of some event for
     the last minute, hour, day, etc, and export these as 4 separate counters.
     """
@@ -258,7 +264,7 @@ class samples(_Nameable, _Bindable):
             for window in self.windows:
                 yield self.name + '.' + type + '.' + str(window)
         # TODO: Infinite Windows
-            
+
 
 _AddArgArgs = namedtuple('_AddArgArgs', ['opts', 'kwargs'])
 

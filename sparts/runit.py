@@ -1,3 +1,9 @@
+# Copyright (c) 2014, Facebook, Inc.  All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+#
 import sys
 import os.path
 from .fileutils import writefile, find_executable, resolve_partition, makedirs
@@ -76,12 +82,12 @@ def make_runit_dir(service_name, path, args=None, make_logdir=True):
         logdir = os.path.join('/var/log', service_name)
         makedirs(logdir)
         make_runit_dir(
-            service_name + '.log', os.path.join(path, 'log'), 
+            service_name + '.log', os.path.join(path, 'log'),
             args=[svlogd, '-ttv', logdir],
             make_logdir=False
         )
 
-    run_path = os.path.join(path, 'run') 
+    run_path = os.path.join(path, 'run')
     writefile(run_path, make_run_script_for_args(args))
     flags = os.stat(run_path).st_mode
     os.chmod(run_path, flags | stat.S_IXUSR | stat.S_IXGRP | stat.S_IXOTH)

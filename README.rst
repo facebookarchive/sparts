@@ -1,15 +1,14 @@
 There is a lot of boilerplate and copypasta associated with building
 services (or any other software that runs continuously and does things)
 
-sparts is a python library that aims to eliminate as much of the boiler
-plate as possible, making it as dead simple to write new services with
-little to no code.
+sparts is a python library developed at Facebook that aims to eliminate
+as much of the skeleton code as possible, making it as dead simple to
+write new services with little to no excess code.
 
 Design Goals
 ============
 
--  Be able to implement services using sparts with as little code as
-   possible
+-  Be able to implement services with as little code as possible
 -  Support as many RPC transports as possible (thrift, http, dbus, etc)
 -  Make it painless to integrate services that require custom IO loops
    (twisted, tornado, glib, etc)
@@ -17,8 +16,9 @@ Design Goals
 HOWTO
 =====
 
-A sparts service typically consists of two parts, the "service"
-definition, and its tasks.
+A sparts service typically consists of two parts, the core "service",
+and its "tasks".  Background and offline processing is generally done
+by tasks, while common or shared functionality belongs to the service.
 
 Service
 -------
@@ -132,3 +132,7 @@ feel free to contact me at any time.
 -  twitter: http://twitter.com/fmoo
 -  irc.freenode: ##sparts
 -  facebook: http://fb.me/ruibalp
+
+License
+=======
+sparts is BSD-licensed.  We also provide an additional patent grant.
