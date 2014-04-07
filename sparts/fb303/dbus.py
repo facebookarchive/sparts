@@ -27,7 +27,7 @@ def log_unhandled(func):
             raise
     return wrapped
 
-class FacebookDbusService(dbus.service.Object):
+class FB303DbusService(dbus.service.Object):
     def __init__(self, bus, handler, name=None):
         parts = ['', 'fb303']
         if name:

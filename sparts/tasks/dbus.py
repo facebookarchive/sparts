@@ -8,7 +8,7 @@ from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
 from ..sparts import option
-from ..fb303.dbus import FacebookDbusService
+from ..fb303.dbus import FB303DbusService
 from .fb303 import FB303ProcessorTask
 
 from dbus.mainloop.glib import DBusGMainLoop
@@ -157,7 +157,7 @@ class DBusServiceTask(DBusTask):
         self.sparts_dbus = self.BUS_CLASS(self)
         task = self.service.getTask(FB303ProcessorTask)
         if task is not None:
-            self.fb303_dbus = FacebookDbusService(
+            self.fb303_dbus = FB303DbusService(
                 self.dbus_service, task.processor, self.service.name)
 
     def stop(self):
