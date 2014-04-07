@@ -260,6 +260,8 @@ class samples(_Nameable, _Bindable):
         # TODO: Infinite Windows
             
 
+_AddArgArgs = namedtuple('_AddArgArgs', ['opts', 'kwargs'])
+
 class option(_Nameable):
     def __init__(self, name=None, type=None, default=None, help=None,
                  action=None, metavar=None, required=False, choices=None):
@@ -308,13 +310,10 @@ class option(_Nameable):
         assert setter is not None
         return setter
 
-    def _prepareForArgumentParser(self, task_cls, main=False):
+    def _prepareForArgumentParser(self, task_cls):
         """Convert inst properties to *args, **kwargs for ap.add_argument().
         """
-        if main:
-            name = '--{}'.format(self.name.replace('_', '-'))
-        else:
-            name = task_cls._loptName(self.name)
+        name = task_cls._loptName(self.name)
 
         # This is kinda funky.  I want to support some form of shorthand
         # notation for overridable default values.  Doing it this way means we
@@ -329,8 +328,7 @@ class option(_Nameable):
             kwargs['metavar'] = self.metavar
             kwargs['type'] = self.type
             kwargs['choices'] = self.choices
-        add_arg_args = namedtuple('add_arg_args', 'opts kwargs')
-        return add_arg_args([name], kwargs)
+        return _AddArgArgs([name], kwargs)
 
     def _addToArgumentParser(self, optargs, ap):
         ap.add_argument(*optargs.opts, **optargs.kwargs)
@@ -369,6 +367,10 @@ class _SpartsObject(object):
                         v.getCounter, subcounter)
         return inst
 
+    @classmethod
+    def _loptName(cls, name):
+        raise NotImplementedError()
+
     def getCounters(self):
         result = {}
         for k in self.counters:
@@ -393,15 +395,17 @@ class _SpartsObject(object):
             opt.regfunc(ap)
 
 
-def get_options(clazz):
-    """Get argparse options for a class.
+_OptRegFunc = namedtuple('_OptRegFunc', ['opt', 'regfunc'])
+
+def get_options(cls):
+    """Get argparse options for class, `cls`
 
     Look for class level attributes of type option and
     convert them into the arguments  necessary for calling
     parser.add_argument().
 
     Arguments:
-        subclass of VTask or Vservice - clazz
+        subclass of VTask or Vservice - `cls`
 
     Returns:
         list(namedtuple) -
@@ -414,16 +418,13 @@ def get_options(clazz):
                        and adds the option to it.
                        (e.g. "foo.regfunc(ap)" registers the foo option on ap)
     """
-    from vservice import VService
-    opt_regfunc = namedtuple('opt_regfunc', 'opt regfunc')
-    main = issubclass(clazz, VService)
     ret = []
-    for k in dir(clazz):
-        v = getattr(clazz, k)
+    for k in dir(cls):
+        v = getattr(cls, k)
         preparefunc = getattr(v, '_prepareForArgumentParser', None)
         if not preparefunc:
             continue
-        opt = preparefunc(clazz, main=main)
+        opt = preparefunc(cls)
         regfunc = partial(getattr(v, '_addToArgumentParser'), opt)
-        ret.append(opt_regfunc(opt, regfunc))
+        ret.append(_OptRegFunc(opt, regfunc))
     return ret

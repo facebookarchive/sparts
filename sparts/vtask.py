@@ -107,14 +107,13 @@ class VTask(_SpartsObject):
         raise NotImplementedError()
 
     @classmethod
-    def _loptName(self, *args):
-        return '--' + self._optName(*args).replace('_', '-')
+    def _loptName(cls, name):
+        return '--' + cls._optName(name).replace('_', '-')
 
     @classmethod
-    def _optName(cls, *args):
-        name = cls.OPT_PREFIX or cls.__name__
-        parts = [name]
-        parts.extend((p.lower().replace('-', '_') for p in args))
+    def _optName(cls, name):
+        parts = [cls.OPT_PREFIX or cls.__name__,
+                 name.replace('-', '_')]
         return '_'.join(parts)
 
     def getTaskOption(self, opt, default=None):

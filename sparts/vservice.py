@@ -47,6 +47,10 @@ class VService(_SpartsObject):
         tasks = set(cls.TASKS).union(get_registered_tasks())
         return resolve_dependencies(tasks)
 
+    @classmethod
+    def _loptName(cls, name):
+        return '--' + name.replace('_', '-')
+
     def preprocessOptions(self):
         """Processes "action" oriented options."""
         if self.getOption('runit_install'):
