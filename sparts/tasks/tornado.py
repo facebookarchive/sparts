@@ -91,10 +91,10 @@ class TornadoHTTPTask(TornadoTask):
                 "Do not specify port *and* sock (%s, %s)" % \
                 (self.port, self.DEFAULT_PORT)
 
-            gid, mode = -1, 0600
+            gid, mode = -1, 0o600
             if self.group != '':
                 e = grp.getgrnam(self.group)
-                gid, mode = e.gr_gid, 0660
+                gid, mode = e.gr_gid, 0o660
 
             sock = tornado.netutil.bind_unix_socket(self.sock, mode=mode)
             if gid != -1:
