@@ -10,9 +10,11 @@ Tasks in sparts are a way to organize and delegate some sort of
 background or other synchronized processing.  This module defines
 the most common features.
 """
+from __future__ import absolute_import
 import logging
 import threading
-from .sparts import _SpartsObject
+from sparts.compat import xrange
+from sparts.sparts import _SpartsObject
 
 
 _REGISTERED_TASKS = set()

@@ -7,6 +7,7 @@
 from sparts.tasks.periodic import PeriodicTask
 from sparts.tasks.queue import QueueTask
 from sparts.vservice import VService
+from sparts.compat import xrange
 import random
 import threading
 
