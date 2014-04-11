@@ -4,3 +4,5 @@ python:
 install:
   - pip install -r requirements-${TRAVIS_PYTHON_VERSION}.txt.travis --use-mirrors
 script:   python setup.py test
+notifications:
+  irc: "irc.freenode.org##sparts"
