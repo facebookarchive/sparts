@@ -7,7 +7,7 @@
 from .base import MultiTaskTestCase, Skip
 
 try:
-    import thrift
+    import thrift.server
 except ImportError:
     raise Skip("thrift is required to run this test")
 
