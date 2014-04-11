@@ -6,12 +6,12 @@
 #
 from sparts.tasks.queue import QueueTask
 from sparts.vtask import ExecuteContext
-from ..base import SingleTaskTestCase
+from ..base import SingleTaskTestCase, Skip
 
 try:
     from twisted.internet.defer import Deferred
 except ImportError:
-    raise AssertionError("Twisted must be installed to run this test")
+    raise Skip("Twisted must be installed to run this test")
 
 
 class NoopTask(QueueTask):
