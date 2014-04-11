@@ -361,11 +361,11 @@ class _NameHelper(type):
         return super(_NameHelper, cls).__new__(cls, name, bases, attrs)
 
 
-class _SpartsObject(object):
-    __metaclass__ = _NameHelper
+_SpartsObjectBase = _NameHelper('_SpartsObjectBase', (object, ), {})
 
+class _SpartsObject(_SpartsObjectBase):
     def __new__(cls, *args, **kwargs):
-        inst = super(_SpartsObject, cls).__new__(cls, *args, **kwargs)
+        inst = super(_SpartsObject, cls).__new__(cls)
         inst.counters = {}
         #for k, v in iteritems(cls.__dict__):
         for k in dir(cls):
