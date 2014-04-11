@@ -14,7 +14,7 @@ except ImportError:
 from sparts.tasks.fb303 import FB303ProcessorTask
 from sparts.tasks.thrift import NBServerTask
 
-from sparts.thrift import ThriftClient
+from sparts.thrift.client import ThriftClient
 from sparts.gen.fb303 import FacebookService
 from sparts.gen.fb303.ttypes import fb_status
 
