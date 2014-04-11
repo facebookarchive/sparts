@@ -18,7 +18,7 @@ import threading
 import time
 
 from argparse import ArgumentParser
-from collections import OrderedDict
+from .compat import OrderedDict
 
 from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
 from .deps import HAS_PSUTIL

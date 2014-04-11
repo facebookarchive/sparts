@@ -7,6 +7,7 @@
 from collections import deque, namedtuple
 from functools import partial
 import time
+from .compat import iteritems
 
 
 class SampleType:
@@ -350,7 +351,7 @@ class option(_Nameable):
 class _NameHelper(type):
     def __new__(cls, name, bases, attrs):
 
-        for k, v in attrs.iteritems():
+        for k, v in iteritems(attrs):
             # Assign `name` for options
             if not isinstance(v, _Nameable):
                 continue
@@ -366,7 +367,7 @@ class _SpartsObject(object):
     def __new__(cls, *args, **kwargs):
         inst = super(_SpartsObject, cls).__new__(cls, *args, **kwargs)
         inst.counters = {}
-        #for k, v in cls.__dict__.iteritems():
+        #for k, v in iteritems(cls.__dict__):
         for k in dir(cls):
             v = getattr(cls, k)
             if isinstance(v, _BaseCounter):
@@ -386,7 +387,7 @@ class _SpartsObject(object):
         for k in self.counters:
             result[k] = self.getCounter(k)
 
-        for cn, c in self.getChildren().iteritems():
+        for cn, c in iteritems(self.getChildren()):
             for k in c.counters:
                 result[cn + '.' + k] = c.getCounter(k)
 
