@@ -11,8 +11,8 @@ try:
 except ImportError:
     raise Skip("Tornado must be installed to run this test")
 
+from sparts.compat import urlopen
 from sparts.tasks.tornado import TornadoIOLoopTask, TornadoHTTPTask
-import urllib2
 
 class TestURLFetchDemo(MultiTaskTestCase):
     TASKS = [TornadoIOLoopTask, TornadoHTTPTask]
@@ -28,5 +28,5 @@ class TestURLFetchDemo(MultiTaskTestCase):
                 host, port = '127.0.0.1', addr[1]
             self.logger.debug('hostport = %s:%s', host, port)
 
-            f = urllib2.urlopen('http://%s:%s/' % (host, port))
-            self.assertEquals(f.read(), 'Hello, world')
+            f = urlopen('http://%s:%s/' % (host, port))
+            self.assertEquals(f.read().decode('ascii'), 'Hello, world')

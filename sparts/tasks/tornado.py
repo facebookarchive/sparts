@@ -6,8 +6,10 @@
 #
 from __future__ import absolute_import
 
-from ..vtask import VTask, SkipTask
-from ..sparts import option, counter  #, samples, SampleType
+
+from sparts.compat import itervalues
+from sparts.sparts import option, counter  #, samples, SampleType
+from sparts.vtask import VTask, SkipTask
 
 import tornado.ioloop
 import tornado.web
@@ -104,7 +106,7 @@ class TornadoHTTPTask(TornadoTask):
             self.server.listen(self.port, self.host)
 
         self.bound_addrs = []
-        for sock in self.server._sockets.itervalues():
+        for sock in itervalues(self.server._sockets):
             sockaddr = sock.getsockname()
             self.bound_addrs.append(sockaddr)
             self.logger.info("%s Server Started on %s (port %s)",
