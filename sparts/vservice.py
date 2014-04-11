@@ -10,6 +10,7 @@ VService can be used directly, for example with `VService.initFromCLI()`,
 or it can be subclassed and used similarly.
 """
 from __future__ import absolute_import
+from __future__ import print_function
 
 import logging
 import signal
@@ -73,9 +74,9 @@ class VService(_SpartsObject):
             self._install()
 
         if self.options.tasks == []:
-            print "Available Tasks:"
+            print("Available Tasks:")
             for t in self._resolveDependencies():
-                print " - %s" % t.__name__
+                print(" - %s" % t.__name__)
             sys.exit(1)
 
     def _createTasks(self):
