@@ -4,9 +4,9 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
-from ..vtask import VTask, ExecuteContext, TryLater
-from ..sparts import option
-from Queue import Queue, Empty
+from sparts.compat import queue
+from sparts.sparts import option
+from sparts.vtask import VTask, ExecuteContext, TryLater
 
 class QueueTask(VTask):
     MAX_ITEMS = 0
@@ -24,7 +24,7 @@ class QueueTask(VTask):
 
     def initTask(self):
         super(QueueTask, self).initTask()
-        self.queue = Queue(maxsize=self.max_items)
+        self.queue = queue.Queue(maxsize=self.max_items)
         self._shutdown_sentinel = object()
 
     def stop(self):
@@ -38,7 +38,7 @@ class QueueTask(VTask):
                 if item is self._shutdown_sentinel:
                     self.queue.put(item)
                     break
-            except Empty:
+            except queue.Empty:
                 continue
 
             if isinstance(item, ExecuteContext):
