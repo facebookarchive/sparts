@@ -128,7 +128,7 @@ setup(
     long_description=read("README.rst"),
 
     install_requires=[],
-    tests_require=['pytest', 'mock', 'unittest2'],
+    tests_require=['pytest', 'mock'],
     extras_require={
         'thrift': ['thrift'],
         'tornado': ['tornado'],
