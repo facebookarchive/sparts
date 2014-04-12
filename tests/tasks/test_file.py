@@ -62,7 +62,10 @@ class TestMyTask(SingleTaskTestCase):
 
         # Forcibly update the atime/mtime of the file
         st = os.stat(path)
-        os.utime(path, (st.st_atime - 10, st.st_mtime - 10))
+        self.task.stat = self.mock.Mock()
+        self.task.stat.return_value = self.mock.Mock(wraps=st)
+        self.task.stat.return_value.st_atime = st.st_atime - 10
+        self.task.stat.return_value.st_mtime = st.st_mtime - 10
 
         self.task.execute()
         self.assertTrue(self.task.onFileChanged.called)
