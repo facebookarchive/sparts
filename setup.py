@@ -119,6 +119,14 @@ class PyTest(TestCommand):
 
 cmdclass['test'] = PyTest
 
+install_requires = ['six']
+if sys.version < '2.7':
+    install_requires.append('ordereddict')
+
+tests_require = install_requires + ['pytest', 'mock']
+if sys.version < '2.7':
+    tests_require.append('unittest2')
+
 VERSION = version()
 setup(
     name="sparts",
@@ -127,8 +135,8 @@ setup(
     description="Build services in python with as little code as possible",
     long_description=read("README.rst"),
 
-    install_requires=['six'],
-    tests_require=['pytest', 'mock'],
+    install_requires=install_requires,
+    tests_require=tests_require,
     extras_require={
         'thrift': ['thrift'],
         'tornado': ['tornado'],
