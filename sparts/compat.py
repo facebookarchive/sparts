@@ -1,5 +1,5 @@
 try:
     from collections import OrderedDict
-except NameError:
+except ImportError:
     # Python2.6 compatibility
     from ordereddict import OrderedDict
