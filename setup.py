@@ -109,7 +109,7 @@ cmdclass['build_py'] = build_py
 class PyTest(TestCommand):
     def finalize_options(self):
         TestCommand.finalize_options(self)
-        self.test_args = ['tests']
+        self.test_args = ['tests', '-rfEsx']
         self.test_suite = True
     def run_tests(self):
         #import here, cause outside the eggs aren't loaded
