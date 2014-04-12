@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
-from sparts.compat import queue
+from six.moves import queue
 from sparts.sparts import option
 from sparts.vtask import VTask, ExecuteContext, TryLater
 

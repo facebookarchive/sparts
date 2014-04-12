@@ -6,8 +6,7 @@
 #
 from __future__ import absolute_import
 
-
-from sparts.compat import itervalues
+from six import itervalues
 from sparts.sparts import option, counter  #, samples, SampleType
 from sparts.vtask import VTask, SkipTask
 

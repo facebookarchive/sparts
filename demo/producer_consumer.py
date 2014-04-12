@@ -4,10 +4,10 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+from six.moves import xrange
 from sparts.tasks.periodic import PeriodicTask
 from sparts.tasks.queue import QueueTask
 from sparts.vservice import VService
-from sparts.compat import xrange
 import random
 import threading
 

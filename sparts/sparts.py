@@ -6,8 +6,8 @@
 #
 from collections import deque, namedtuple
 from functools import partial
+from six import iteritems
 import time
-from .compat import iteritems
 
 
 class SampleType:

@@ -11,7 +11,7 @@ try:
 except ImportError:
     raise Skip("Tornado must be installed to run this test")
 
-from sparts.compat import urlopen
+from six.moves.urllib.request import urlopen
 from sparts.tasks.tornado import TornadoIOLoopTask, TornadoHTTPTask
 
 class TestURLFetchDemo(MultiTaskTestCase):

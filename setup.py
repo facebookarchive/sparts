@@ -127,7 +127,7 @@ setup(
     description="Build services in python with as little code as possible",
     long_description=read("README.rst"),
 
-    install_requires=[],
+    install_requires=['six'],
     tests_require=['pytest', 'mock'],
     extras_require={
         'thrift': ['thrift'],

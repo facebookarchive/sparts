@@ -3,3 +3,4 @@ Twisted
 mock
 pytest
 thrift
+six

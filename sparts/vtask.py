@@ -13,7 +13,7 @@ the most common features.
 from __future__ import absolute_import
 import logging
 import threading
-from sparts.compat import xrange
+from six.moves import xrange
 from sparts.sparts import _SpartsObject
 
 
