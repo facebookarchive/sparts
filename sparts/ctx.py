@@ -1,15 +1,13 @@
+from __future__ import absolute_import
+
 from contextlib import contextmanager
-import shutil
+from sparts.fileutils import NamedTemporaryDirectory
 import sys
-import tempfile
 
 @contextmanager
 def tmpdir(*args, **kwargs):
-    path = tempfile.mkdtemp(*args, **kwargs)
-    try:
-        yield path
-    finally:
-        shutil.rmtree(path)
+    with NamedTemporaryDirectory() as d:
+        yield d.name
 
 @contextmanager
 def add_path(path):

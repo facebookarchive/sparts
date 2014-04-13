@@ -5,9 +5,11 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from distutils.spawn import find_executable
-import os.path
 import errno
 import logging
+import os.path
+import shutil
+import tempfile
 
 logger = logging.getLogger('sparts.fileutils')
 
@@ -49,3 +51,54 @@ def resolve_partition(path):
             elif len(mountpoint) > len(found.mountpoint):
                 found = partition
     return found
+
+
+class NamedTemporaryDirectory(object):
+    """Wrapper around `mkdtemp` that cleans up after itself
+
+    These objects provide the following additional nice features:
+    
+    - A `name` attribute, which refers to the full temporary path created
+    - The ContextManager protocol, similar to ctx.tempdir,
+      to cleanup as the context exits.
+    - Implicit cleanup on dereference (via `__del__`)
+    - Helpers for reading and writing files relative to this created directory
+    """
+    def __init__(self, suffix="", prefix=tempfile.template, dir=None): 
+        self.name = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
+        self.delete = True
+        self.close_called = False
+
+    def __del__(self):
+        self.close()
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc, value, tb):
+        self.close()
+
+    def __str__(self):
+        return self.name
+
+    def close(self):
+        """Trigger cleanup (if it has not been disabled)"""
+        if not self.close_called:
+            if self.delete:
+                shutil.rmtree(self.name)
+            self.close_called = True
+
+    def keep(self):
+        """Request persistence of the contents of this temporary directory.
+        
+        Disabled the cleanup logic that is normally triggered on `__exit__()`,
+        `__del__()`, or close() calls."""
+        self.delete = False
+
+    def writefile(self, path, contents):
+        """Writes `contents` to the `path` relative to this directory"""
+        return writefile(os.path.join(self.name, path), contents)
+
+    def readfile(self, path):
+        """Reads the contents from the `path` relative to this directory"""
+        return readfile(os.path.join(self.name, path))
