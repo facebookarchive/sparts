@@ -1,12 +1,16 @@
 CHANGES
 =======
 
-0.4.2
+0.5.0
 -----
 * Fix some bugs in DirectoryWatcherTask
 * Add an initService() hook to VService
 * Added a hook to do per-thread Task-specific initialization, initTaskThread()
-* New sparts.thrift.ThriftClient helper to reduce synchronous thrift client boilerplate
+* `sparts.thrift.client` with ThriftClient helper to reduce synchronous thrift client boilerplate
+* Basic python3 support, python2.6 support via `six` dependency.
+* `sparts.ctx` module with common helpful context managers
+* `sparts.thrift.compiler` with helpers to generate thrift on-the-fly
+* Various unittest, documentation improvements
 
 0.4.1
 -----
