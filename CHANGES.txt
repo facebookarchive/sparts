@@ -11,6 +11,7 @@ CHANGES
 * `sparts.ctx` module with common helpful context managers
 * `sparts.thrift.compiler` with helpers to generate thrift on-the-fly
 * Various unittest, documentation improvements
+* Handle string args to sparts.tasks.twisted_command.CommandTask better
 
 0.4.1
 -----

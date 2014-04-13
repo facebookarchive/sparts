@@ -52,7 +52,7 @@ class CommandTask(TwistedTask):
         to allow more time for the command to shut down."""
         self.logger.debug("task starting %s...", command)
         if isinstance(command, basestring):
-            command = [command]
+            command = command.split(" ")
 
         # wrap on_exit with helper to remove registered comments
         on_exit = functools.partial(self._procExited, on_exit)
