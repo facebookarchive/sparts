@@ -8,6 +8,7 @@ from __future__ import absolute_import
 
 from ..vtask import VTask
 
+from sparts.sparts import option
 from thrift.server.TNonblockingServer import TNonblockingServer
 from thrift.transport.TSocket import TServerSocket
 
@@ -31,6 +32,14 @@ class NBServerTask(VTask):
 
     bound_host = bound_port = None
 
+    host = option(default=lambda cls: cls.DEFAULT_HOST, metavar='HOST',
+                  help='Address to bind server to [%(default)s]')
+    port = option(default=lambda cls: cls.DEFAULT_PORT,
+                  type=int, metavar='PORT',
+                  help='Port to run server on [%(default)s]')
+    num_threads = option(name='threads', default=10, type=int, metavar='N',
+                         help='Server Worker Threads [%(default)s]')
+
     def getProcessor(self):
         """Automatically find the ThriftProcessorTask subclass"""
         found = None
@@ -46,11 +55,9 @@ class NBServerTask(VTask):
         super(NBServerTask, self).initTask()
 
         self._stopped = False
-        self.socket = TServerSocket(
-            self.getTaskOption('host'), self.getTaskOption('port'))
-        self.server = TNonblockingServer(
-            self.getProcessor(), self.socket,
-            threads=self.getTaskOption('threads'))
+        self.socket = TServerSocket(self.host, self.port)
+        self.server = TNonblockingServer(self.getProcessor(), self.socket,
+                                         threads=self.num_threads)
         self.server.prepare()
         self.bound_host, self.bound_port = \
             self.server.socket.handle.getsockname()
@@ -67,16 +74,3 @@ class NBServerTask(VTask):
             self.server.serve()
         while not self._stopped:
             time.sleep(0.1)
-
-    @classmethod
-    def _addArguments(cls, ap):
-        super(NBServerTask, cls)._addArguments(ap)
-        ap.add_argument(cls._loptName('host'), default=cls.DEFAULT_HOST,
-                        metavar='HOST',
-                        help='Address to bind server to [%(default)s]')
-        ap.add_argument(cls._loptName('port'), type=int, metavar='PORT',
-                        default=cls.DEFAULT_PORT,
-                        help='Port to run server on [%(default)s]')
-        ap.add_argument(cls._loptName('threads'), type=int, default=10,
-                        metavar='N',
-                        help='Server Worker Threads [%(default)s]')

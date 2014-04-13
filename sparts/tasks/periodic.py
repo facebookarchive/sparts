@@ -25,7 +25,7 @@ class PeriodicTask(VTask):
 
     def initTask(self):
         super(PeriodicTask, self).initTask()
-        assert self.getTaskOption('interval') is not None
+        assert self.interval is not None
         self.stop_event = Event()
 
     def stop(self):
