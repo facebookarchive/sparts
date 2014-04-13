@@ -16,8 +16,8 @@ from thrift.transport import TSSLSocket
 from thrift.transport import THttpClient
 from thrift.protocol import TBinaryProtocol
 
-import FacebookService
-from ttypes import *
+from fb303 import FacebookService
+from fb303.ttypes import *
 
 epilog = """Functions:
   string getName()

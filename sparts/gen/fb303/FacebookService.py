@@ -21,32 +21,32 @@ class Iface(object):
   """
   Standard base service
   """
-  def getName(self, ):
+  def getName(self):
     """
     Returns a descriptive name of the service
     """
     pass
 
-  def getVersion(self, ):
+  def getVersion(self):
     """
     Returns the version of the service
     """
     pass
 
-  def getStatus(self, ):
+  def getStatus(self):
     """
     Gets the status of this service
     """
     pass
 
-  def getStatusDetails(self, ):
+  def getStatusDetails(self):
     """
     User friendly description of status, such as why the service is in
     the dead or warning state, or what is being started or stopped.
     """
     pass
 
-  def getCounters(self, ):
+  def getCounters(self):
     """
     Gets the counters for this service
     """
@@ -80,7 +80,7 @@ class Iface(object):
     """
     pass
 
-  def getOptions(self, ):
+  def getOptions(self):
     """
     Gets all options
     """
@@ -96,19 +96,19 @@ class Iface(object):
     """
     pass
 
-  def aliveSince(self, ):
+  def aliveSince(self):
     """
     Returns the unix time that the server has been running since
     """
     pass
 
-  def reinitialize(self, ):
+  def reinitialize(self):
     """
     Tell the server to reload its configuration, reopen log files, etc
     """
     pass
 
-  def shutdown(self, ):
+  def shutdown(self):
     """
     Suggest a shutdown to the server
     """
@@ -125,21 +125,21 @@ class Client(Iface):
       self._oprot = oprot
     self._seqid = 0
 
-  def getName(self, ):
+  def getName(self):
     """
     Returns a descriptive name of the service
     """
     self.send_getName()
     return self.recv_getName()
 
-  def send_getName(self, ):
+  def send_getName(self):
     self._oprot.writeMessageBegin('getName', TMessageType.CALL, self._seqid)
     args = getName_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getName(self, ):
+  def recv_getName(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -153,21 +153,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getName failed: unknown result");
 
-  def getVersion(self, ):
+  def getVersion(self):
     """
     Returns the version of the service
     """
     self.send_getVersion()
     return self.recv_getVersion()
 
-  def send_getVersion(self, ):
+  def send_getVersion(self):
     self._oprot.writeMessageBegin('getVersion', TMessageType.CALL, self._seqid)
     args = getVersion_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getVersion(self, ):
+  def recv_getVersion(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -181,21 +181,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getVersion failed: unknown result");
 
-  def getStatus(self, ):
+  def getStatus(self):
     """
     Gets the status of this service
     """
     self.send_getStatus()
     return self.recv_getStatus()
 
-  def send_getStatus(self, ):
+  def send_getStatus(self):
     self._oprot.writeMessageBegin('getStatus', TMessageType.CALL, self._seqid)
     args = getStatus_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getStatus(self, ):
+  def recv_getStatus(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -209,7 +209,7 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getStatus failed: unknown result");
 
-  def getStatusDetails(self, ):
+  def getStatusDetails(self):
     """
     User friendly description of status, such as why the service is in
     the dead or warning state, or what is being started or stopped.
@@ -217,14 +217,14 @@ class Client(Iface):
     self.send_getStatusDetails()
     return self.recv_getStatusDetails()
 
-  def send_getStatusDetails(self, ):
+  def send_getStatusDetails(self):
     self._oprot.writeMessageBegin('getStatusDetails', TMessageType.CALL, self._seqid)
     args = getStatusDetails_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getStatusDetails(self, ):
+  def recv_getStatusDetails(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -238,21 +238,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getStatusDetails failed: unknown result");
 
-  def getCounters(self, ):
+  def getCounters(self):
     """
     Gets the counters for this service
     """
     self.send_getCounters()
     return self.recv_getCounters()
 
-  def send_getCounters(self, ):
+  def send_getCounters(self):
     self._oprot.writeMessageBegin('getCounters', TMessageType.CALL, self._seqid)
     args = getCounters_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getCounters(self, ):
+  def recv_getCounters(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -284,7 +284,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getCounter(self, ):
+  def recv_getCounter(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -318,7 +318,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_setOption(self, ):
+  def recv_setOption(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -348,7 +348,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getOption(self, ):
+  def recv_getOption(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -362,21 +362,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getOption failed: unknown result");
 
-  def getOptions(self, ):
+  def getOptions(self):
     """
     Gets all options
     """
     self.send_getOptions()
     return self.recv_getOptions()
 
-  def send_getOptions(self, ):
+  def send_getOptions(self):
     self._oprot.writeMessageBegin('getOptions', TMessageType.CALL, self._seqid)
     args = getOptions_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getOptions(self, ):
+  def recv_getOptions(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -409,7 +409,7 @@ class Client(Iface):
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_getCpuProfile(self, ):
+  def recv_getCpuProfile(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -423,21 +423,21 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "getCpuProfile failed: unknown result");
 
-  def aliveSince(self, ):
+  def aliveSince(self):
     """
     Returns the unix time that the server has been running since
     """
     self.send_aliveSince()
     return self.recv_aliveSince()
 
-  def send_aliveSince(self, ):
+  def send_aliveSince(self):
     self._oprot.writeMessageBegin('aliveSince', TMessageType.CALL, self._seqid)
     args = aliveSince_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
 
-  def recv_aliveSince(self, ):
+  def recv_aliveSince(self):
     (fname, mtype, rseqid) = self._iprot.readMessageBegin()
     if mtype == TMessageType.EXCEPTION:
       x = TApplicationException()
@@ -451,25 +451,25 @@ class Client(Iface):
       return result.success
     raise TApplicationException(TApplicationException.MISSING_RESULT, "aliveSince failed: unknown result");
 
-  def reinitialize(self, ):
+  def reinitialize(self):
     """
     Tell the server to reload its configuration, reopen log files, etc
     """
     self.send_reinitialize()
 
-  def send_reinitialize(self, ):
+  def send_reinitialize(self):
     self._oprot.writeMessageBegin('reinitialize', TMessageType.CALL, self._seqid)
     args = reinitialize_args()
     args.write(self._oprot)
     self._oprot.writeMessageEnd()
     self._oprot.trans.flush()
-  def shutdown(self, ):
+  def shutdown(self):
     """
     Suggest a shutdown to the server
     """
     self.send_shutdown()
 
-  def send_shutdown(self, ):
+  def send_shutdown(self):
     self._oprot.writeMessageBegin('shutdown', TMessageType.CALL, self._seqid)
     args = shutdown_args()
     args.write(self._oprot)
@@ -1118,7 +1118,7 @@ class getCounters_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype1, _vtype2, _size0 ) = iprot.readMapBegin() 
+          (_ktype1, _vtype2, _size0 ) = iprot.readMapBegin()
           for _i4 in xrange(_size0):
             _key5 = iprot.readString();
             _val6 = iprot.readI64();
@@ -1581,7 +1581,7 @@ class getOptions_result(object):
       if fid == 0:
         if ftype == TType.MAP:
           self.success = {}
-          (_ktype10, _vtype11, _size9 ) = iprot.readMapBegin() 
+          (_ktype10, _vtype11, _size9 ) = iprot.readMapBegin()
           for _i13 in xrange(_size9):
             _key14 = iprot.readString();
             _val15 = iprot.readString();
