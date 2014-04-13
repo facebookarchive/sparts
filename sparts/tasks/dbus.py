@@ -119,6 +119,7 @@ class DBusMainLoopTask(VTask):
 class DBusTask(VTask):
     """Base Class for Tasks that depend on the DBus Main Loop"""
     DEPS = [DBusMainLoopTask]
+    LOOPLESS = True
 
     def initTask(self):
         super(DBusTask, self).initTask()
@@ -133,7 +134,6 @@ class DBusServiceTask(DBusTask):
     """Glue Task for exporting this VService over dbus"""
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
-    LOOPLESS = True
     BUS_CLASS = VServiceDBusObject
 
     bus_name = option(default=lambda cls: cls.BUS_NAME, metavar='NAME',
