@@ -1,5 +1,6 @@
 *.pyc
 .*.sw?
+*.egg
 build/
 tags
 sparts.egg-info/
