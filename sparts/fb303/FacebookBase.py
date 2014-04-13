@@ -31,16 +31,16 @@ class FacebookBase(FacebookService.Iface):
     self.counters = {}
     self.options = {}
 
-  def getName(self, ):
+  def getName(self):
     return self.name
 
-  def getVersion(self, ):
+  def getVersion(self):
     return ''
 
-  def getStatus(self, ):
+  def getStatus(self):
     return fb_status.ALIVE
 
-  def getStatusDetails(self, ):
+  def getStatusDetails(self):
     return ''
 
   def getCounters(self):
