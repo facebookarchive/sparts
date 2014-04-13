@@ -1,10 +1,51 @@
 language: python
+
 python:
   - "2.6"
   - "2.7"
   - "3.3"
+
+before_install:
+  # Only prepare thrift stuff for python 2
+  - if [ $(echo ${TRAVIS_PYTHON_VERSION} | cut -c1) = "2" ]; then
+
+  # Prepare thrift for install
+  - pushd externals/thrift
+  - ./bootstrap.sh
+  - ./configure
+
+  # Compile the thrift compiler
+  - echo "python " $(echo ${TRAVIS_PYTHON_VERSION} | cut -c1)
+  - pushd compiler/cpp
+  - make
+  - popd
+
+  # Compiler the python extension/modules, etc
+  - pushd lib/py
+  - python setup.py build
+  - popd
+  - popd
+  - fi
+
 install:
+  # Only prepare thrift stuff for python 2
+  - if [ $(echo ${TRAVIS_PYTHON_VERSION} | cut -c1) = "2" ]; then
+  # Install thrift-related dependencies
+  - pushd externals/thrift
+  - pushd compiler/cpp
+  - sudo make install
+  - popd
+  - pushd lib/py
+  - sudo python setup.py install
+  - popd
+  - popd
+  - fi
+
+  # Install additional dependencies
   - pip install -r requirements-${TRAVIS_PYTHON_VERSION}.txt.travis
-script:   python setup.py test
+
+script:
+  - python setup.py test
+
 notifications:
   irc: "irc.freenode.org##sparts"
