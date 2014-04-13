@@ -40,6 +40,9 @@ class VTask(_SpartsObject):
         return self.__class__.__name__
 
     def __init__(self, service):
+        """Task Constructor.  requires a `service` VService instance
+
+        You should not need to override this.  Override initTask isntead."""
         self.service = service
         self.logger = logging.getLogger('%s.%s' % (service.name, self.name))
         self.threads = []
@@ -62,6 +65,7 @@ class VTask(_SpartsObject):
         """Override thread-specific initialization for multi-threaded tasks"""
 
     def start(self):
+        """Called during bootstrap to spin up threads post-creation."""
         if not self.LOOPLESS:
             for thread in self.threads:
                 thread.start()
@@ -74,6 +78,7 @@ class VTask(_SpartsObject):
         pass
 
     def join(self):
+        """Block, waiting for all child worker threads to finish."""
         if not self.LOOPLESS:
             for thread in self.threads:
                 while thread.isAlive():

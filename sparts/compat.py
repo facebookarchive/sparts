@@ -4,6 +4,10 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Run-time compatiblity helpers with third-party modules
+
+For most standard library moves and discrepancies, you should use `six` instead
+"""
 try:
     from collections import OrderedDict
 except ImportError:
