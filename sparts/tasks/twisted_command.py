@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module that provides an API for executing and managing child processes."""
 from __future__ import absolute_import
 from twisted.internet.protocol import ProcessProtocol
 from twisted.protocols.basic import LineReceiver
@@ -18,6 +19,15 @@ import twisted.internet.threads
 
 
 class CommandTask(TwistedTask):
+    """A task that provides a useful API for executing other commands.
+
+    Python's Popen() can be hard to use, especially if you are executing long
+    running child processes, and need to handle various stdout, stderr, and
+    process exit events asynchronously.
+
+    This particular implementation relies on Twisted's ProcessProtocol, but it
+    wraps it in a way that makes it mostly opaque.
+    """
     LOOPLESS = True
     OPT_PREFIX = 'cmd'
 
@@ -27,28 +37,25 @@ class CommandTask(TwistedTask):
     started = counter()
     finished = counter()
 
-    def initTask(self):
-        super(CommandTask, self).initTask()
-        self.outstanding = {}
-
-    def procExited(self, on_exit, proto, trans, reason):
-        self.logger.debug("%s closed for %s", trans, reason)
-        if on_exit is not None:
-            on_exit(reason)
-
-        self.outstanding.pop(trans)
-
-        self.finished.increment()
-        return None
-
     def run(self, command, on_stdout=None, on_stderr=None, on_exit=None,
             line_buffered=True, kill_timeout=None):
+        """Call this function to start a new child process running `command`.
+        
+        Additional callbacks, such as `on_stdout`, `on_stderr`, and `on_exit`,
+        can be provided, that will receive a variety of parameters on the
+        appropriate events.
+
+        Line buffering can be disabled by passing `line_buffered`=False.
+
+        Also, a custom `kill_timeout` (seconds) may be set that overrides the
+        task default, in the event that a shutdown is received and you want
+        to allow more time for the command to shut down."""
         self.logger.debug("task starting %s...", command)
         if isinstance(command, basestring):
             command = [command]
 
         # wrap on_exit with helper to remove registered comments
-        on_exit = functools.partial(self.procExited, on_exit)
+        on_exit = functools.partial(self._procExited, on_exit)
 
         proto = _ProcessProtocolAdapter(on_stdout, on_stderr, on_exit,
                                        line_buffered=line_buffered)
@@ -66,8 +73,22 @@ class CommandTask(TwistedTask):
         self.started.increment()
         return result
 
+    def initTask(self):
+        super(CommandTask, self).initTask()
+        self.outstanding = {}
+
+    def _procExited(self, on_exit, proto, trans, reason):
+        self.logger.debug("%s closed for %s", trans, reason)
+        if on_exit is not None:
+            on_exit(reason)
+
+        self.outstanding.pop(trans)
+
+        self.finished.increment()
+        return None
+
     def join(self):
-        """Override to wait for process workers to shutdown / be killed"""
+        """Overridden to block for process workers to shutdown / be killed."""
         # TODO: Conditions instead of sleep polling?
         while len(self.outstanding) > 0:
             time.sleep(0.250)
@@ -96,9 +117,11 @@ class CommandTask(TwistedTask):
                 self.reactor.callFromThread(self.reactor.callLater, *args)
 
     def isDoneWithReactor(self):
+        """Overridden to keep reactor running until all commands finish."""
         return len(self.outstanding) == 0
 
 class _ProcessProtocolAdapter(ProcessProtocol):
+    """ProcessProtocol that allows custom callbacks, buffering."""
     def __init__(self, on_stdout=None, on_stderr=None, on_exit=None,
                  line_buffered=True):
 
@@ -135,7 +158,7 @@ class _ProcessProtocolAdapter(ProcessProtocol):
 
     def processEnded(self, reason):
         # Ugh, this is a hack... I need to pass self because Twisted unsets pid
-        # after the process has exited, and I need the *old* pid to do proper
+        # after the process has exited, but I need the *old* pid to do proper
         # accounting.  *YES* I get why this is fundamentally broken
         self.on_exit(self, self.transport, reason)
         self.transport.loseConnection()

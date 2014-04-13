@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module for common base classes and helpers, such as options and counters"""
 from collections import deque, namedtuple
 from functools import partial
 from six import iteritems
@@ -31,6 +32,7 @@ class _Nameable(object):
 
 
 class _Bindable(object):
+    """Helper class for allowing instance-unique class-declarative behavior."""
     def __init__(self, *args, **kwargs):
         self._bound = {}
         super(_Bindable, self).__init__(*args, **kwargs)

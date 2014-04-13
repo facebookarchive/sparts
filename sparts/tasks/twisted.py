@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Twisted-related helper tasks"""
 from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
@@ -15,6 +16,7 @@ import twisted.internet
 
 
 class TwistedReactorTask(VTask):
+    """Configure and run the twisted reactor in a sparts task"""
     reactor = None
 
     def initTask(self):
@@ -56,6 +58,9 @@ class TwistedReactorTask(VTask):
                                         self._tryShutdown)
 
 class TwistedTask(VTask):
+    """Base class for tasks that require a twisted reactor.
+    
+    Implicitly configures the twisted reactor task as a dependency."""
     DEPS = [TwistedReactorTask]
 
     def initTask(self):

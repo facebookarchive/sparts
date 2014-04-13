@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module containing helpers for implementing fb303 with `VService`s"""
 from .fb303 import FacebookService
 from .fb303.ttypes import fb_status
 

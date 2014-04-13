@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""thrift-related helper tasks"""
 from __future__ import absolute_import
 
 from ..vtask import VTask
@@ -16,16 +17,23 @@ import time
 
 
 class ThriftProcessorTask(VTask):
+    """A loopless task that helps process thrift requests.
+
+    You will need a subclass of this task in order to properly handle thrift
+    requests in your NBServerTasks and such."""
     LOOPLESS = True
     PROCESSOR = None
 
     def __init__(self, service):
+        # TODO: I don't like the way this works: it's too much boilerplate and
+        # complexity to implement custom thrift services.
         super(ThriftProcessorTask, self).__init__(service)
         assert self.PROCESSOR is not None
         self.processor = self.PROCESSOR(self.service)
 
 
 class NBServerTask(VTask):
+    """Spin up a thrift TNonblockingServer in a sparts worker thread"""
     DEFAULT_HOST = '0.0.0.0'
     DEFAULT_PORT = 0
     OPT_PREFIX = 'thrift'
@@ -52,6 +60,7 @@ class NBServerTask(VTask):
         return found.processor
 
     def initTask(self):
+        """Overridden to bind sockets, etc"""
         super(NBServerTask, self).initTask()
 
         self._stopped = False
@@ -65,11 +74,13 @@ class NBServerTask(VTask):
                          self.name, self.bound_host, self.bound_port)
 
     def stop(self):
+        """Overridden to tell the thrift server to shutdown asynchronously"""
         self.server.stop()
         self.server.close()
         self._stopped = True
 
     def _runloop(self):
+        """Overridden to execute TNonblockingServer's main loop"""
         while not self.server._stop:
             self.server.serve()
         while not self._stopped:

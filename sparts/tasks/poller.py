@@ -9,6 +9,12 @@ from threading import Event
 
 
 class PollerTask(PeriodicTask):
+    """A PeriodicTask oriented around monitoring a single value.
+    
+    Simply override `fetch`, and the `onValueChanged()` method will be called
+    with the old and new values.  Additionally, the `getValue()` method can
+    be called by other tasks to block until the values are ready.
+    """
     def initTask(self):
         self.current_value = None
         self.fetched = Event()

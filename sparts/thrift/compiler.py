@@ -32,6 +32,7 @@ def compile(path, root='.', **kwargs):
 
 
 def _require_executable(name):
+    """Given `name`, assert on and return the path to that binary."""
     path = distutils.spawn.find_executable(name)
     assert path is not None, 'Unable to find %s in PATH' % repr(name)
     return path

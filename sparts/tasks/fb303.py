@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module related to implementing fb303 thrift handlers"""
 from __future__ import absolute_import
 
 from .thrift import ThriftProcessorTask

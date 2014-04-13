@@ -4,11 +4,13 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module for tasks related to doing work from a queue"""
 from six.moves import queue
 from sparts.sparts import option
 from sparts.vtask import VTask, ExecuteContext, TryLater
 
 class QueueTask(VTask):
+    """Task that calls `execute` for all work put on its `queue`"""
     MAX_ITEMS = 0
     WORKERS = 1
     max_items = option(type=int, default=lambda cls: cls.MAX_ITEMS,
@@ -68,5 +70,3 @@ class QueueTask(VTask):
     def unhandledErrback(self, error):
         self.unhandled = error
         return None
-
-

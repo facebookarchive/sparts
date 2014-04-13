@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""This module contains tornado-related helper tasks and classes."""
 from __future__ import absolute_import
 
 from six import itervalues
@@ -20,6 +21,7 @@ import os
 
 
 class TornadoIOLoopTask(VTask):
+    """Configure and run the Tornado IO Loop in a sparts task"""
     OPT_PREFIX = 'tornado'
 
     def initTask(self):
@@ -43,6 +45,11 @@ class TornadoIOLoopTask(VTask):
 
 
 class TornadoTask(VTask):
+    """Base class for tasks that require the tornado IO Loop.
+    
+    Implicitly configures the tornado IO Loop task as a dependency.
+    
+    The ioloop can be accessed via `self.ioloop`"""
     DEPS = [TornadoIOLoopTask]
 
     def initTask(self):
@@ -55,6 +62,10 @@ class TornadoTask(VTask):
 
 
 class TornadoHTTPTask(TornadoTask):
+    """A loopless task that implements an HTTP server using Tornado.
+    
+    It is loopless because it depends on tornado's separate IOLoop task.  You
+    will need to subclass this to do something more useful."""
     LOOPLESS = True
     OPT_PREFIX = 'http'
     DEFAULT_PORT = 0
@@ -74,6 +85,12 @@ class TornadoHTTPTask(TornadoTask):
                        '[%(default)s]')
     group = option(name='sock-group', metavar='GROUP', default='',
                    help='Group to create unix files as [%(default)s]')
+
+    def getApplicationConfig(self):
+        """Override this to register custom handlers / routes."""
+        return [
+            ('/', HelloWorldHandler),
+        ]
 
     def initTask(self):
         super(TornadoHTTPTask, self).initTask()
@@ -126,11 +143,8 @@ class TornadoHTTPTask(TornadoTask):
         super(TornadoHTTPTask, self).stop()
         self.server.stop()
 
-    def getApplicationConfig(self):
-        return [
-            ('/', HelloWorldHandler),
-        ]
 
 class HelloWorldHandler(tornado.web.RequestHandler):
+    """A sample twisted web handler for use in the default http server task"""
     def get(self):
         self.write("Hello, world")

@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module related to configuring services under runit"""
 import sys
 import os.path
 from .fileutils import writefile, find_executable, resolve_partition, makedirs
@@ -13,6 +14,7 @@ import stat
 logger = logging.getLogger('sparts.runit')
 
 def install(service_name):
+    """Installs the running python script as `service_name` under runit."""
     preferred = '/etc/service'
     dirs = get_runsvdir_dirs()
     assert len(dirs) > 0, "runsvdir is not running!"
@@ -24,14 +26,16 @@ def install(service_name):
     logger.info('Installing %s in %s', service_name, service_path)
     make_runit_dir(service_name, service_path)
 
-
 def is_runit_installed():
+    """Returns True if runit is installed"""
+    # Check if the `runsv` binary is in the path.
     return bool(find_executable('runsv'))
 
-
 def get_runsvdir_dirs():
+    """Returns all dirs being currently managed by `runsvdir`"""
     import psutil
     dirs = []
+    # Find all running `runsvdir` processes
     for proc in psutil.process_iter():
         if proc.name == 'runsvdir':
             d = get_runsvdir_dir_from_cmdline(proc.cmdline)
@@ -40,6 +44,7 @@ def get_runsvdir_dirs():
     return dirs
 
 def get_runsvdir_dir_from_cmdline(cmdline):
+    """Return runsvdir's target path based on its `cmdline` args"""
     # TODO - unittest this
     for i, arg in enumerate(cmdline):
         # Skip the process name
@@ -54,6 +59,7 @@ def get_runsvdir_dir_from_cmdline(cmdline):
     return None
 
 def on_same_filesystem(path1, path2):
+    """Returns True if `path` and `path2` reside on the same mount"""
     return resolve_partition(path1).mountpoint == \
             resolve_partition(path2).mountpoint
 

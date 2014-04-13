@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Module providing tasks that help with dbus integration"""
 from __future__ import absolute_import
 
 from ..vtask import VTask, SkipTask
@@ -20,6 +21,7 @@ import time
 
 
 class VServiceDBusObject(dbus.service.Object):
+    """DBus interface implementation that exports common VService methods"""
     def __init__(self, dbus_service):
         self.dbus_service = dbus_service
         self.service = self.dbus_service.service
@@ -77,6 +79,7 @@ class VServiceDBusObject(dbus.service.Object):
 
 
 class DBusMainLoopTask(VTask):
+    """Configure and run the DBus Main Loop in a sparts task"""
     THREADS_INITED = False
     mainloop = None
 
@@ -114,6 +117,7 @@ class DBusMainLoopTask(VTask):
         self.mainloop = None
 
 class DBusTask(VTask):
+    """Base Class for Tasks that depend on the DBus Main Loop"""
     DEPS = [DBusMainLoopTask]
 
     def initTask(self):
@@ -126,6 +130,7 @@ class DBusTask(VTask):
 
 
 class DBusServiceTask(DBusTask):
+    """Glue Task for exporting this VService over dbus"""
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
     LOOPLESS = True

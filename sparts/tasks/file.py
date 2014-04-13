@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Tasks related for files and filesystems"""
 from .poller import PollerTask
 import errno
 import os
@@ -11,13 +12,34 @@ import os
 from ..sparts import option
 
 class DirectoryWatcherTask(PollerTask):
-    """DirectoryWatcherTask watches for new, deleted, modified files"""
+    """DirectoryWatcherTask watches for new, deleted, and modified files
+    
+    The `IGNORE_INITIAL_FILES` attribute can be overridden to Flaase if you
+    do not want to receive a bunch of `onFileCreated` callbacks during startup.
+
+    This could be better implemented with the inotify/pyinotify API, but for
+    basic rapid prototyping, polling should be sufficient.
+    """
     PATH = '.'
     path = option(default=lambda cls: cls.PATH,
                   help='Directory path to watch [%(default)s]')
     IGNORE_INITIAL_FILES = True
 
+    def onFileCreated(self, filename, stat):
+        """Override this to do custom processing when new files are created."""
+        self.logger.debug('onFileCreated(%s, %s)', filename, stat)
+
+    def onFileDeleted(self, filename, old_stat):
+        """Override this to do custom processing when files are deleted."""
+        self.logger.debug('onFileDeleted(%s, %s)', filename, old_stat)
+
+    def onFileChanged(self, filename, old_stat, new_stat):
+        """Override this to do custom processing when files are modified."""
+        self.logger.debug('onFileChanged(%s, %s, %s)', filename, old_stat, new_stat)
+
+
     def fetch(self):
+        """Overridden to stat a particular filesystem path"""
         d = {}
         root = self.path
         contents = self.listdir(root)
@@ -33,22 +55,8 @@ class DirectoryWatcherTask(PollerTask):
 
         return sorted(d.items())
 
-    def listdir(self, path):
-        return os.listdir(path)
-
-    def stat(self, path):
-        return os.stat(path)
-
-    def onFileCreated(self, filename, stat):
-        self.logger.debug('onFileCreated(%s, %s)', filename, stat)
-
-    def onFileDeleted(self, filename, old_stat):
-        self.logger.debug('onFileDeleted(%s, %s)', filename, old_stat)
-
-    def onFileChanged(self, filename, old_stat, new_stat):
-        self.logger.debug('onFileChanged(%s, %s, %s)', filename, old_stat, new_stat)
-
     def onValueChanged(self, old_value, new_value):
+        """Overridden to track file statuses."""
         if old_value is None:
             # For the first run, ignore pre-existing files by default.
             # Override this class and set this to False if you want them.
@@ -70,3 +78,11 @@ class DirectoryWatcherTask(PollerTask):
         for (name, new_stat) in new_value:
             if name not in old_value_dict:
                 self.onFileCreated(name, new_stat)
+
+    def listdir(self, path):
+        """Wrapper for making unittesting/mocking easier"""
+        return os.listdir(path)
+
+    def stat(self, path):
+        """Wrapper for making unittesting/mocking easier"""
+        return os.stat(path)

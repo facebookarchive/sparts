@@ -11,6 +11,11 @@ from threading import Event
 
 
 class PeriodicTask(VTask):
+    """Task that executes `execute` at a specified interval
+    
+    You must either override the `INTERVAL` (seconds) class attribute, or
+    pass a --{OPT_PREFIX}-interval in order for your task to run.
+    """
     INTERVAL = None
 
     execute_duration_ms = samples(windows=[60, 240],
@@ -23,9 +28,16 @@ class PeriodicTask(VTask):
                       default=lambda cls: cls.INTERVAL,
                       help='How often this task should run [%(default)s] (s)')
 
+    def execute(self, context=None):
+        """Override this to perform some custom action periodically."""
+        self.logger.debug('execute')
+
     def initTask(self):
         super(PeriodicTask, self).initTask()
         assert self.interval is not None
+
+        # Register an event that we can more smartly wait on in case shutdown
+        # is requested while we would be `sleep()`ing
         self.stop_event = Event()
 
     def stop(self):
@@ -51,6 +63,3 @@ class PeriodicTask(VTask):
                 self.n_slow_iterations.increment()
 
             t0 = time.time()
-
-    def execute(self, context=None):
-        self.logger.debug('execute')

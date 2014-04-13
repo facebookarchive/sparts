@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+"""Helpers for commonly performed file operations"""
 from distutils.spawn import find_executable
 import errno
 import logging
@@ -15,15 +16,18 @@ logger = logging.getLogger('sparts.fileutils')
 
 
 def readfile(path):
+    """Return the contents of the file at `path`"""
     with open(path, mode='rb') as f:
         return f.read()
 
 def writefile(path, contents):
+    """Write `contents` to the file at `path`"""
     logger.debug('writefile("%s", ...)', path)
     with open(path, mode='wb') as f:
         return f.write(contents)
 
 def makedirs(path, *args, **kwargs):
+    """Create necessary directory heirarchy to `path` if it doesn't exist"""
     try:
         logger.debug('makedirs("%s", ...)', path)
         os.makedirs(path, *args, **kwargs)
@@ -37,6 +41,9 @@ find_executable = find_executable
 
 
 def resolve_partition(path):
+    """Return the mount that `path` is present on.
+    
+    Requires `psutil`."""
     import psutil
     path = os.path.realpath(path)
     found = None
