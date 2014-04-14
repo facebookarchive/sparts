@@ -9,12 +9,11 @@
 import distutils.spawn
 import imp
 import os.path
-import subprocess
 import tempfile
 
 from six import iterkeys, iteritems
 from sparts import ctx
-from sparts.compat import OrderedDict
+from sparts.compat import OrderedDict, check_output
 from sparts.fileutils import NamedTemporaryDirectory
 
 
@@ -143,12 +142,12 @@ class CompileContext(object):
         args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
                ["--gen", self.getThriftOptions(**kwargs), '-v',
                 "-out", outdir.name, srcdir.join(pathbase)]
-        subprocess.check_output(args)
+        check_output(args)
 
         args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
                ["--gen", self.getThriftOptions(**kwargs), '-v', '-r',
                 "-out", outdir_recurse.name, srcdir.join(pathbase)]
-        subprocess.check_output(args)
+        check_output(args)
 
         # Prepend output directory to the path
         with ctx.add_path(outdir_recurse.name, 0):

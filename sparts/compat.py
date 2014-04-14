@@ -13,3 +13,19 @@ try:
 except ImportError:
     # Python2.6 compatibility
     from ordereddict import OrderedDict
+
+try:
+    from subprocess import check_output
+except ImportError:
+    import subprocess
+
+    def check_output(args, stdin=None, stderr=None, shell=False,
+                     universal_newlines=False):
+        """Mostly compatible `check_output` for python2.6"""
+        p = subprocess.Popen(args, stdin=stdin, stderr=stderr, shell=shell,
+              universal_newlines=universal_newlines)
+        output, stderr = p.communicate()
+        returncode = p.wait()
+        if returncode != 0:
+            raise subprocess.CalledProcessError(returncode, cmd=args, output=output)
+        return output
