@@ -88,6 +88,10 @@ class NamedTemporaryDirectory(object):
     def __str__(self):
         return self.name
 
+    def __repr__(self):
+        """Overridden to include the temp dir path for debugging clarity."""
+        return "<NamedTemporaryDirectory '%s' at 0x%x>" % (self.name, id(self))
+
     def close(self):
         """Trigger cleanup (if it has not been disabled)"""
         if not self.close_called:
@@ -104,8 +108,15 @@ class NamedTemporaryDirectory(object):
 
     def writefile(self, path, contents):
         """Writes `contents` to the `path` relative to this directory"""
-        return writefile(os.path.join(self.name, path), contents)
+        return writefile(self.join(path), contents)
 
     def readfile(self, path):
         """Reads the contents from the `path` relative to this directory"""
-        return readfile(os.path.join(self.name, path))
+        return readfile(self.join(path))
+
+    def symlink(self, path, dst):
+        """Create a symlink to `dst` at the `path` relative to this directory"""
+        return os.symlink(dst, self.join(path))
+
+    def join(self, *path):
+        return os.path.join(self.name, *path)
