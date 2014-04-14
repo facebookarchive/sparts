@@ -5,7 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from sparts.tasks.poller import PollerTask
-from ..base import SingleTaskTestCase
+from sparts.tests.base import SingleTaskTestCase
 
 
 class MyTask(PollerTask):

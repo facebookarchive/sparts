@@ -4,8 +4,8 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+from sparts.tests.base import SingleTaskTestCase
 from sparts.tasks.file import DirectoryWatcherTask
-from ..base import SingleTaskTestCase
 from tempfile import mkdtemp
 from shutil import rmtree
 

@@ -5,7 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from sparts.tasks.periodic import PeriodicTask
-from ..base import SingleTaskTestCase
+from sparts.tests.base import SingleTaskTestCase
 import time
 import threading
 

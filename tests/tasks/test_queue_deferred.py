@@ -5,8 +5,8 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from sparts.tasks.queue import QueueTask
+from sparts.tests.base import SingleTaskTestCase, Skip
 from sparts.vtask import ExecuteContext
-from ..base import SingleTaskTestCase, Skip
 
 try:
     from twisted.internet.defer import Deferred

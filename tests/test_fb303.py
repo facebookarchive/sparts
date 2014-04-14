@@ -5,7 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from __future__ import absolute_import
-from .base import MultiTaskTestCase, Skip
+from sparts.tests.base import MultiTaskTestCase, Skip
 
 try:
     import thrift.server
