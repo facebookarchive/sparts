@@ -7,8 +7,12 @@
 from sparts.tests.base import BaseSpartsTestCase
 from sparts import ctx
 
+import os
+import sys
+
 class ContextTests(BaseSpartsTestCase):
     def testTmpdir(self):
+        """Verify `ctx.tmpdir`"""
         with ctx.tmpdir() as path:
             path_copy = path
             self.assertExists(path)
@@ -16,10 +20,49 @@ class ContextTests(BaseSpartsTestCase):
         self.assertNotExists(path_copy)
 
     def testAddPath(self):
-        import sys
+        """Verify `ctx.add_path`"""
+        # Create a temp directory
         with ctx.tmpdir() as path:
+            # The temp dir should not be in the path yet.
             self.assertNotIn(path, sys.path)
+
             with ctx.add_path(path):
+                # Now it should be in the path
                 self.assertIn(path, sys.path)
+
+            # After exiting the context, it should be gone again
             self.assertNotIn(path, sys.path)
+
+    def testChdir(self):
+        """Verify `ctx.chdir`"""
+        with ctx.tmpdir() as path:
+            orig_dir = os.getcwd()
+
+            # Make sure we're not in the new tmpdir.  This should be impossible.
+            self.assertNotEquals(orig_dir, path)
+
+            with ctx.chdir(path):
+                # Make sure we changed correctly
+                self.assertEquals(os.getcwd(), path)
+
+            # Make sure we're not there anymore
+            self.assertNotEquals(os.getcwd(), path)
+
+            # Make sure we returned to the original location
+            self.assertEquals(os.getcwd(), orig_dir)
+
+    def testModuleSnapshot(self):
+        """Verify `ctx.module_snapshot`"""
+        # Make sure this module hasn't been imported yet.  This should never
+        # be used by this unittest.
+        self.assertNotIn('sparts.tests.dummy', sys.modules)
+
+        with ctx.module_snapshot():
+            # Import the module
+            import sparts.tests.dummy
+            self.assertIn('sparts.tests.dummy', sys.modules)
+            self.assertIs(sys.modules['sparts.tests.dummy'], sparts.tests.dummy)
+
+        # Make sure it's been removed
+        self.assertNotIn('sparts.tests.dummy', sys.modules)
 
