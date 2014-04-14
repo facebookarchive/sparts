@@ -9,26 +9,28 @@
 import distutils.spawn
 import imp
 import os.path
-import re
 import subprocess
+import tempfile
 
+from six import iterkeys, iteritems
 from sparts import ctx
-from contextlib import contextmanager, nested
+from sparts.compat import OrderedDict
+from sparts.fileutils import NamedTemporaryDirectory
 
 
-def compile(path, root='.', **kwargs):
+def compile(path, root='.', debug=False, **kwargs):
     """Return a compiled thrift file module from `path`
-    
+
     Additional kwargs may be passed to indicate options to the thrift compiler:
 
-    - new_style [default:True]: Use new-style classes 
+    - new_style [default:True]: Use new-style classes
     - twisted [default:False]: Generated twisted-friendly bindings
     - tornado [default:False]: Generate tornado-friendly bindings
     - utf8strings [default:False]: Use unicode strings instead of native
     - slots [default:True]: Use __slots__ in generated structs
     """
-    comp = _CompileContext(root=root)
-    return comp.importThrift(path, **kwargs)
+    comp = CompileContext(root=root, debug=debug)
+    return comp.compileThriftFileAt(path, **kwargs)
 
 
 def _require_executable(name):
@@ -38,10 +40,36 @@ def _require_executable(name):
     return path
 
 
-class _CompileContext(object):
-    def __init__(self, root='.'):
+class CompileContext(object):
+    def __init__(self, root='.', debug=False):
         self.root = root
         self.thrift_bin = _require_executable('thrift')
+        self.include_dirs = OrderedDict()
+        self.dep_files = {}
+        self.dep_contents = {}
+        self.debug = debug
+
+        self.addIncludeDir(self.root)
+
+    def makeTemporaryIncludeDir(self):
+        d = NamedTemporaryDirectory(prefix='tsrc_')
+        if self.debug:
+            d.keep()
+        for k, v in iteritems(self.dep_contents):
+            d.writefile(k, v)
+        for k, v in iteritems(self.dep_files):
+            d.symlink(k, v)
+        return d
+
+    def makeIncludeArgs(self, temp_include_dir=None):
+        result = []
+        for k in iterkeys(self.include_dirs):
+            result += ['-I', k]
+
+        if temp_include_dir is not None:
+            result += ['-I', temp_include_dir.name]
+
+        return result
 
     def getThriftOptions(self, new_style=True, twisted=False, tornado=False,
                          utf8strings=False, slots=True, dynamic=False,
@@ -71,80 +99,92 @@ class _CompileContext(object):
 
         return param
 
-    @contextmanager
-    def _preCompileCtx(self, path, **kwargs):
-        """Compiles a .thrift file and adds the output dir to the PYTHONPATH"""
-        with ctx.tmpdir(prefix='tcomp') as tempdir:
-            with ctx.add_path(tempdir):
-                subprocess.check_output(
-                    [self.thrift_bin, '-I', self.root, "--gen",
-                     self.getThriftOptions(**kwargs),
-                     '-v',
-                     "-out", tempdir, os.path.join(self.root, path)])
+    def addIncludeDir(self, path):
+        assert os.path.exists(path) and os.path.isdir(path)
+        self.include_dirs[os.path.abspath(path)] = True
 
-                yield
+    def addDependentFilePath(self, path):
+        assert os.path.exists(path)
+
+        self.dep_files[os.path.basename(path)] = os.path.abspath(path)
+
+        path = os.path.dirname(path) or '.'
+        self.addIncludeDir(path)
+
+    def addDependentFileContents(self, name, contents):
+        self.dep_contents[name] = contents
+
+    def importThriftStr(self, payload, **kwargs):
+        """Compiles a thrift file from string `payload`"""
+        with tempfile.NamedTemporaryFile(suffix='.thrift') as f:
+            if self.debug:
+                f.delete = False
+            f.write(payload)
+            f.flush()
+            return self.importThrift(f.name, **kwargs)
 
     def importThrift(self, path, **kwargs):
         """Compiles a .thrift file, importing its contents into its return value"""
         path = os.path.abspath(path)
+        assert os.path.exists(path)
+        assert os.path.isfile(path)
 
-        with ctx.tmpdir(prefix='tcomp') as tempdir:
-            output = subprocess.check_output(
-                [self.thrift_bin, '-I', self.root, "--gen",
-                 self.getThriftOptions(**kwargs),
-                 '-v',
-                 "-out", tempdir, os.path.join(self.root, path)])
+        srcdir = self.makeTemporaryIncludeDir()
+        pathbase = os.path.basename(path)
+        srcdir.symlink(pathbase, path)
 
-            deps = []
+        outdir = NamedTemporaryDirectory(prefix='to1_')
+        outdir_recurse = NamedTemporaryDirectory(prefix='tor_')
 
-            # Find dependencies and generate them in reversed order,
-            # configuring context managers that will allow us to implicitly
-            # add the generated code to our PYTHONPATH.
-            for line in reversed(output.split('\n')):
-                # When executing thrift with -v, explicit and implicit includes
-                # are emitted to stdout in the following way:
-                m = re.match('Scanning (.*) for includes', line)
-                if m is None:
-                    continue
+        if self.debug:
+            outdir.keep()
+            outdir_recurse.keep()
 
-                # Only pre-compile new dependencies
-                if m.group(1) != path:
-                    deps.append(self._preCompileCtx(m.group(1), **kwargs))
+        args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
+               ["--gen", self.getThriftOptions(**kwargs), '-v',
+                "-out", outdir.name, srcdir.join(pathbase)]
+        subprocess.check_output(args)
 
-            result = None
+        args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
+               ["--gen", self.getThriftOptions(**kwargs), '-v', '-r',
+                "-out", outdir_recurse.name, srcdir.join(pathbase)]
+        subprocess.check_output(args)
 
-            thriftname = os.path.splitext(os.path.basename(path))[0]
-            with nested(*deps):
-                for dirpath, dirnames, filenames in os.walk(tempdir):
-                    # Emulate relative imports badly
-                    with ctx.add_path(dirpath):
-                        # Add types to module first
-                        if 'ttypes.py' in filenames:
-                            ttypes = self.importPython(dirpath + '/ttypes.py')
-                            result = ttypes
-                            filenames.remove('ttypes.py')
+        # Prepend output directory to the path
+        with ctx.add_path(outdir_recurse.name, 0):
 
-                        # Then constants
-                        if 'constants.py' in filenames:
-                            result = self.mergeModules(
-                                self.importPython(dirpath + '/constants.py'),
-                                result)
-                            filenames.remove('constants.py')
+            thriftname = os.path.splitext(pathbase)[0]
+            for dirpath, dirnames, filenames in os.walk(outdir.name):
+                # Emulate relative imports badly
+                dirpath = os.path.abspath(os.path.join(outdir, dirpath))
+                with ctx.add_path(dirpath):
+                    # Add types to module first
+                    if 'ttypes.py' in filenames:
+                        ttypes = self.importPython(dirpath + '/ttypes.py')
+                        result = ttypes
+                        filenames.remove('ttypes.py')
 
-                        for filename in filenames:
-                            # Skip pyremotes
-                            if not filename.endswith('.py') or \
-                               filename == '__init__.py':
-                                continue
+                    # Then constants
+                    if 'constants.py' in filenames:
+                        result = self.mergeModules(
+                            self.importPython(dirpath + '/constants.py'),
+                            result)
+                        filenames.remove('constants.py')
 
-                            # Attach services as attributes on the module.
-                            svcpath = dirpath + '/' + filename
-                            svcname = os.path.splitext(filename)[0]
-                            svcmod = self.importPython(svcpath)
-                            svcmod.__file__ = os.path.abspath(svcpath)
-                            svcmod.__name__ = '%s.%s (generated)' % \
-                                (thriftname, svcname)
-                            setattr(result, svcname, svcmod)
+                    for filename in filenames:
+                        # Skip pyremotes
+                        if not filename.endswith('.py') or \
+                           filename == '__init__.py':
+                            continue
+
+                        # Attach services as attributes on the module.
+                        svcpath = dirpath + '/' + filename
+                        svcname = os.path.splitext(filename)[0]
+                        svcmod = self.importPython(svcpath)
+                        svcmod.__file__ = os.path.abspath(svcpath)
+                        svcmod.__name__ = '%s.%s (generated)' % \
+                            (thriftname, svcname)
+                        setattr(result, svcname, svcmod)
 
             assert result is not None, "No files generated by %s" % (path, )
 
@@ -175,7 +215,10 @@ class _CompileContext(object):
         # Any special variables we want to include in execution context
         orig_locals = {}
         exec_locals = orig_locals.copy()
-        execfile(path, exec_locals, exec_locals)
+
+        # Keep a copy of the module cache prior to execution
+        with ctx.module_snapshot():
+            execfile(path, exec_locals, exec_locals)
 
         # Generate a new module object, and assign the modified locals
         # as attributes on it.
