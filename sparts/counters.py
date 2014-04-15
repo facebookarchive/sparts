@@ -185,8 +185,12 @@ class Samples(_Nameable, _Bindable, ProvidesCounters):
         for subcounter in self.iterkeys():
             yield subcounter, partial(self.getCounter, subcounter)
 
+    def _now(self):
+        """Defined to allow unittest overriding"""
+        return time.time()
+
     def add(self, value):
-        now = time.time()
+        now = self._now()
         self.samples.append((now, value))
 
         # When adding samples, trim old ones.
@@ -197,14 +201,14 @@ class Samples(_Nameable, _Bindable, ProvidesCounters):
         # TODO: Handle "infinite" windows
 
     def getCounters(self):
-        if self.dirty is False and self._prev_time == int(time.time()):
+        if self.dirty is False and self._prev_time == int(self._now()):
             return self._prev_counters
 
         ops = []
         for type in self.types:
             ops.append(_SampleMethod[type]())
 
-        now = time.time()
+        now = self._now()
         genwindows = iter(self.windows)
         window = genwindows.next()
         result = {}
