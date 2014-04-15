@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 from collections import deque
 from functools import partial
+from six import next
 from sparts.sparts import _Nameable, _Bindable, ProvidesCounters
 
 import time
@@ -210,7 +211,7 @@ class Samples(_Nameable, _Bindable, ProvidesCounters):
 
         now = self._now()
         genwindows = iter(self.windows)
-        window = genwindows.next()
+        window = next(genwindows)
         result = {}
         done = False
 
@@ -226,7 +227,7 @@ class Samples(_Nameable, _Bindable, ProvidesCounters):
                     op.getvalue()
             # Move to the next window
             try:
-                return genwindows.next(), False
+                return next(genwindows), False
             except StopIteration:
                 # We exhausted all our windows
                 return None, True
