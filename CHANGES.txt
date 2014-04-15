@@ -4,7 +4,7 @@ CHANGES
 0.5.0
 -----
 * Moved counters from sparts.sparts to sparts.counters
-* Fix some bugs in DirectoryWatcherTask
+* Fix some bugs in DirectoryWatcherTask, counters
 * Add an initService() hook to VService
 * Added a hook to do per-thread Task-specific initialization, initTaskThread()
 * `sparts.thrift.client` with ThriftClient helper to reduce synchronous thrift client boilerplate
