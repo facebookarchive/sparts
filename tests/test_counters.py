@@ -11,6 +11,7 @@ import time
 
 class CounterTests(BaseSpartsTestCase):
     def testSum(self):
+        """Test `counters.Sum()"""
         c = counters.Sum()
         self.assertEquals(c(), 0.0)
         c.increment()
@@ -20,13 +21,24 @@ class CounterTests(BaseSpartsTestCase):
         c.add(10)
         self.assertEquals(c(), 21.0)
 
+        # Test some other types
+        self.assertEquals(int(c), 21)
+        self.assertEquals(float(c), 21.0)
+        self.assertEquals(str(c), '21.0')
+
+        # Test reset API
+        c.reset(0.5)
+        self.assertEquals(float(c), 0.5)
+
     def testCount(self):
+        """Test `counters.Count()"""
         c = counters.Count()
         self.assertEquals(c(), 0)
         c.add(100)
         self.assertEquals(c(), 1)
 
     def testMax(self):
+        """Test `counters.Max()"""
         c = counters.Max()
         self.assertIs(c(), None)
         c.add(-10)
@@ -36,7 +48,28 @@ class CounterTests(BaseSpartsTestCase):
         c.add(20)
         self.assertEquals(c(), 20)
 
+    def testMin(self):
+        """Test `counters.Min()"""
+        c = counters.Min()
+        self.assertIs(c(), None)
+        c.add(-10)
+        self.assertEquals(c(), -10)
+        c.add(20)
+        self.assertEquals(c(), -10)
+        c.add(-20)
+        self.assertEquals(c(), -20)
+
+    def testAverage(self):
+        """Test `counters.Average()"""
+        c = counters.Average()
+        self.assertEquals(c(), None)
+        c.add(10)
+        c.add(20)
+        self.assertEquals(c(), 15.0)
+
+
     def testSampleNames(self):
+        """Test `counters.Samples() getCounters API, etc"""
         c = counters.samples(name='foo',
             types=[counters.SampleType.COUNT], windows=[100])
         c.add(1)
@@ -64,6 +97,9 @@ class CounterTests(BaseSpartsTestCase):
         self.assertEquals(c.getCounter('count.1000'), 2)
         self.assertEquals(c.getCounter('sum.100'), 20.0)
         self.assertEquals(c.getCounter('sum.1000'), 20.0)
+
+        # Make sure there are only four counters
+        self.assertEquals(len(c.getCounters()), 4)
 
         # At t=10, add one values of 10.0
         c._now.return_value = now + 10
