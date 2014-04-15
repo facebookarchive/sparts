@@ -233,11 +233,13 @@ class Samples(_Nameable, _Bindable, ProvidesCounters):
 
         for ts, value in reversed(self.samples):
             # We exceeded the current window
-            if now - window > ts:
+            while not done and now - window > ts:
                 # Save counter values
                 window, done = _saveCounterValues(window)
-                if done:
-                    break
+
+            if done:
+                # TODO: "prune" any remaining samples
+                break
 
             for op in ops:
                 op.add(value)
