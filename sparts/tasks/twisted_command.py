@@ -6,10 +6,13 @@
 #
 """Module that provides an API for executing and managing child processes."""
 from __future__ import absolute_import
+
+from sparts.counters import counter
+from sparts.sparts import option
+
 from twisted.internet.protocol import ProcessProtocol
 from twisted.protocols.basic import LineReceiver
-from .twisted import TwistedTask
-from ..sparts import counter, option
+from sparts.tasks.twisted import TwistedTask
 
 import functools
 import signal

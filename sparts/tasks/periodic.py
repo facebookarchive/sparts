@@ -4,9 +4,12 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
-from ..vtask import VTask, TryLater
+from __future__ import absolute_import
+
 import time
-from ..sparts import option, counter, samples, SampleType
+from sparts.counters import counter, samples, SampleType
+from sparts.sparts import option
+from sparts.vtask import VTask, TryLater
 from threading import Event
 
 
