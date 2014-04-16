@@ -41,8 +41,6 @@ cmdclass = {}
 WANT_COPY = {
     'externals/thrift/contrib/fb303/if/fb303.thrift':
         'thrift/fb303.thrift',
-    'externals/thrift/contrib/fb303/py/fb303/FacebookBase.py':
-        'sparts/fb303/FacebookBase.py',
 }
 
 # Let's figure out which files exist in which submodules...
