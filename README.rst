@@ -130,7 +130,7 @@ feel free to contact me at any time.
 
 -  email: ruibalp@gmail.com
 -  twitter: http://twitter.com/fmoo
--  irc.freenode: ##sparts
+-  irc.freenode: #sparts
 -  facebook: http://fb.me/ruibalp
 
 License
