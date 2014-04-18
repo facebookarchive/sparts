@@ -144,8 +144,8 @@ setup(
     author_email='ruibalp@gmail.com',
     license='ISC',
     keywords='service boostrap daemon thrift tornado',
-    url='http://github.com/fmoo/sparts',
-    download_url='https://github.com/fmoo/sparts/archive/%s.tar.gz' % VERSION,
+    url='http://github.com/facebook/sparts',
+    download_url='https://github.com/facebook/sparts/archive/%s.tar.gz' % VERSION,
 
     test_suite="tests",
     cmdclass=cmdclass,
@@ -155,6 +155,7 @@ setup(
         "Topic :: Utilities",
         "Topic :: Software Development :: Libraries :: Application Frameworks",
         "License :: OSI Approved :: ISC License (ISCL)",
+        "Programming Language :: Python :: 2.6",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3.3",
     ],
