@@ -24,13 +24,20 @@ class ThriftHandlerTask(VTask):
     LOOPLESS = True
     MODULE = None
 
+    _processor = None
+
     def initTask(self):
         super(ThriftHandlerTask, self).initTask()
         assert self.MODULE is not None
-        self.processor = self._makeProcessor()
 
     def _makeProcessor(self):
         return self.MODULE.Processor(self)
+
+    @property
+    def processor(self):
+        if self._processor is None:
+            self._processor = self._makeProcessor()
+        return self._processor
 
 
 class ThriftServerTask(VTask):
