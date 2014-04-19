@@ -8,14 +8,14 @@ from __future__ import absolute_import
 
 from sparts.vservice import VService
 from sparts.tasks.dbus import DBusMainLoopTask, DBusServiceTask
-from sparts.tasks.fb303 import FB303ProcessorTask
+from sparts.tasks.fb303 import FB303HandlerTask
 
 
 class MyDBusServiceTask(DBusServiceTask):
     BUS_NAME = 'org.sparts.DBusDemo'
 
 class MyDBusService(VService):
-    TASKS=[DBusMainLoopTask, MyDBusServiceTask, FB303ProcessorTask]
+    TASKS=[DBusMainLoopTask, MyDBusServiceTask, FB303HandlerTask]
 
 
 if __name__ == '__main__':

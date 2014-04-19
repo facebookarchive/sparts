@@ -6,10 +6,10 @@
 #
 from sparts.vservice import VService
 from sparts.tasks.thrift import NBServerTask
-from sparts.tasks.fb303 import FB303ProcessorTask
+from sparts.tasks.fb303 import FB303HandlerTask
 
 NBServerTask.register()
-FB303ProcessorTask.register()
+FB303HandlerTask.register()
 
 
 if __name__ == '__main__':

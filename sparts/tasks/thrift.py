@@ -16,23 +16,83 @@ from thrift.transport.TSocket import TServerSocket
 import time
 
 
-class ThriftProcessorTask(VTask):
-    """A loopless task that helps process thrift requests.
+class ThriftHandlerTask(VTask):
+    """A loopless task that handles thrift requests.
 
-    You will need a subclass of this task in order to properly handle thrift
-    requests in your NBServerTasks and such."""
+    You will need to subclass this task, set MODULE, and implement the
+    necessary methods in order for requests to be mapped here."""
     LOOPLESS = True
-    PROCESSOR = None
+    MODULE = None
 
-    def __init__(self, service):
-        # TODO: I don't like the way this works: it's too much boilerplate and
-        # complexity to implement custom thrift services.
-        super(ThriftProcessorTask, self).__init__(service)
-        assert self.PROCESSOR is not None
-        self.processor = self.PROCESSOR(self.service)
+    def initTask(self):
+        super(ThriftHandlerTask, self).initTask()
+        assert self.MODULE is not None
+        self.processor = self._makeProcessor()
+
+    def _makeProcessor(self):
+        return self.MODULE.Processor(self)
 
 
-class NBServerTask(VTask):
+class ThriftServerTask(VTask):
+    MODULE = None
+
+    def initTask(self):
+        super(ThriftServerTask, self).initTask()
+        processors = self._findProcessors()
+        assert len(processors) > 0, "No processors found for %s" % (self.MODULE)
+        assert len(processors) == 1, "Too many processors found for %s" % \
+                (self.MODULE)
+        self.processorTask = processors[0]
+
+    @property
+    def processor(self):
+        return self.processorTask.processor
+
+    def _checkTaskModule(self, task):
+        """Returns True if `task` implements the appropriate MODULE Iface"""
+        # Skip non-ThriftHandlerTasks
+        if not isinstance(task, ThriftHandlerTask):
+            return False
+
+        # If self.MODULE is None, then connect *any* ThriftHandlerTask
+        if self.MODULE is None:
+            return True
+
+        iface = self.MODULE.Iface
+        # Verify task has all the Iface methods.
+        for method_name in dir(iface):
+            method = getattr(iface, method_name)
+
+            # Skip field attributes
+            if not callable(method):
+                continue
+
+            # Check for this method on the handler task
+            handler_method = getattr(task, method_name, None)
+            if handler_method is None:
+                self.logger.debug("Skipping Task %s (missing method %s)",
+                                  task.name, method_name)
+                return False
+
+            # And make sure that attribute is actually callable
+            if not callable(handler_method):
+                self.logger.debug("Skipping Task %s (%s not callable)",
+                                  task.name, method_name)
+                return False
+
+        # If all the methods are there, the shoe fits.
+        return True
+
+    def _findProcessors(self):
+        """Returns all processors that match this tasks' MODULE"""
+        processors = []
+        for task in self.service.tasks:
+            if self._checkTaskModule(task):
+                processors.append(task)
+        return processors
+
+
+class NBServerTask(ThriftServerTask):
     """Spin up a thrift TNonblockingServer in a sparts worker thread"""
     DEFAULT_HOST = '0.0.0.0'
     DEFAULT_PORT = 0
@@ -48,24 +108,13 @@ class NBServerTask(VTask):
     num_threads = option(name='threads', default=10, type=int, metavar='N',
                          help='Server Worker Threads [%(default)s]')
 
-    def getProcessor(self):
-        """Automatically find the ThriftProcessorTask subclass"""
-        found = None
-        for task in self.service.tasks:
-            if isinstance(task, ThriftProcessorTask):
-                assert found is None, "Multiple processor tasks! (%s, %s)" % \
-                    (found.name, task.name)
-                found = task
-        assert found is not None, "No ThriftProcessorTask's found!"
-        return found.processor
-
     def initTask(self):
         """Overridden to bind sockets, etc"""
         super(NBServerTask, self).initTask()
 
         self._stopped = False
         self.socket = TServerSocket(self.host, self.port)
-        self.server = TNonblockingServer(self.getProcessor(), self.socket,
+        self.server = TNonblockingServer(self.processor, self.socket,
                                          threads=self.num_threads)
         self.server.prepare()
         self.bound_host, self.bound_port = \

@@ -7,10 +7,10 @@
 """Module providing tasks that help with dbus integration"""
 from __future__ import absolute_import
 
-from ..vtask import VTask, SkipTask
-from ..sparts import option
-from ..fb303.dbus import FB303DbusService
-from .fb303 import FB303ProcessorTask
+from sparts.fb303.dbus import FB303DbusService
+from sparts.sparts import option
+from sparts.tasks.fb303 import FB303HandlerTask
+from sparts.vtask import VTask, SkipTask
 
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
@@ -160,10 +160,10 @@ class DBusServiceTask(DBusTask):
 
     def addHandlers(self):
         self.sparts_dbus = self.BUS_CLASS(self)
-        task = self.service.getTask(FB303ProcessorTask)
+        task = self.service.getTask(FB303HandlerTask)
         if task is not None:
             self.fb303_dbus = FB303DbusService(
-                self.dbus_service, task.processor, self.service.name)
+                self.dbus_service, task, self.service.name)
 
     def stop(self):
         del(self.dbus_service)

@@ -12,7 +12,7 @@ try:
 except ImportError:
     raise Skip("thrift is required to run this test")
 
-from sparts.tasks.fb303 import FB303ProcessorTask
+from sparts.tasks.fb303 import FB303HandlerTask
 from sparts.tasks.thrift import NBServerTask
 
 from sparts.thrift.client import ThriftClient
@@ -22,7 +22,7 @@ from sparts.gen.fb303.ttypes import fb_status
 import socket
 
 class TestFB303(MultiTaskTestCase):
-    TASKS = [NBServerTask, FB303ProcessorTask]
+    TASKS = [NBServerTask, FB303HandlerTask]
 
     def assertCanConnect(self, host, port):
         s = socket.socket()
