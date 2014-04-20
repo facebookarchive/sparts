@@ -145,6 +145,8 @@ class DBusServiceTask(DBusTask):
         default=False, help='If not --{task}-replace, will wait to take '
                             'this bus name')
 
+    dbus_service = None
+
     def initTask(self):
         super(DBusServiceTask, self).initTask()
 
@@ -166,6 +168,8 @@ class DBusServiceTask(DBusTask):
                 self.dbus_service, task, self.service.name)
 
     def stop(self):
-        del(self.dbus_service)
+        if self.dbus_service is not None:
+            self.dbus_service = None
+
         #self.bus.close()
         super(DBusServiceTask, self).stop()
