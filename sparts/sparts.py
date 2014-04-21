@@ -72,6 +72,14 @@ class option(_Nameable):
             return self
 
         value = self._getter(obj)(self.name)
+
+        # If the default is of a different type than the option requires,
+        # we should return the default.  Unfortunately, the way this is
+        # currently implemented, it's impossible to detect this case.  For now,
+        # let's treat `None` like a special case and return it as-is.
+        if value is None:
+            return value
+
         if self.type is not None:
             value = self.type(value)
         return value
