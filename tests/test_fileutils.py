@@ -26,6 +26,11 @@ class NamedTemporaryDirTests(BaseSpartsTestCase):
             self.assertExists(os.path.join(d.name, 'spam'))
             self.assertEquals(d.readfile('spam'), 'bar')
 
+            # Makedirs
+            d.makedirs('adir')
+            self.assertTrue(os.path.exists(d.join('adir')))
+            self.assertTrue(os.path.isdir(d.join('adir')))
+
             # Save the tempdir path
             tmpdir_path = d.name
             self.assertExists(d.name)

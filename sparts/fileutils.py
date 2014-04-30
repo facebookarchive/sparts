@@ -118,5 +118,8 @@ class NamedTemporaryDirectory(object):
         """Create a symlink to `dst` at the `path` relative to this directory"""
         return os.symlink(dst, self.join(path))
 
+    def makedirs(self, path):
+        return makedirs(self.join(path))
+
     def join(self, *path):
         return os.path.join(self.name, *path)
