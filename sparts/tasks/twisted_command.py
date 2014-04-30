@@ -41,7 +41,7 @@ class CommandTask(TwistedTask):
     finished = counter()
 
     def run(self, command, on_stdout=None, on_stderr=None, on_exit=None,
-            line_buffered=True, kill_timeout=None):
+            line_buffered=True, kill_timeout=None, env=None):
         """Call this function to start a new child process running `command`.
         
         Additional callbacks, such as `on_stdout`, `on_stderr`, and `on_exit`,
@@ -69,7 +69,7 @@ class CommandTask(TwistedTask):
         else:
             result = twisted.internet.threads.blockingCallFromThread(
                 self.reactor, self.reactor.spawnProcess, proto,
-                executable=command[0], args=command)
+                executable=command[0], args=command, env=env)
 
         self.outstanding[result] = kill_timeout
 
