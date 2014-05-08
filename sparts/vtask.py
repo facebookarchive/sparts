@@ -133,6 +133,9 @@ class VTask(_SpartsObject):
         return getattr(self.service.options,
                        self._optName(opt), default)
 
+    def setTaskOption(self, opt, value):
+        setattr(self.service.options, self._optName(opt), value)
+
     @classmethod
     def register(cls):
         _REGISTERED_TASKS.add(cls)
