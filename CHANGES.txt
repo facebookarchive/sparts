@@ -3,6 +3,9 @@ CHANGES
 
 master
 ------
+
+0.5.1
+-----
 * Renamed FB303ProcessorTask to FB303HandlerTask
 * NBServerTask can now specify a MODULE to dictate which thrift handler task should be used
   in the event that more than one has been registered.
