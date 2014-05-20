@@ -1,4 +1,5 @@
 tornado>=1.2
+Twisted>=14.0.0
 mock
 pytest
 six
