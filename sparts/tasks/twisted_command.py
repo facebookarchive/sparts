@@ -16,6 +16,7 @@ from sparts.tasks.twisted import TwistedTask
 
 import functools
 import signal
+import six
 import time
 import twisted.python.threadable
 import twisted.internet.threads
@@ -54,7 +55,7 @@ class CommandTask(TwistedTask):
         task default, in the event that a shutdown is received and you want
         to allow more time for the command to shut down."""
         self.logger.debug("task starting %s...", command)
-        if isinstance(command, basestring):
+        if isinstance(command, six.string_types):
             command = command.split(" ")
 
         # wrap on_exit with helper to remove registered comments

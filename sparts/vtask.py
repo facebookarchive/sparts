@@ -12,7 +12,9 @@ the most common features.
 """
 from __future__ import absolute_import
 import logging
+import six
 import threading
+
 from six.moves import xrange
 from sparts.sparts import _SpartsObject
 
@@ -266,7 +268,7 @@ class Tasks(object):
 
     def get(self, task):
         """Returns the `task` or its class, if creation hasn't happened yet."""
-        if isinstance(task, basestring):
+        if isinstance(task, six.string_types):
             name = task
         else:
             assert issubclass(task, VTask)
