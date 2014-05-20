@@ -17,8 +17,6 @@ from six.moves import xrange
 from sparts.sparts import _SpartsObject
 
 
-_REGISTERED_TASKS = set()
-
 class VTask(_SpartsObject):
     """The base class for all tasks.  Needs to be subclassed to be useful.
 
@@ -138,11 +136,7 @@ class VTask(_SpartsObject):
 
     @classmethod
     def register(cls):
-        _REGISTERED_TASKS.add(cls)
-
-
-def get_registered_tasks():
-    return _REGISTERED_TASKS.copy()
+        REGISTERED.register(cls)
 
 
 class SkipTask(Exception):
@@ -174,20 +168,155 @@ class ExecuteContext(object):
         self.deferred = deferred
 
 
-def resolve_dependencies(task_classes):
-    """Returns a flattened dependency chain for `task_classes`.
+class Tasks(object):
+    """Collection class for dealing with service tasks.
 
-    Turns a short list of `Task` subclasses into a longer list of `Task`
-    subclasses.  This is useful for tasks that depend on other tasks, such as
-    TwistedTask subclasses that must initialize and run after the Twisted
-    reactor has been started."""
-    result = []
-    for t in task_classes:
-        assert issubclass(t, VTask)
-        for dep in resolve_dependencies(t.DEPS):
-            if dep not in result:
-                result.append(dep)
+    Tasks can be accessed but accessing them (by name) as attributes, or via
+    the get/require methods.
+    """
+    def __init__(self, tasks=None):
+        self.logger = logging.getLogger('sparts.tasks')
+        self._registered = []
+        self._registered_names = {}
+        self._created = []
+        self._created_names = {}
+        self._did_create = False
 
-        if t not in result:
-            result.append(t)
-    return result
+        tasks = tasks or []
+        for t in tasks:
+            self.register(t)
+
+    def register(self, task_class):
+        """Register task_class with the collection"""
+        assert not self._did_create
+        name = task_class.__name__
+        if name not in self._registered_names:
+            # Recursively register dependencies
+            for dep in task_class.DEPS:
+                self.register(dep)
+
+            self._registered.append(task_class)
+            self._registered_names[name] = task_class
+
+    def register_all(self, tasks):
+        """Register multiple `tasks` classes with the collection"""
+        assert not self._did_create
+        for task in tasks:
+            self.register(task)
+
+    def unregister(self, task_class):
+        """Unregister `task_class` from the collection"""
+        assert not self._did_create
+        self._registered.remove(task_class)
+        del(self._registered_names[task_class.__name__])
+
+    def create(self, *args, **kwargs):
+        """Create all registered tasks.
+
+        TODO: Handle SkipTask?
+        """
+        assert not self._did_create
+        for task_cls in self._registered:
+            task = task_cls(*args, **kwargs)
+            self._created.append(task)
+            self._created_names[task_cls.__name__] = task
+
+        self._did_create = True
+
+    def remove(self, task):
+        """Remove created `task` from the collection"""
+        assert self._did_create
+        self._created.remove(task)
+        del(self._created_names[task.name])
+
+    def init(self):
+        """Initialize all created tasks.  Remove ones that throw SkipTask."""
+        assert self._did_create
+        exceptions = []
+        skipped = []
+
+        for t in self:
+            try:
+                t.initTask()
+            except SkipTask as e:
+                # Keep track of SkipTasks so we can remove it from this
+                # task collection
+                self.logger.info("Skipping %s (%s)", t.name, e)
+                skipped.append(t)
+            except Exception as e:
+                # Log and track unhandled exceptions during init, so we can
+                # fail later.
+                self.logger.exception("Error creating task, %s", t.name)
+                exceptions.append(e)
+
+        # Remove any tasks that should be skipped
+        for t in skipped:
+            self.remove(t)
+
+        # Reraise a new exception, if any exceptions were thrown in init
+        if len(exceptions):
+            raise Exception("Unable to start service (%d task start errors)" %
+                            len(exceptions))
+
+    def start(self):
+        """Start all the tasks, creating worker threads, etc"""
+        assert self._did_create
+        for t in self.tasks:
+            t.start()
+
+    def get(self, task):
+        """Returns the `task` or its class, if creation hasn't happened yet."""
+        if isinstance(task, basestring):
+            name = task
+        else:
+            assert issubclass(task, VTask)
+            name = task.__name__
+
+        if self._did_create:
+            return self._created_names.get(name)
+        else:
+            return self._registered_names.get(name)
+
+    def require(self, task):
+        """Return the `task` instance or class, raising if not found."""
+        result = self.get(task)
+        if result is None:
+            raise KeyError('%s not in tasks (%s|%s)' %
+                           (task, self.task_classes, self.tasks))
+
+        return result
+
+    @property
+    def task_classes(self):
+        """Accessor for accessing a copy of registered task classes"""
+        return self._registered[:]
+
+    @property
+    def tasks(self):
+        """Accessor for accessing a registered or instantiated task classes
+
+        Return value varies based on whether `create()` has been called."""
+        if self._did_create:
+            return self._created[:]
+        else:
+            return self.task_classes
+
+    def __getattr__(self, name):
+        """Helper for accessing tasks using their name as an attribute."""
+        return self.require(name)
+
+    def __iter__(self):
+        """Iterates on created or registered tasks, as appropriate."""
+        return iter(self.tasks)
+
+    def __len__(self):
+        """Returns the number of created or registered tasks, as appropriate"""
+        return len(self.tasks)
+
+    def __getitem__(self, index):
+        """Returns the created or registered task at the specified `index`"""
+        return self.tasks[index]
+
+
+# This `Tasks` collection tracks globally registered tasks.
+REGISTERED = Tasks()

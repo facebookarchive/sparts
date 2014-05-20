@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* Tasks now accessible via attributes on `service.tasks` by name and via `get()` and `require()`
 
 0.5.1
 -----

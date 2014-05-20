@@ -18,7 +18,7 @@ class SpawnHelloWorldTask(PeriodicTask):
     DEPS = [CommandTask]
 
     def execute(self):
-        t = self.service.requireTask(CommandTask)
+        t = self.service.tasks.CommandTask
         c = t.run('sleep 5')
         self.logger.debug("PeriodicTask spawned %s", c)
 

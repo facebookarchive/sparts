@@ -25,7 +25,7 @@ class PrintCountersTask(PeriodicTask):
        types=[SampleType.MAX, SampleType.MIN])
 
     def execute(self, *args, **kwargs):
-        hostcheck = self.service.requireTask(HostCheckTask)
+        hostcheck = self.service.tasks.HostCheckTask
         self.logger.info("hostcheck.duration :: %s",
                          hostcheck.execute_duration.getCounters())
         self.logger.info("this.duration :: %s",

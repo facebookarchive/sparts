@@ -21,7 +21,7 @@ class MyHTTPTask(TornadoHTTPTask):
     def getApplicationConfig(self):
         return [
             ('/thrift', TornadoThriftHandler,
-                dict(processor=self.service.requireTask(FB303HandlerTask))),
+                dict(processor=self.service.tasks.FB303HandlerTask)),
         ]
 
 MyHTTPTask.register()

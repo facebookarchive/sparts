@@ -21,7 +21,7 @@ import time
 from argparse import ArgumentParser
 from .compat import OrderedDict
 
-from .vtask import SkipTask, resolve_dependencies, get_registered_tasks
+from sparts import vtask
 from .deps import HAS_PSUTIL
 from .sparts import _SpartsObject, option
 
@@ -47,22 +47,34 @@ class VService(_SpartsObject):
     def __init__(self, ns):
         super(VService, self).__init__()
         self.logger = logging.getLogger(self.name)
+
+        # Option initialization
         self.options = ns
         self.initLogging()
+
+        # Control variables
         self._stop = False
         self._restart = False
-        self.tasks = []
+
+        # Initialize Tasks
+        self.tasks = vtask.Tasks()
+        # Register tasks from global instance
+        for t in vtask.REGISTERED:
+            self.tasks.register(t)
+
+        # Register additional tasks from service declaration
+        for t in self.TASKS:
+            self.tasks.register(t)
+
+        # Register warnings API
         self.warnings = OrderedDict()
         self.warning_id = 0
+
+        # Set start_time for aliveSince() calls
         self.start_time = time.time()
 
     def initService(self):
         """Override this to do any service-specific initialization"""
-
-    @classmethod
-    def _resolveDependencies(cls):
-        tasks = set(cls.TASKS).union(get_registered_tasks())
-        return resolve_dependencies(tasks)
 
     @classmethod
     def _loptName(cls, name):
@@ -75,41 +87,35 @@ class VService(_SpartsObject):
 
         if self.options.tasks == []:
             print("Available Tasks:")
-            for t in self._resolveDependencies():
+            for t in self.tasks:
                 print(" - %s" % t.__name__)
             sys.exit(1)
 
     def _createTasks(self):
-        all_tasks = self._resolveDependencies()
+        all_tasks = set(self.tasks)
 
         selected_tasks = self.options.tasks
         if selected_tasks is None:
             selected_tasks = [t.__name__ for t in all_tasks]
 
-        for t in all_tasks:
-            if t.__name__ in selected_tasks:
-                self.tasks.append(t(self))
+        # Determine which tasks need to be unregistered based on the
+        # selected tasks.
+        unregister_tasks = [t for t in all_tasks
+                            if t.__name__ not in selected_tasks]
+
+        # Unregister non-selected tasks
+        for t in unregister_tasks:
+            self.tasks.unregister(t)
+
+        # Actually create the tasks
+        self.tasks.create(self)
 
         # Call service initialization hook after tasks have been instantiated,
         # but before they've been initialized.
         self.initService()
 
-        exceptions = []
-        required = []
-        for t in self.tasks:
-            try:
-                t.initTask()
-                required.append(t)
-            except SkipTask as e:
-                self.logger.info("Skipping %s (%s)", t.name, e)
-            except Exception as e:
-                self.logger.exception("Error creating task, %s", t.name)
-                exceptions.append(e)
-        self.tasks = required
-
-        if len(exceptions):
-            raise Exception("Unable to start service (%d task start errors)" %
-                            len(exceptions))
+        # Initialize the tasks
+        self.tasks.init()
 
     def _handleShutdownSignals(self, signum, frame):
         assert signum in (signal.SIGINT, signal.SIGTERM)
@@ -117,33 +123,24 @@ class VService(_SpartsObject):
         self.shutdown()
 
     def _startTasks(self):
+        # TODO: Should this be somewhere else?
         if self.REGISTER_SIGNAL_HANDLERS:
             # Things seem to fail more gracefully if we trigger the stop
             # out of band (with a signal handler) instead of catching the
             # KeyboardInterrupt...
             signal.signal(signal.SIGINT, self._handleShutdownSignals)
             signal.signal(signal.SIGTERM, self._handleShutdownSignals)
-        for t in self.tasks:
-            t.start()
+
+        self.tasks.start()
         self.logger.debug("All tasks started")
 
     def getTask(self, name):
         """Returns a task for the given class `name` or type, or None."""
-        for t in self.tasks:
-            if isinstance(name, str):
-                if t.name == name:
-                    return t
-            else:
-                if t.__class__ is name:
-                    return t
-        return None
+        return self.tasks.get(name)
 
     def requireTask(self, name):
         """Returns a task for the given class `name` or type, or throws."""
-        t = self.getTask(name)
-        if t is None:
-            raise Exception("Task %s not found in service" % name)
-        return t
+        return self.tasks.require(name)
 
     def shutdown(self):
         """Request a graceful shutdown.  Does not block."""
@@ -262,10 +259,13 @@ class VService(_SpartsObject):
         ap = cls._makeArgumentParser()
         cls._addArguments(ap)
 
-        all_tasks = set(cls.TASKS).union(get_registered_tasks())
-        for t in resolve_dependencies(all_tasks):
+        all_tasks = vtask.Tasks()
+        all_tasks.register_all(cls.TASKS)
+        all_tasks.register_all(vtask.REGISTERED)
+        for t in all_tasks:
             # TODO: Add each tasks' arguments to an argument group
             t._addArguments(ap)
+
         return ap
 
     @property

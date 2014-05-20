@@ -25,7 +25,7 @@ class Producer(PeriodicTask):
 
     def initTask(self):
         super(Producer, self).initTask()
-        self.consumer = self.service.requireTask(Consumer)
+        self.consumer = self.service.tasks.Consumer
 
     def execute(self, *args, **kwargs):
         for i in xrange(5):
