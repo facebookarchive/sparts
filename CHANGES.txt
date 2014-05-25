@@ -4,6 +4,7 @@ CHANGES
 master
 ------
 * Tasks now accessible via attributes on `service.tasks` by name and via `get()` and `require()`
+* Fixed a race condition in deferred errback handling in QueueTask
 
 0.5.1
 -----

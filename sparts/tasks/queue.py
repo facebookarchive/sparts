@@ -43,30 +43,23 @@ class QueueTask(VTask):
             except queue.Empty:
                 continue
 
+            # Create an ExecuteContext if we didn't have one
             if isinstance(item, ExecuteContext):
                 context = item
                 item = context.item
             else:
                 context = ExecuteContext(item=item)
+
             try:
                 result = self.execute(item, context)
-                if context.deferred is not None:
-                    context.deferred.callback(result)
+                context.set_result(result)
             except TryLater:
                 context.attempt += 1
                 self.queue.put(context)
             except Exception as ex:
-                if context.deferred is not None:
-                    self.unhandled = None
-                    context.deferred.addErrback(self.unhandledErrback)
-                    context.deferred.errback(ex)
-                    if self.unhandled is not None:
-                        self.unhandled.raiseException()
-                else:
+                handled = context.set_exception(ex)
+                if not handled:
                     raise
+
             finally:
                 self.queue.task_done()
-
-    def unhandledErrback(self, error):
-        self.unhandled = error
-        return None

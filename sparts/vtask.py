@@ -169,6 +169,26 @@ class ExecuteContext(object):
         self.item = item
         self.deferred = deferred
 
+    def set_result(self, result):
+        if self.deferred is not None:
+            self.deferred.callback(result)
+
+    def set_exception(self, exception):
+        handled = False
+
+        if self.deferred is not None:
+            unhandled = []
+            self.deferred.addErrback(self._unhandledErrback, unhandled)
+            self.deferred.errback(exception)
+            if not unhandled:
+                handled = True
+
+        return handled
+
+    @staticmethod
+    def _unhandledErrback(error, unhandled):
+        unhandled.append(error)
+        return None
 
 class Tasks(object):
     """Collection class for dealing with service tasks.
