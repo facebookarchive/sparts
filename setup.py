@@ -124,6 +124,8 @@ if sys.version < '2.7':
 tests_require = install_requires + ['pytest', 'mock']
 if sys.version < '2.7':
     tests_require.append('unittest2')
+if sys.version  < '3.2':
+    tests_require.append('futures')
 
 VERSION = version()
 setup(

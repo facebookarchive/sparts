@@ -51,6 +51,7 @@ class QueueTask(VTask):
                 context = ExecuteContext(item=item)
 
             try:
+                context.start()
                 result = self.execute(item, context)
                 context.set_result(result)
             except TryLater:

@@ -1,0 +1,97 @@
+# Copyright (c) 2014, Facebook, Inc.  All rights reserved.
+#
+# This source code is licensed under the BSD-style license found in the
+# LICENSE file in the root directory of this source tree. An additional grant
+# of patent rights can be found in the PATENTS file in the same directory.
+#
+"""Verify futures functionality of QueueTasks"""
+from sparts.tasks.queue import QueueTask
+from sparts.tests.base import SingleTaskTestCase, Skip
+from sparts.vtask import ExecuteContext, TryLater
+
+try:
+    from concurrent import futures
+except ImportError:
+    raise Skip("futures must be installed to run this test")
+
+
+class BarTask(QueueTask):
+    """Helper task.  Returns results for callbacks.
+
+    Appends "bar" to input string, "baz" to exception message if
+    `do_raise` class attribute is set to True"""
+    do_raise = False
+    do_trylater = False
+
+    def execute(self, item, context):
+        if self.do_trylater:
+            raise TryLater(item + ":TryLater")
+        if self.do_raise:
+            raise Exception(item + 'baz')
+
+        return item + 'bar'
+
+
+class FutureTests(SingleTaskTestCase):
+    TASK = BarTask
+
+    def makeContext(self, item):
+        """Helper for making an ExecuteContext with a default future"""
+        return ExecuteContext(item=item, future=futures.Future())
+
+    def test_future_wait(self):
+        """Make sure waiting for results works"""
+        # Put a piece of work in the queue
+        ctx = self.makeContext('foo')
+        self.task.queue.put(ctx)
+
+        # Wait for it to complete, check the result
+        result = ctx.future.result(5.0)
+        self.assertEquals(result, 'foobar')
+
+    def test_future_raise(self):
+        """Make sure raising exceptions works properly.
+        
+        .result() should raise and .exception() should return the unhandled
+        exception"""
+        # Make all tasks raise
+        self.task.do_raise = True
+
+        # Put a piece of work in the queue
+        ctx = self.makeContext('foo')
+        self.task.queue.put(ctx)
+
+        # Result should raise, since there was an unhandled exception
+        with self.assertRaises(Exception) as cm:
+            ctx.future.result(5.0)
+
+        # Make sure these are the right exceptions
+        self.assertEquals(str(cm.exception), 'foobaz')
+        self.assertEquals(str(ctx.future.exception(5.0)), 'foobaz')
+
+    def test_future_trylater(self):
+        """Make sure starting the work marks the future as running"""
+        # Force all work to TryLater instead of complete
+        self.task.do_trylater = True
+
+        # Put work in the queue
+        ctx = self.makeContext('foo')
+        self.task.queue.put(ctx)
+
+        # Wait for the first execution to start
+        ctx.running.wait()
+
+        # Future should be marked running
+        self.assertTrue(ctx.future.running())
+
+        # Now make sure that calling result() will timeout (since we are in
+        # a tight TryLater loop)
+        with self.assertRaises(futures.TimeoutError):
+            ctx.future.result(0.0)
+
+        # Disable TryLater
+        self.task.do_trylater = False
+
+        # Wait for it to complete, check the result
+        result = ctx.future.result(5.0)
+        self.assertEquals(result, 'foobar')

@@ -164,17 +164,30 @@ class ExecuteContext(object):
 
     Encapsulates common metrics for work that can be retried later, hooks for
     signalling completion, etc"""
-    def __init__(self, attempt=1, item=None, deferred=None):
+    def __init__(self, attempt=1, item=None, deferred=None, future=None):
         self.attempt = attempt
         self.item = item
         self.deferred = deferred
+        self.future = future
+        self.running = threading.Event()
+
+    def start(self):
+        if not self.running.is_set():
+            if self.future is not None:
+                self.future.set_running_or_notify_cancel()
+            self.running.set()
 
     def set_result(self, result):
+        if self.future is not None:
+            self.future.set_result(result)
         if self.deferred is not None:
             self.deferred.callback(result)
 
     def set_exception(self, exception):
         handled = False
+
+        if self.future is not None:
+            self.future.set_exception(exception)
 
         if self.deferred is not None:
             unhandled = []
