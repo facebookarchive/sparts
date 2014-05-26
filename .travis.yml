@@ -41,9 +41,6 @@ install:
   - popd
   - fi
 
-  # Install additional dependencies
-  - pip install -r requirements-${TRAVIS_PYTHON_VERSION}.txt.travis
-
 script:
   - python setup.py test
 

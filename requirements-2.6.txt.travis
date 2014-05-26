@@ -1,7 +1,0 @@
-tornado>=1.2
-Twisted
-mock
-pytest
-thrift
-six
-ordereddict
