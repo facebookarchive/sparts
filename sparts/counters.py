@@ -75,6 +75,18 @@ class ValueCounter(_BaseCounter):
         return self._value
 
 
+class Callback(_BaseCounter):
+    def __init__(self, callback, name=None):
+        super(Callback, self).__init__(name=name)
+        self._callback = callback
+
+    def _initialize(self):
+        pass
+
+    def getvalue(self):
+        return self._callback()
+
+
 class Sum(ValueCounter):
     """A running total"""
     suffix = SampleType.SUM

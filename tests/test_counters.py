@@ -67,6 +67,13 @@ class CounterTests(BaseSpartsTestCase):
         c.add(20)
         self.assertEquals(c(), 15.0)
 
+    def testCallback(self):
+        """Test `counters.Callback()`"""
+        l = [0.0]
+        c = counters.Callback(lambda: l[0])
+        self.assertEquals(c(), 0.0)
+        l[0] = 10.0
+        self.assertEquals(c(), 10.0)
 
     def testSampleNames(self):
         """Test `counters.Samples() getCounters API, etc"""
@@ -134,4 +141,3 @@ class CounterTests(BaseSpartsTestCase):
         self.assertEquals(c.getCounter('count.1000'), 0, str((now, c.samples)))
         self.assertEquals(c.getCounter('sum.100'), 0.0)
         self.assertEquals(c.getCounter('sum.1000'), 0.0)
-
