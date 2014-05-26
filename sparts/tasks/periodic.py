@@ -9,6 +9,7 @@ from __future__ import absolute_import
 import time
 from sparts.counters import counter, samples, SampleType
 from sparts.sparts import option
+from sparts.timer import Timer
 from sparts.vtask import VTask, TryLater
 from threading import Event
 
@@ -48,7 +49,8 @@ class PeriodicTask(VTask):
         super(PeriodicTask, self).stop()
 
     def _runloop(self):
-        t0 = time.time()
+        timer = Timer()
+        timer.start()
         while not self.service._stop:
             try:
                 self.execute()
@@ -57,12 +59,12 @@ class PeriodicTask(VTask):
                 continue
 
             self.n_iterations.increment()
-            self.execute_duration_ms.add((time.time() - t0) * 1000)
-            to_sleep = (t0 + self.interval) - time.time()
+            self.execute_duration_ms.add(timer.elapsed * 1000)
+            to_sleep = self.interval - timer.elapsed
             if to_sleep > 0:
                 if self.stop_event.wait(to_sleep):
                     return
             else:
                 self.n_slow_iterations.increment()
 
-            t0 = time.time()
+            timer.start()
