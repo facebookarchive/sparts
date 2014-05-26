@@ -6,6 +6,7 @@
 #
 """Module for tasks related to doing work from a queue"""
 from six.moves import queue
+from sparts.counters import counter, samples, SampleType
 from sparts.sparts import option
 from sparts.vtask import VTask, ExecuteContext, TryLater
 
@@ -19,6 +20,12 @@ class QueueTask(VTask):
     workers = option(type=int, default=lambda cls: cls.WORKERS,
                      help='Number of threads to spawn to work on items from '
                           'its queue. [%(default)s]')
+
+    execute_duration_ms = samples(windows=[60, 240],
+       types=[SampleType.AVG, SampleType.MAX, SampleType.MIN])
+    n_trylater = counter()
+    n_completed = counter()
+    n_unhandled = counter()
 
     def execute(self, item, context):
         """Implement this in your QueueTask subclasses"""
@@ -53,11 +60,16 @@ class QueueTask(VTask):
             try:
                 context.start()
                 result = self.execute(item, context)
+                self.n_completed.increment()
+                self.execute_duration_ms.add(context.elapsed * 1000.0)
                 context.set_result(result)
             except TryLater:
+                self.n_trylater.increment()
                 context.attempt += 1
                 self.queue.put(context)
             except Exception as ex:
+                self.n_unhandled.increment()
+                self.execute_duration_ms.add(context.elapsed * 1000.0)
                 handled = context.set_exception(ex)
                 if not handled:
                     raise
