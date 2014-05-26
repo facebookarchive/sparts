@@ -152,6 +152,13 @@ class _SpartsObject(_SpartsObjectBase):
         inst = super(_SpartsObject, cls).__new__(cls)
         inst.counters = {}
         #for k, v in iteritems(cls.__dict__):
+
+        # Traverse all child objects and statically assign a callable
+        # reference to all child counters to the instance's counters dictionary.
+        #
+        # This is sort of implicitly broken for Callback counters, which are
+        # defined after __new__ is called (e.g., during Task initialization)
+        # TODO: Implement this in a better way.
         for k in dir(cls):
             v = getattr(cls, k)
             if isinstance(v, ProvidesCounters):
@@ -176,7 +183,17 @@ class _SpartsObject(_SpartsObjectBase):
         return result
 
     def getCounter(self, name):
+        # Hack to get counters from a child task, even if the callable
+        # wasn't statically assigned to this instance's counters dictionary.
+        # TODO: Figure out a better way to do this.
+        if name not in self.counters and '.' in name:
+            child, sep, name = name.partition('.')
+            return self.getChild(child).getCounter(name)
+
         return self.counters.get(name, lambda: None)
+
+    def getChild(self, name):
+        return self.getChildren()[name]
 
     def getChildren(self):
         return {}
