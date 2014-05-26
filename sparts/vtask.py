@@ -17,6 +17,7 @@ import threading
 
 from six.moves import xrange
 from sparts.sparts import _SpartsObject
+from sparts.timer import Timer
 
 
 class VTask(_SpartsObject):
@@ -170,22 +171,29 @@ class ExecuteContext(object):
         self.deferred = deferred
         self.future = future
         self.running = threading.Event()
+        self.timer = Timer()
 
     def start(self):
+        """Indicate that execution has started"""
         if not self.running.is_set():
             if self.future is not None:
                 self.future.set_running_or_notify_cancel()
+            self.timer.start()
             self.running.set()
 
     def set_result(self, result):
+        """Indicate that execution has completed"""
+        self.timer.stop()
         if self.future is not None:
             self.future.set_result(result)
         if self.deferred is not None:
             self.deferred.callback(result)
 
     def set_exception(self, exception):
+        """Indicate that execution has failed"""
         handled = False
 
+        self.timer.stop()
         if self.future is not None:
             self.future.set_exception(exception)
 
@@ -198,8 +206,14 @@ class ExecuteContext(object):
 
         return handled
 
+    @property
+    def elapsed(self):
+        """Convenience property.  Returns timer duration."""
+        return self.timer.elapsed
+
     @staticmethod
     def _unhandledErrback(error, unhandled):
+        """Fallback errback for deferred processing"""
         unhandled.append(error)
         return None
 
