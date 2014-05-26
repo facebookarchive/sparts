@@ -6,6 +6,7 @@ master
 * Tasks now accessible via attributes on `service.tasks` by name and via `get()` and `require()`
 * Fixed a race condition in deferred errback handling in QueueTask
 * ExecuteContext (for QueueTask) now supports a `future` keyword argument.
+* `sparts.timer` with `Timer` class for tracking timings
 
 0.5.1
 -----
