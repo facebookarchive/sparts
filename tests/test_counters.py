@@ -67,10 +67,10 @@ class CounterTests(BaseSpartsTestCase):
         c.add(20)
         self.assertEquals(c(), 15.0)
 
-    def testCallback(self):
-        """Test `counters.Callback()`"""
+    def testCallbackCounter(self):
+        """Test `counters.CallbackCounter()`"""
         l = [0.0]
-        c = counters.Callback(lambda: l[0])
+        c = counters.CallbackCounter(lambda: l[0])
         self.assertEquals(c(), 0.0)
         l[0] = 10.0
         self.assertEquals(c(), 10.0)

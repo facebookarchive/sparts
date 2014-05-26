@@ -75,9 +75,9 @@ class ValueCounter(_BaseCounter):
         return self._value
 
 
-class Callback(_BaseCounter):
+class CallbackCounter(_BaseCounter):
     def __init__(self, callback, name=None):
-        super(Callback, self).__init__(name=name)
+        super(CallbackCounter, self).__init__(name=name)
         self._callback = callback
 
     def _initialize(self):

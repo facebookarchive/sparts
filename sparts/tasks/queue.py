@@ -6,7 +6,7 @@
 #
 """Module for tasks related to doing work from a queue"""
 from six.moves import queue
-from sparts.counters import counter, samples, SampleType, Callback
+from sparts.counters import counter, samples, SampleType, CallbackCounter
 from sparts.sparts import option
 from sparts.vtask import VTask, ExecuteContext, TryLater
 
@@ -34,7 +34,8 @@ class QueueTask(VTask):
     def initTask(self):
         super(QueueTask, self).initTask()
         self.queue = queue.Queue(maxsize=self.max_items)
-        self.counters['queue_depth'] = Callback(lambda: self.queue.qsize())
+        self.counters['queue_depth'] = \
+            CallbackCounter(lambda: self.queue.qsize())
         self._shutdown_sentinel = object()
 
     def stop(self):
