@@ -121,11 +121,24 @@ install_requires = ['six']
 if sys.version < '2.7':
     install_requires.append('ordereddict')
 
-tests_require = install_requires + ['pytest', 'mock']
+tests_require = install_requires + [
+    'pytest',
+    'mock',
+    'tornado>=1.2',
+]
+
 if sys.version < '2.7':
     tests_require.append('unittest2')
-if sys.version  < '3.2':
+
+if sys.version < '3.2':
     tests_require.append('futures')
+
+if sys.version < '3.0':
+    tests_require.append('Twisted')
+    tests_require.append('thrift')
+else:
+    # Py3k requires Twisted >= 14.0
+    tests_require.append('Twisted>=14.0.0')
 
 VERSION = version()
 setup(
