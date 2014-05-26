@@ -77,12 +77,18 @@ class FutureTests(SingleTaskTestCase):
         # Put work in the queue
         ctx = self.makeContext('foo')
         self.task.queue.put(ctx)
+        self.task.queue.put('another')
 
         # Wait for the first execution to start
         ctx.running.wait()
 
         # Future should be marked running
         self.assertTrue(ctx.future.running())
+
+        # queue_depth counter should return > 0 as well
+        self.assertGreater(self.task.getCounter('queue_depth')(), 0)
+        self.assertGreater(self.service.getCounters()['BarTask.queue_depth'](), 0)
+        self.assertGreater(self.service.getCounter('BarTask.queue_depth')(), 0)
 
         # Now make sure that calling result() will timeout (since we are in
         # a tight TryLater loop)
