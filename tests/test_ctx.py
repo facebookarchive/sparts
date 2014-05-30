@@ -8,6 +8,7 @@ from sparts.tests.base import BaseSpartsTestCase
 from sparts import ctx
 
 import os
+import os.path
 import sys
 
 class ContextTests(BaseSpartsTestCase):
@@ -33,23 +34,31 @@ class ContextTests(BaseSpartsTestCase):
             # After exiting the context, it should be gone again
             self.assertNotIn(path, sys.path)
 
+    def assertSamePath(self, a, b, msg=''):
+        self.assertEquals(os.path.realpath(a),
+                          os.path.realpath(b), msg)
+
+    def assertDifferentPath(self, a, b, msg=''):
+        self.assertNotEquals(os.path.realpath(a),
+                             os.path.realpath(b), msg)
+
     def testChdir(self):
         """Verify `ctx.chdir`"""
         with ctx.tmpdir() as path:
             orig_dir = os.getcwd()
 
             # Make sure we're not in the new tmpdir.  This should be impossible.
-            self.assertNotEquals(orig_dir, path)
+            self.assertDifferentPath(orig_dir, path)
 
             with ctx.chdir(path):
                 # Make sure we changed correctly
-                self.assertEquals(os.getcwd(), path)
+                self.assertSamePath(os.getcwd(), path)
 
             # Make sure we're not there anymore
-            self.assertNotEquals(os.getcwd(), path)
+            self.assertDifferentPath(os.getcwd(), path)
 
             # Make sure we returned to the original location
-            self.assertEquals(os.getcwd(), orig_dir)
+            self.assertSamePath(os.getcwd(), orig_dir)
 
     def testModuleSnapshot(self):
         """Verify `ctx.module_snapshot`"""
