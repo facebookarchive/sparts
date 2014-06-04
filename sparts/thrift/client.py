@@ -8,7 +8,8 @@
 from __future__ import absolute_import
 
 from thrift.transport.TSocket import TSocket
-from thrift.transport.TTransport import TFramedTransport
+from thrift.transport.TTransport import TFramedTransport, TBufferedTransport
+from thrift.transport.THttpClient import THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
 from functools import partial
@@ -24,7 +25,9 @@ class ThriftClient(object):
         MODULE - The generated thrift module.  Should include Iface and Client
         HOST - A default host to connect to.  Possibly a vip.
         PORT - A default port to connect to.
-        TRANSPORT_CLASS - By default, `TFramedTransport`
+        PATH - An http path to request.  Enables HTTP client mode.
+        TRANSPORT_CLASS - By default, `TFramedTransport` for socket servers,
+                          `TBufferedTransport` for HTTP servers.
         PROTOCOL_CLASS - By default, `TBinaryProtocol`
         CONNECT_TIMEOUT - By default, 3.0 seconds
 
@@ -36,7 +39,8 @@ class ThriftClient(object):
         `module` - Generated thrift module.
         `host` - IP address to connect to.
         `port` - Port to connect to.
-        `connect_Timeout` - Socket connection timeout
+        `path` - HTTP URI path to request.  Enables HTTP client mode.
+        `connect_timeout` - Socket connection timeout
         `transport_class` - Thrift transport class
         `protocol_class` - Thrift protocol class
 
@@ -51,7 +55,8 @@ class ThriftClient(object):
     MODULE = None
     HOST = None
     PORT = None
-    TRANSPORT_CLASS = TFramedTransport
+    PATH = None
+    TRANSPORT_CLASS = None
     PROTOCOL_CLASS = TBinaryProtocol
     CONNECT_TIMEOUT = 3.0
 
@@ -66,22 +71,32 @@ class ThriftClient(object):
         assert port or cls.PORT, "You must define a port!"
         return cls(host='127.0.0.1', port=port, **kwargs)
 
-    def _initAttribute(self, name, value, default):
-        if value is None:
-            value = default
+    def _initAttribute(self, name, value, *defaults):
+        defaults = list(defaults)
+        while value is None and len(defaults):
+            value = defaults.pop(0)
+
         setattr(self, name, value)
 
     def __init__(self, host=None, port=None, module=None, lazy=True,
                  connect_timeout=None, transport_class=None,
-                 protocol_class=None):
+                 protocol_class=None, path=None):
 
         self._initAttribute('host', host, self.HOST)
         self._initAttribute('port', port, self.PORT)
+        self._initAttribute('path', path, self.PATH)
         self._initAttribute('module', module, self.MODULE)
         self._initAttribute('connect_timeout', connect_timeout,
                             self.CONNECT_TIMEOUT)
+
+        # For non-http, default should be TFramed, for http, default TBuffered
+        if self.path is None:
+            fallback_transport = TFramedTransport
+        else:
+            fallback_transport = TBufferedTransport
+
         self._initAttribute('transport_class', transport_class,
-                            self.TRANSPORT_CLASS)
+                            self.TRANSPORT_CLASS, fallback_transport)
         self._initAttribute('protocol_class', protocol_class,
                             self.PROTOCOL_CLASS)
         self.lazy = lazy
@@ -94,8 +109,10 @@ class ThriftClient(object):
             self._connect()
 
     def _connect(self):
-        # TODO: Add some kind of support for HTTP or SSLSocket
-        self._socket = TSocket(self.host, self.port)
+        if self.path is None:
+            self._socket = TSocket(self.host, self.port)
+        else:
+            self._socket = THttpClient(self.host, self.port, self.path)
         self._socket.setTimeout(int(self.connect_timeout * 1000))
         self._transport = self.transport_class(self._socket)
         self._protocol = self.protocol_class(self._transport)

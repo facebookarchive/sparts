@@ -14,6 +14,8 @@ except ImportError:
 
 from sparts.tasks.fb303 import FB303HandlerTask
 from sparts.tasks.thrift import NBServerTask
+from sparts.tasks.tornado import TornadoHTTPTask
+from sparts.tasks.tornado_thrift import TornadoThriftHandler
 
 from sparts.thrift.client import ThriftClient
 from sparts.gen.fb303 import FacebookService
@@ -21,8 +23,16 @@ from sparts.gen.fb303.ttypes import fb_status
 
 import socket
 
+class ThriftHTTPTask(TornadoHTTPTask):
+    def getApplicationConfig(self):
+        return [
+            ('/thrift', TornadoThriftHandler,
+             dict(processor=self.service.tasks.FB303HandlerTask)),
+        ]
+
+
 class TestFB303(MultiTaskTestCase):
-    TASKS = [NBServerTask, FB303HandlerTask]
+    TASKS = [NBServerTask, FB303HandlerTask, ThriftHTTPTask]
 
     def assertCanConnect(self, host, port):
         s = socket.socket()
@@ -40,4 +50,18 @@ class TestFB303(MultiTaskTestCase):
         server = self.service.requireTask(NBServerTask)
         client = ThriftClient.for_localhost(
                 server.bound_port, module=FacebookService)
+        self.assertEquals(client.getStatus(), fb_status.ALIVE)
+
+    def testHTTPServerCommand(self):
+        server = self.service.tasks.ThriftHTTPTask
+        self.assertGreater(len(server.bound_addrs), 0)
+        bound_addr = server.bound_addrs[0]
+        if ':' in bound_addr[0]:
+            host = '::1'
+        else:
+            host = '127.0.0.1'
+
+        client = ThriftClient.for_hostport(
+                host=host, port=bound_addr[1],
+                path='/thrift', module=FacebookService)
         self.assertEquals(client.getStatus(), fb_status.ALIVE)
