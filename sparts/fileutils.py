@@ -42,7 +42,7 @@ find_executable = find_executable
 
 def resolve_partition(path):
     """Return the mount that `path` is present on.
-    
+
     Requires `psutil`."""
     import psutil
     path = os.path.realpath(path)
@@ -60,19 +60,8 @@ def resolve_partition(path):
     return found
 
 
-class NamedTemporaryDirectory(object):
-    """Wrapper around `mkdtemp` that cleans up after itself
-
-    These objects provide the following additional nice features:
-    
-    - A `name` attribute, which refers to the full temporary path created
-    - The ContextManager protocol, similar to ctx.tempdir,
-      to cleanup as the context exits.
-    - Implicit cleanup on dereference (via `__del__`)
-    - Helpers for reading and writing files relative to this created directory
-    """
-    def __init__(self, suffix="", prefix=tempfile.template, dir=None): 
-        self.name = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
+class NamedTemporary(object):
+    def __init__(self):
         self.delete = True
         self.close_called = False
 
@@ -90,21 +79,45 @@ class NamedTemporaryDirectory(object):
 
     def __repr__(self):
         """Overridden to include the temp dir path for debugging clarity."""
-        return "<NamedTemporaryDirectory '%s' at 0x%x>" % (self.name, id(self))
+        return "<%s '%s' at 0x%x>" % \
+            (self.__class__.__name__, self.name, id(self))
 
     def close(self):
         """Trigger cleanup (if it has not been disabled)"""
         if not self.close_called:
             if self.delete:
-                shutil.rmtree(self.name)
+                self._cleanup()
             self.close_called = True
 
     def keep(self):
         """Request persistence of the contents of this temporary directory.
-        
+
         Disabled the cleanup logic that is normally triggered on `__exit__()`,
         `__del__()`, or close() calls."""
         self.delete = False
+
+    def _cleanup(self):
+        """Implement this to cleanup after yourself"""
+        raise NotImplementedError()
+
+
+class NamedTemporaryDirectory(NamedTemporary):
+    """Wrapper around `mkdtemp` that cleans up after itself
+
+    These objects provide the following additional nice features:
+
+    - A `name` attribute, which refers to the full temporary path created
+    - The ContextManager protocol, similar to ctx.tempdir,
+      to cleanup as the context exits.
+    - Implicit cleanup on dereference (via `__del__`)
+    - Helpers for reading and writing files relative to this created directory
+    """
+    def __init__(self, suffix="", prefix=tempfile.template, dir=None):
+        self.name = tempfile.mkdtemp(suffix=suffix, prefix=prefix, dir=dir)
+        super(NamedTemporaryDirectory, self).__init__()
+
+    def _cleanup(self):
+        shutil.rmtree(self.name)
 
     def writefile(self, path, contents):
         """Writes `contents` to the `path` relative to this directory"""
