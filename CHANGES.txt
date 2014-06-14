@@ -4,6 +4,7 @@ CHANGES
 master
 ------
 * `QueueTask` new counters: queue_depth, n_trylater, n_unhandled, n_completed, execute_duration_ms
+* Add http-based thrift support to sparts.thrift.client
 * Tasks now accessible via attributes on `service.tasks` by name and via `get()` and `require()`
 * Fixed a race condition in deferred errback handling in QueueTask
 * ExecuteContext (for QueueTask) now supports a `future` keyword argument.
