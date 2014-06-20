@@ -31,6 +31,7 @@ from .sparts import _SpartsObject, option
 class VService(_SpartsObject):
     """Core class for implementing services."""
     DEFAULT_LOGLEVEL = 'DEBUG'
+    DEFAULT_PID = '/var/run/sparts.pid'
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
     VERSION = ''
@@ -42,6 +43,20 @@ class VService(_SpartsObject):
                             help='Tasks to run.  Pass without args to see the '
                                  'list. If not passed, all tasks will be '
                                  'started')
+    daemon = option(
+        action='store_true',
+        help='Start as a daemon.',
+    )
+    pidfile = option(
+        default=DEFAULT_PID,
+        help='path to pid file when running as a daemon [%(default)s]',
+        metavar='PIDFILE',
+    )
+    kill = option(
+        action='store_true',
+        help='kill the currently running daemon if there is one',
+    )
+
     if HAS_PSUTIL:
         runit_install = option(action='store_true',
                                help='Install this service under runit.')

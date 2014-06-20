@@ -117,7 +117,7 @@ class PyTest(TestCommand):
 
 cmdclass['test'] = PyTest
 
-install_requires = ['six']
+install_requires = ['six', 'daemonize']
 if sys.version < '2.7':
     install_requires.append('ordereddict')
 
