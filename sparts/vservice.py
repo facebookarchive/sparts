@@ -27,6 +27,7 @@ from sparts import vtask
 from .deps import HAS_PSUTIL
 from .sparts import _SpartsObject, option
 
+from daemonize import Daemonize
 
 class VService(_SpartsObject):
     """Core class for implementing services."""
@@ -220,6 +221,16 @@ class VService(_SpartsObject):
         if name is not None:
             instance.name = name
         instance.preprocessOptions()
+        if ns.daemon:
+            daemon = Daemonize(
+                app=name,
+                pid=ns.pidfile,
+                # This is basically No-Op
+                action=lambda x: None,
+                verbose=True,
+            )
+            daemon.start()
+
         return cls._runloop(instance)
 
     @classmethod
