@@ -29,6 +29,22 @@ class ThriftHandlerTask(VTask):
     def initTask(self):
         super(ThriftHandlerTask, self).initTask()
         assert self.MODULE is not None
+        self._verifyInterface()
+
+    def _verifyInterface(self):
+        iface = self.MODULE.Iface
+        missing_methods = []
+        for k in dir(iface):
+            v = getattr(iface, k, None)
+            if not callable(v) or k.startswith('_'):
+                continue
+            v2 = getattr(self, k, None)
+            if v2 is None or not callable(v):
+                missing_methods.append(k)
+
+        if missing_methods:
+            raise TypeError("%s is missing the following methods: %s" %
+                (self.__class__.__name__, missing_methods))
 
     def _makeProcessor(self):
         return self.MODULE.Processor(self)
