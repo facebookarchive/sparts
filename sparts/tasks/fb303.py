@@ -11,9 +11,17 @@ from sparts.tasks.thrift import ThriftHandlerTask
 from sparts.gen.fb303 import FacebookService
 from sparts.gen.fb303.ttypes import fb_status
 
+import threading
+import time
+from six import StringIO
+
 
 class FB303HandlerTask(ThriftHandlerTask):
     MODULE = FacebookService
+
+    def initTask(self):
+        super(FB303HandlerTask, self).initTask()
+        self._profile_lock = threading.Lock()
 
     def getName(self):
         return self.service.name
@@ -101,3 +109,27 @@ class FB303HandlerTask(ThriftHandlerTask):
 
     def shutdown(self):
         self.service.shutdown()
+
+    def getCpuProfile(self):
+        try:
+            import yappi
+        except ImportError:
+            # Fallback (but log) if people call this method and we
+            # don't have yappi
+            self.logger.warning('getCpuProfile called without yappi installed')
+            return ''
+
+        # We need to lock this since it muck about with the global python
+        # profile hooks.
+        with self._profile_lock:
+            yappi.start()
+            time.sleep(1.0)
+            yappi.stop()
+            stats = yappi.get_func_stats()
+
+        # Save the "pretty" output to a buffer and return the raw string
+        # Alternatively, we should return this as JSON and let the caller
+        # render it appropriately, but this is fine for now.
+        sio = StringIO()
+        stats.print_all(out=sio)
+        return sio.getvalue()
