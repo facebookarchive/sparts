@@ -226,8 +226,7 @@ class VService(_SpartsObject):
                 app=name,
                 pid=ns.pidfile,
                 # This is basically No-Op
-                action=lambda x: None,
-                verbose=True,
+                action=lambda *x: None,
             )
             daemon.start()
 
