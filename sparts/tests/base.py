@@ -78,6 +78,8 @@ class BaseSpartsTestCase(unittest.TestCase):
 
 
 class ServiceTestCase(BaseSpartsTestCase):
+    runloop = None
+
     def getServiceClass(self):
         return VService
 
@@ -94,7 +96,10 @@ class ServiceTestCase(BaseSpartsTestCase):
 
     def tearDown(self):
         self.service.stop()
-        self.runloop.join()
+
+        # Only join if setUp() didn't fail gracefully
+        if self.runloop is not None:
+            self.runloop.join()
         super(ServiceTestCase, self).tearDown()
 
 
