@@ -14,6 +14,7 @@ from __future__ import print_function
 
 import copy
 import logging
+import os
 import re
 import signal
 import sys
@@ -32,7 +33,6 @@ from daemonize import Daemonize
 class VService(_SpartsObject):
     """Core class for implementing services."""
     DEFAULT_LOGLEVEL = 'DEBUG'
-    DEFAULT_PID = '/var/run/sparts.pid'
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
     VERSION = ''
@@ -49,8 +49,7 @@ class VService(_SpartsObject):
         help='Start as a daemon.',
     )
     pidfile = option(
-        default=DEFAULT_PID,
-        help='path to pid file when running as a daemon [%(default)s]',
+        help='path to pid file when running as a daemon',
         metavar='PIDFILE',
     )
     kill = option(
@@ -221,12 +220,26 @@ class VService(_SpartsObject):
         if name is not None:
             instance.name = name
         instance.preprocessOptions()
+
+        # act on the --kill flag if present
+        if ns.kill:
+            with open(ns.pidfile, 'r') as pidfile:
+                daemon_pid = int(pidfile.read())
+
+            try:
+                os.kill(daemon_pid, signal.SIGTERM)
+            except OSError:
+                instance.logger.info("Couldn't kill process with PID %d" %
+                                     daemon_pid)
+            return
+
         if ns.daemon:
             daemon = Daemonize(
                 app=name,
                 pid=ns.pidfile,
                 # This is basically No-Op
                 action=lambda *x: None,
+                logger=instance.logger
             )
             daemon.start()
 
