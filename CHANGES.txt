@@ -13,6 +13,8 @@ master
 * `sparts.counters.Callback` counter that take a callback to be called to return the value.
 * Better support for counters defined in `initTask()` (instead of declaratively)
 * Improved unittest stability
+* Improved support for v6
+* Improved support for fbthrift
 
 0.5.1
 -----
