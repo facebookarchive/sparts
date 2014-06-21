@@ -144,10 +144,18 @@ class NBServerTask(ThriftServerTask):
         self.server = TNonblockingServer(self.processor, self.socket,
                                          threads=self.num_threads)
         self.server.prepare()
-        self.bound_host, self.bound_port = \
-            self.server.socket.handle.getsockname()
-        self.logger.info("%s Server Started on %s:%s",
-                         self.name, self.bound_host, self.bound_port)
+
+        addrinfo = self.server.socket.handle.getsockname()
+        self.bound_host, self.bound_port = addrinfo[0:2]
+
+        self.logger.info("%s Server Started on %s", self.name,
+                         self._fmt_hostport(self.bound_host, self.bound_port))
+
+    def _fmt_hostport(self, host, port):
+        if ':' in host:
+            return '[%s]:%d' % (host, port)
+        else:
+            return '%s:%d' % (host, port)
 
     def stop(self):
         """Overridden to tell the thrift server to shutdown asynchronously"""
