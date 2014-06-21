@@ -136,7 +136,11 @@ class NBServerTask(ThriftServerTask):
         super(NBServerTask, self).initTask()
 
         self._stopped = False
-        self.socket = TServerSocket(self.host, self.port)
+
+        # Construct TServerSocket this way for compatibility with fbthrift
+        self.socket = TServerSocket(port=self.port)
+        self.socket.host = self.host
+
         self.server = TNonblockingServer(self.processor, self.socket,
                                          threads=self.num_threads)
         self.server.prepare()
