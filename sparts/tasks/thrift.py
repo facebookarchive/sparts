@@ -145,11 +145,23 @@ class NBServerTask(ThriftServerTask):
                                          threads=self.num_threads)
         self.server.prepare()
 
-        addrinfo = self.server.socket.handle.getsockname()
-        self.bound_host, self.bound_port = addrinfo[0:2]
+        self.bound_addrs = []
+        for handle in self._get_socket_handles(self.server.socket):
+            addrinfo = handle.getsockname()
+            self.bound_host, self.bound_port = addrinfo[0:2]
+            self.logger.info("%s Server Started on %s", self.name,
+                self._fmt_hostport(self.bound_host, self.bound_port))
 
-        self.logger.info("%s Server Started on %s", self.name,
-                         self._fmt_hostport(self.bound_host, self.bound_port))
+    def _get_socket_handles(self, tsocket):
+        """Helper to retrieve the socket objects for a given TServerSocket"""
+        handle = getattr(tsocket, 'handle', None)
+        if handle is not None:
+            return [tsocket.handle]
+
+        # Some TServerSocket implementations support multiple handles per
+        # TServerSocket (e.g., to support binding v4 and v6 without
+        # v4-mapped addresses
+        return tsocket.handles.values()
 
     def _fmt_hostport(self, host, port):
         if ':' in host:
