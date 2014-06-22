@@ -12,7 +12,9 @@ or it can be subclassed and used similarly.
 from __future__ import absolute_import
 from __future__ import print_function
 
+import copy
 import logging
+import re
 import signal
 import sys
 import threading
@@ -69,6 +71,9 @@ class VService(_SpartsObject):
         # Register warnings API
         self.warnings = OrderedDict()
         self.warning_id = 0
+
+        # Register exported values API
+        self.exported_values = {}
 
         # Set start_time for aliveSince() calls
         self.start_time = time.time()
@@ -310,3 +315,25 @@ class VService(_SpartsObject):
             return False
         del self.warnings[id]
         return True
+
+    def getExportedValue(self, name):
+        return self.exported_values.get(name, '')
+
+    def setExportedValue(self, name, value):
+        if value is None:
+            del self.exported_values[name]
+        else:
+            self.exported_values[name] = value
+
+    def getExportedValues(self):
+        return copy.copy(self.exported_values)
+
+    def getRegexExportedValues(self, regex):
+        matcher = re.compile(regex)
+        keys = [key for key in self.exported_values.keys()
+                if matcher.match(key) is not None]
+        return self.getSelectedExportedValues(keys)
+
+    def getSelectedExportedValues(self, keys):
+        return dict([(key, self.getExportedValue(key))
+            for key in keys])

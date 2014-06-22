@@ -27,3 +27,51 @@ class VServiceTests(ServiceTestCase):
         self.service.clearWarnings()
         self.assertEmpty(self.service.getWarnings())
 
+    def testExportedValues(self):
+        service = self.service
+
+        self.assertEmpty(service.getExportedValues())
+        self.assertEquals(service.getExportedValue('notexists'), '')
+
+        # Set some values
+        service.setExportedValue('foo', 'bar')
+        service.setExportedValue('spam', 'eggs')
+        service.setExportedValue('ham', 'eggs')
+
+        # Verify we got something back this time
+        self.assertNotEmpty(service.getExportedValues())
+
+        # Verify getExportedValue with real values
+        self.assertEquals(service.getExportedValue('foo'), 'bar')
+        self.assertEquals(service.getExportedValue('spam'), 'eggs')
+
+        # Verify Regex API
+        k_v = service.getRegexExportedValues('.*am')
+        self.assertEquals(len(k_v), 2)
+        self.assertNotContains('foo', k_v)
+        self.assertContains('spam', k_v)
+        self.assertContains('ham', k_v)
+
+        # Verify Selected API
+        k_v = service.getSelectedExportedValues(['notexists', 'ham', 'spam'])
+        self.assertEquals(len(k_v), 3)
+        self.assertNotContains('foo', k_v)
+
+        # Verify keys
+        self.assertContains('notexists', k_v)
+        self.assertContains('spam', k_v)
+        self.assertContains('ham', k_v)
+
+        # Verify values
+        self.assertEquals(k_v['notexists'], '')
+        self.assertEquals(k_v['spam'], 'eggs')
+        self.assertEquals(k_v['ham'], 'eggs')
+
+        # Verify deletion
+        service.setExportedValue('ham', None)
+        values = service.getExportedValues()
+        self.assertNotEmpty(values)
+        self.assertEquals(len(values), 2)
+        self.assertContains('foo', values)
+        self.assertContains('spam', values)
+        self.assertNotContains('ham', values)
