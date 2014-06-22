@@ -110,7 +110,7 @@ class FB303HandlerTask(ThriftHandlerTask):
     def shutdown(self):
         self.service.shutdown()
 
-    def getCpuProfile(self):
+    def getCpuProfile(self, profileDurationInSec):
         try:
             import yappi
         except ImportError:
@@ -123,7 +123,7 @@ class FB303HandlerTask(ThriftHandlerTask):
         # profile hooks.
         with self._profile_lock:
             yappi.start()
-            time.sleep(1.0)
+            time.sleep(profileDurationInSec)
             yappi.stop()
             stats = yappi.get_func_stats()
 
