@@ -13,7 +13,7 @@ from sparts.gen.fb303.ttypes import fb_status
 
 import threading
 import time
-from six import StringIO
+from six import StringIO, iteritems
 
 
 class FB303HandlerTask(ThriftHandlerTask):
@@ -63,7 +63,7 @@ class FB303HandlerTask(ThriftHandlerTask):
 
     def getCounters(self):
         result = {}
-        for k, v in self.service.getCounters().iteritems():
+        for k, v in iteritems(self.service.getCounters()):
             v = v()
             if v is None:
                 continue
