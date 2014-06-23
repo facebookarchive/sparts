@@ -30,9 +30,11 @@ from .sparts import _SpartsObject, option
 
 from daemonize import Daemonize
 
+
 class VService(_SpartsObject):
     """Core class for implementing services."""
     DEFAULT_LOGLEVEL = 'DEBUG'
+    DEFAULT_PID = lambda cls: '/var/run/%s.pid' % cls.__name__
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
     VERSION = ''
@@ -49,7 +51,8 @@ class VService(_SpartsObject):
         help='Start as a daemon.',
     )
     pidfile = option(
-        help='path to pid file when running as a daemon',
+        default=DEFAULT_PID,
+        help='path to pid file when running as a daemon [%(default)s]',
         metavar='PIDFILE',
     )
     kill = option(
