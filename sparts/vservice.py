@@ -13,6 +13,7 @@ from __future__ import absolute_import
 from __future__ import print_function
 
 import copy
+import functools
 import logging
 import os
 import re
@@ -241,13 +242,12 @@ class VService(_SpartsObject):
             daemon = Daemonize(
                 app=name,
                 pid=ns.pidfile,
-                # This is basically No-Op
-                action=lambda *x: None,
+                action=functools.partial(cls._runloop, instance),
                 logger=logging.getLogger(instance.name + ".daemon")
             )
             daemon.start()
-
-        return cls._runloop(instance)
+        else:
+            return cls._runloop(instance)
 
     @classmethod
     def _runloop(cls, instance):
