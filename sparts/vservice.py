@@ -108,6 +108,19 @@ class VService(_SpartsObject):
         if self.getOption('runit_install'):
             self._install()
 
+        # act on the --kill flag if present
+        if self.options.kill:
+            try:
+                with open(self.options.pidfile, 'r') as pidfile:
+                    daemon_pid = int(pidfile.read())
+                os.kill(daemon_pid, signal.SIGTERM)
+            except OSError:
+                self.logger.exception(
+                    "Couldn't kill process with PID %d", daemon_pid)
+            except IOError as ioe:
+                self.logger.exception(ioe)
+            sys.exit(1)
+
         if self.options.tasks == []:
             print("Available Tasks:")
             for t in self.tasks:
@@ -224,25 +237,13 @@ class VService(_SpartsObject):
             instance.name = name
         instance.preprocessOptions()
 
-        # act on the --kill flag if present
-        if ns.kill:
-            with open(ns.pidfile, 'r') as pidfile:
-                daemon_pid = int(pidfile.read())
-
-            try:
-                os.kill(daemon_pid, signal.SIGTERM)
-            except OSError:
-                instance.logger.info("Couldn't kill process with PID %d" %
-                                     daemon_pid)
-            return
-
         if ns.daemon:
             daemon = Daemonize(
                 app=name,
                 pid=ns.pidfile,
                 # This is basically No-Op
                 action=lambda *x: None,
-                logger=instance.logger
+                logger=logging.getLogger(instance.name + ".daemon")
             )
             daemon.start()
 
