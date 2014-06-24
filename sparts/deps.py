@@ -14,3 +14,4 @@ def HAS(module):
 
 HAS_PSUTIL = HAS('psutil')
 HAS_THRIFT = HAS('thrift')
+HAS_DAEMONIZE = HAS('daemonize')

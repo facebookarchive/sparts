@@ -15,7 +15,6 @@ from __future__ import print_function
 import copy
 import functools
 import logging
-import os
 import re
 import signal
 import sys
@@ -26,10 +25,10 @@ from argparse import ArgumentParser
 from .compat import OrderedDict
 
 from sparts import vtask
-from .deps import HAS_PSUTIL
+from .deps import HAS_PSUTIL, HAS_DAEMONIZE
 from .sparts import _SpartsObject, option
 
-from daemonize import Daemonize
+from sparts import daemon
 
 
 class VService(_SpartsObject):
@@ -47,19 +46,25 @@ class VService(_SpartsObject):
                             help='Tasks to run.  Pass without args to see the '
                                  'list. If not passed, all tasks will be '
                                  'started')
-    daemon = option(
-        action='store_true',
-        help='Start as a daemon.',
-    )
-    pidfile = option(
-        default=DEFAULT_PID,
-        help='path to pid file when running as a daemon [%(default)s]',
-        metavar='PIDFILE',
-    )
-    kill = option(
-        action='store_true',
-        help='kill the currently running daemon if there is one',
-    )
+
+    if HAS_DAEMONIZE:
+        daemon = option(
+            action='store_true',
+            help='Start as a daemon using PIDFILE',
+        )
+        pidfile = option(
+            default=DEFAULT_PID,
+            help='Daemon pid file path [%(default)s]',
+            metavar='PIDFILE',
+        )
+        kill = option(
+            action='store_true',
+            help='Kill the currently running daemon for PIDFILE',
+        )
+        status = option(
+            action='store_true',
+            help='Output whether the daemon for PIDFILE is running',
+        )
 
     if HAS_PSUTIL:
         runit_install = option(action='store_true',
@@ -109,18 +114,21 @@ class VService(_SpartsObject):
         if self.getOption('runit_install'):
             self._install()
 
-        # act on the --kill flag if present
-        if self.options.kill:
-            try:
-                with open(self.options.pidfile, 'r') as pidfile:
-                    daemon_pid = int(pidfile.read())
-                os.kill(daemon_pid, signal.SIGTERM)
-            except OSError:
-                self.logger.exception(
-                    "Couldn't kill process with PID %d", daemon_pid)
-            except IOError as ioe:
-                self.logger.exception(ioe)
-            sys.exit(1)
+        # Act on the --status if present.  We use getOption, since it
+        # may return null if HAS_DAEMONIZE is False
+        if self.getOption('status'):
+            if daemon.status(pidfile=self.pidfile, logger=self.logger):
+                sys.exit(0)
+            else:
+                sys.exit(1)
+
+        # Act on the --kill flag if present.  We use getOption, since it
+        # may return null if HAS_DAEMONIZE is False
+        if self.getOption('kill'):
+            if daemon.kill(pidfile=self.pidfile, logger=self.logger):
+                sys.exit(0)
+            else:
+                sys.exit(1)
 
         if self.options.tasks == []:
             print("Available Tasks:")
@@ -239,13 +247,13 @@ class VService(_SpartsObject):
         instance.preprocessOptions()
 
         if ns.daemon:
-            daemon = Daemonize(
-                app=name,
-                pid=ns.pidfile,
-                action=functools.partial(cls._runloop, instance),
-                logger=logging.getLogger(instance.name + ".daemon")
+            daemon.daemonize(
+                command=functools.partial(cls._runloop, instance),
+                name=instance.name,
+                pidfile=ns.pidfile,
+                logger=instance.logger,
             )
-            daemon.start()
+
         else:
             return cls._runloop(instance)
 
