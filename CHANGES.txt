@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* Support for POSIX daemonization helpers (--daemonize, --kill, --status, etc) if `daemonize` is installed.
 * ThriftHandlerTask subclasses now verify it implements MODULE.Iface
 * `QueueTask` new counters: queue_depth, n_trylater, n_unhandled, n_completed, execute_duration_ms
 * Add http-based thrift support to sparts.thrift.client
