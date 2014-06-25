@@ -50,3 +50,17 @@ class Timer(object):
     def _time(self):
         """Private-ish time to help with mocking/unittests"""
         return time.time()
+
+
+def run_until_true(f, timeout):
+    """Runs function `f` until it returns True or `timeout` elapses.
+    
+    Returns if f returns True.  Raises if timeout is exceeded."""
+    with Timer() as t:
+        while t.elapsed < timeout:
+            if f():
+                return
+            time.sleep(0.001)
+
+    raise Exception("%.1fs Timeout Exceeded waiting for %s to complete" %
+                    (timeout, f))

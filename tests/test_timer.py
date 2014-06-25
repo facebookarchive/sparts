@@ -5,10 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from sparts.tests.base import BaseSpartsTestCase
-from sparts.timer import Timer
-
-import os
-import sys
+from sparts.timer import Timer, run_until_true
 
 
 class TimerTests(BaseSpartsTestCase):
@@ -74,3 +71,14 @@ class TimerTests(BaseSpartsTestCase):
         # Re-stop the timer, which should update stop_time and  elapsed to 10s
         t.stop()
         self.assertEquals(t.elapsed, 10.0)
+
+
+class RunUntilTrueTests(BaseSpartsTestCase):
+    def testTrue(self):
+        run_until_true(lambda: True, timeout=5.0)
+        self.assertTrue(True)
+
+    def testTimeout(self):
+        with self.assertRaises(Exception):
+            run_until_true(lambda: False, timeout=0.1)
+        self.assertTrue(True)
