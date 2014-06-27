@@ -3,6 +3,10 @@ CHANGES
 
 master
 ------
+
+
+0.6.0
+-----
 * Support for POSIX daemonization helpers (--daemonize, --kill, --status, etc) if `daemonize` is installed.
 * ThriftHandlerTask subclasses now verify it implements MODULE.Iface
 * `QueueTask` new counters: queue_depth, n_trylater, n_unhandled, n_completed, execute_duration_ms
@@ -13,6 +17,7 @@ master
 * `sparts.timer` with `Timer` class for tracking timings
 * `sparts.counters.Callback` counter that take a callback to be called to return the value.
 * Better support for counters defined in `initTask()` (instead of declaratively)
+* New function: sparts.timer.run_until_true(f, timeout)
 * Improved unittest stability
 * Improved support for v6
 * Improved support for fbthrift
