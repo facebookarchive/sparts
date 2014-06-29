@@ -49,6 +49,33 @@ class FutureTests(SingleTaskTestCase):
         result = ctx.future.result(5.0)
         self.assertEquals(result, 'foobar')
 
+        # Put a piece of work in the queue with the put API
+        self.submit('ham')
+        future = self.submit('spam')
+        self.submit('eggs')
+        result = future.result(5.0)
+        self.assertEquals(result, 'spambar')
+
+    def submit(self, item):
+        return self.task.submit(item)
+
+    def map(self, items, timeout=None):
+        return self.task.map(items, timeout=timeout)
+
+    def test_map(self):
+        """Test out the futures-based map API"""
+        inputs = map(str, range(5))
+        results = self.map(inputs)
+        self.assertEquals(results, ['0bar', '1bar', '2bar', '3bar', '4bar'])
+
+    def test_map_timeout(self):
+        """Test out the futures-based map API"""
+        self.task.do_trylater = True
+
+        inputs = map(str, range(5))
+        with self.assertRaises(futures.TimeoutError):
+            self.map(inputs, timeout=0.05)
+
     def test_future_raise(self):
         """Make sure raising exceptions works properly.
         

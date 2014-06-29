@@ -3,7 +3,7 @@ CHANGES
 
 master
 ------
-
+* Add `map` and `submit` API to QueueTask
 
 0.6.0
 -----

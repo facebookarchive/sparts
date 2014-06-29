@@ -5,6 +5,7 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 """Module for tasks related to doing work from a queue"""
+from concurrent.futures import Future
 from six.moves import queue
 from sparts.counters import counter, samples, SampleType, CallbackCounter
 from sparts.sparts import option
@@ -41,6 +42,18 @@ class QueueTask(VTask):
     def stop(self):
         super(QueueTask, self).stop()
         self.queue.put(self._shutdown_sentinel)
+
+    def submit(self, item):
+        """Enqueue `item` into this task's Queue.  Returns a `Future`"""
+        future = Future()
+        work = ExecuteContext(item=item, future=future)
+        self.queue.put(work)
+        return future
+
+    def map(self, items, timeout=None):
+        """Enqueues `items` into the queue"""
+        futures = map(self.submit, items)
+        return [f.result(timeout) for f in futures]
 
     def _runloop(self):
         while not self.service._stop:
