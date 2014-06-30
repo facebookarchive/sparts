@@ -114,21 +114,20 @@ class VService(_SpartsObject):
         if self.getOption('runit_install'):
             self._install()
 
-        # Act on the --status if present.  We use getOption, since it
-        # may return null if HAS_DAEMONIZE is False
-        if self.getOption('status'):
-            if daemon.status(pidfile=self.pidfile, logger=self.logger):
-                sys.exit(0)
-            else:
-                sys.exit(1)
+        if HAS_DAEMONIZE:
+            # Act on the --status if present.
+            if self.status:
+                if daemon.status(pidfile=self.pidfile, logger=self.logger):
+                    sys.exit(0)
+                else:
+                    sys.exit(1)
 
-        # Act on the --kill flag if present.  We use getOption, since it
-        # may return null if HAS_DAEMONIZE is False
-        if self.getOption('kill'):
-            if daemon.kill(pidfile=self.pidfile, logger=self.logger):
-                sys.exit(0)
-            else:
-                sys.exit(1)
+            # Act on the --kill flag if present.
+            if self.kill:
+                if daemon.kill(pidfile=self.pidfile, logger=self.logger):
+                    sys.exit(0)
+                else:
+                    sys.exit(1)
 
         if self.options.tasks == []:
             print("Available Tasks:")
@@ -246,7 +245,7 @@ class VService(_SpartsObject):
             instance.name = name
         instance.preprocessOptions()
 
-        if ns.daemon:
+        if HAS_DAEMONIZE and ns.daemon:
             daemon.daemonize(
                 command=functools.partial(cls._runloop, instance),
                 name=instance.name,

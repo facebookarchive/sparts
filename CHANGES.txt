@@ -3,6 +3,10 @@ CHANGES
 
 master
 ------
+
+0.6.1
+------
+* Fix vservice initialization when daemonize is not installed
 * Add `map` and `submit` API to QueueTask
 
 0.6.0
