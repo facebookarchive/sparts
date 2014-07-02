@@ -10,6 +10,7 @@ except ImportError:
     import unittest
 import logging
 import os.path
+import warnings
 
 from sparts.vservice import VService
 
@@ -45,6 +46,9 @@ class BaseSpartsTestCase(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.logger = logging.getLogger('sparts.%s' % cls.__name__)
+
+        # Treat all warnings as errors when running unittests
+        warnings.simplefilter('error')
         super(BaseSpartsTestCase, cls).setUpClass()
 
     def setUp(self):
