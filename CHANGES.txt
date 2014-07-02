@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* `sparts.collections` introduces a PriorityQueue and UniqueQueue
 
 0.6.1
 ------
