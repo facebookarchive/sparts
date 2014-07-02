@@ -55,13 +55,14 @@ class TestFB303(MultiTaskTestCase):
     def testHTTPServerCommand(self):
         server = self.service.tasks.ThriftHTTPTask
         self.assertGreater(len(server.bound_addrs), 0)
-        bound_addr = server.bound_addrs[0]
-        if ':' in bound_addr[0]:
-            host = '::1'
-        else:
-            host = '127.0.0.1'
 
-        client = ThriftClient.for_hostport(
-                host=host, port=bound_addr[1],
-                path='/thrift', module=FacebookService)
-        self.assertEquals(client.getStatus(), fb_status.ALIVE)
+        for bound_addr in server.bound_addrs:
+            if ':' in bound_addr[0]:
+                host = '::1'
+            else:
+                host = '127.0.0.1'
+
+            client = ThriftClient.for_hostport(
+                    host=host, port=bound_addr[1],
+                    path='/thrift', module=FacebookService)
+            self.assertEquals(client.getStatus(), fb_status.ALIVE)

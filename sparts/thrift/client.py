@@ -121,8 +121,13 @@ class ThriftClient(object):
 
     def _makeConnectURI(self):
         assert self.path.startswith('/')
+        host = self.host
+        # If host is a v6 addr, we need to format the URI a little bit
+        # differently in order to parse its port out according to spec
+        if ':' in host:
+            host = '[{}]'.format(host)
         return 'http://{host}:{port}{path}'.format(
-            host=self.host,
+            host=host,
             port=self.port,
             path=self.path,
         )
