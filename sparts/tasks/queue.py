@@ -7,9 +7,11 @@
 """Module for tasks related to doing work from a queue"""
 from concurrent.futures import Future
 from six.moves import queue
+from sparts.collections import PriorityQueue, UniqueQueue
 from sparts.counters import counter, samples, SampleType, CallbackCounter
 from sparts.sparts import option
 from sparts.vtask import VTask, ExecuteContext, TryLater
+
 
 class QueueTask(VTask):
     """Task that calls `execute` for all work put on its `queue`"""
@@ -32,9 +34,13 @@ class QueueTask(VTask):
         """Implement this in your QueueTask subclasses"""
         raise NotImplementedError()
 
+    def _makeQueue(self):
+        """Override this if you need a custom Queue implementation"""
+        return queue.Queue(maxsize=self.max_items)
+
     def initTask(self):
         super(QueueTask, self).initTask()
-        self.queue = queue.Queue(maxsize=self.max_items)
+        self.queue = self._makeQueue()
         self.counters['queue_depth'] = \
             CallbackCounter(lambda: self.queue.qsize())
         self._shutdown_sentinel = object()
@@ -91,3 +97,13 @@ class QueueTask(VTask):
 
             finally:
                 self.queue.task_done()
+
+
+class PriorityQueueTask(QueueTask):
+    def _makeQueue(self):
+        return PriorityQueue(maxsize=self.max_items)
+
+
+class UniqueQueueTask(QueueTask):
+    def _makeQueue(self):
+        return UniqueQueue(maxsize=self.max_items)
