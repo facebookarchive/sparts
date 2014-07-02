@@ -19,12 +19,12 @@ class NamedTemporaryDirTests(BaseSpartsTestCase):
             # Write it, make sure it's there, and verify the contents
             d.writefile('foo', 'bar')
             self.assertExists(os.path.join(d.name, 'foo'))
-            self.assertEquals(d.readfile('foo'), 'bar')
+            self.assertEqual(d.readfile('foo'), 'bar')
 
             # Symlink it, and make sure that is correct as well
             d.symlink('spam', d.join('foo'))
             self.assertExists(os.path.join(d.name, 'spam'))
-            self.assertEquals(d.readfile('spam'), 'bar')
+            self.assertEqual(d.readfile('spam'), 'bar')
 
             # Makedirs
             d.makedirs('adir')

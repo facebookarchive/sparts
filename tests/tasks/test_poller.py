@@ -26,13 +26,13 @@ class PollerTests(SingleTaskTestCase):
     TASK = MyTask
 
     def test_value_changed(self):
-        self.assertEquals(self.task.getValue(), 0)
-        self.assertEquals(self.task.num_changes, 1)  # Change from None => 1
+        self.assertEqual(self.task.getValue(), 0)
+        self.assertEqual(self.task.num_changes, 1)  # Change from None => 1
 
         self.task.execute(None)
 
-        self.assertEquals(self.task.getValue(), 0)
-        self.assertEquals(self.task.num_changes, 1)
+        self.assertEqual(self.task.getValue(), 0)
+        self.assertEqual(self.task.num_changes, 1)
 
         # Enable incrementing, and force at least one execution
         self.task.do_increment = True

@@ -23,7 +23,7 @@ class TestMyTask(SingleTaskTestCase):
         self.task.queue.put('bar')
         self.task.queue.put('baz')
         self.task.queue.join()
-        self.assertEquals(self.task.counter, 3)
+        self.assertEqual(self.task.counter, 3)
 
 
 class MyRetryTask(QueueTask):
@@ -45,5 +45,5 @@ class TestRetries(SingleTaskTestCase):
         self.task.queue.put('bar')
         self.task.queue.put('baz')
         self.task.queue.join()
-        self.assertEquals(self.task.retried, 30)
-        self.assertEquals(self.task.completed, 3)
+        self.assertEqual(self.task.retried, 30)
+        self.assertEqual(self.task.completed, 3)

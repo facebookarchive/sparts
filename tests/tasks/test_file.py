@@ -41,9 +41,9 @@ class TestMyTask(SingleTaskTestCase):
         os.utime(fn, None)
         self.task.execute()
         self.assertTrue(self.task.onFileCreated.called)
-        self.assertEquals(self.task.onFileCreated.call_count, 1)
-        self.assertEquals(self.task.onFileCreated.call_args[0][0], 'foo',
-                          self.task.onFileCreated.call_args)
+        self.assertEqual(self.task.onFileCreated.call_count, 1)
+        self.assertEqual(self.task.onFileCreated.call_args[0][0], 'foo',
+                         self.task.onFileCreated.call_args)
 
     def test_file_delete(self):
         self.test_file_create()
@@ -51,8 +51,8 @@ class TestMyTask(SingleTaskTestCase):
         self.task.execute()
 
         self.assertTrue(self.task.onFileDeleted.called)
-        self.assertEquals(self.task.onFileDeleted.call_count, 1)
-        self.assertEquals(self.task.onFileDeleted.call_args[0][0], 'foo',
+        self.assertEqual(self.task.onFileDeleted.call_count, 1)
+        self.assertEqual(self.task.onFileDeleted.call_args[0][0], 'foo',
                           self.task.onFileDeleted.call_args)
 
     def test_file_update(self):
@@ -69,9 +69,9 @@ class TestMyTask(SingleTaskTestCase):
 
         self.task.execute()
         self.assertTrue(self.task.onFileChanged.called)
-        self.assertEquals(self.task.onFileChanged.call_count, 1)
-        self.assertEquals(self.task.onFileChanged.call_args[0][0], 'foo',
-                          self.task.onFileChanged.call_args)
+        self.assertEqual(self.task.onFileChanged.call_count, 1)
+        self.assertEqual(self.task.onFileChanged.call_args[0][0], 'foo',
+                         self.task.onFileChanged.call_args)
 
     def test_file_delete_race_condition(self):
         self.test_file_create()

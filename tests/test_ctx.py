@@ -35,12 +35,12 @@ class ContextTests(BaseSpartsTestCase):
             self.assertNotIn(path, sys.path)
 
     def assertSamePath(self, a, b, msg=''):
-        self.assertEquals(os.path.realpath(a),
-                          os.path.realpath(b), msg)
+        self.assertEqual(os.path.realpath(a),
+                         os.path.realpath(b), msg)
 
     def assertDifferentPath(self, a, b, msg=''):
-        self.assertNotEquals(os.path.realpath(a),
-                             os.path.realpath(b), msg)
+        self.assertNotEqual(os.path.realpath(a),
+                            os.path.realpath(b), msg)
 
     def testChdir(self):
         """Verify `ctx.chdir`"""

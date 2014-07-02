@@ -29,4 +29,4 @@ class TestURLFetchDemo(MultiTaskTestCase):
             self.logger.debug('hostport = %s:%s', host, port)
 
             f = urlopen('http://%s:%s/' % (host, port))
-            self.assertEquals(f.read().decode('ascii'), 'Hello, world')
+            self.assertEqual(f.read().decode('ascii'), 'Hello, world')

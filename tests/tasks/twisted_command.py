@@ -27,7 +27,7 @@ class PollerTests(SingleTaskTestCase):
                       on_exit=on_exit)
 
         result[2].wait()
-        self.assertEquals(result[0], 'Hello World!')
+        self.assertEqual(result[0], 'Hello World!')
 
     # TODO: Current unittest framework has bad subtest isolation.
     # Since each test causes a twisted reactor to start/stop,
@@ -48,5 +48,5 @@ class PollerTests(SingleTaskTestCase):
                       on_exit=on_exit, line_buffered=False)
 
         self.assertTrue(result[2].wait(30.0))
-        self.assertEquals(result[0], 'Hello World!')
+        self.assertEqual(result[0], 'Hello World!')
     """

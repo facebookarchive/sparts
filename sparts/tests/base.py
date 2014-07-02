@@ -32,7 +32,7 @@ class BaseSpartsTestCase(unittest.TestCase):
         self.assertTrue(o is not None, msg)
 
     def assertEmpty(self, arr, msg=''):
-        return self.assertEquals(len(arr), 0, msg)
+        return self.assertEqual(len(arr), 0, msg)
 
     def assertNotEmpty(self, o, msg=''):
         self.assertTrue(len(o) > 0, msg)

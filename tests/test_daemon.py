@@ -20,7 +20,7 @@ class SimpleTestCase(BaseSpartsTestCase):
     def test_read_pid(self):
         with NamedTemporaryFile() as tf:
             writefile(tf.name, '1234')
-            self.assertEquals(daemon.read_pid(tf.name, self.logger), 1234)
+            self.assertEqual(daemon.read_pid(tf.name, self.logger), 1234)
 
         self.assertIsNone(daemon.read_pid(tf.name, self.logger))
 

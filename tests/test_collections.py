@@ -29,13 +29,13 @@ class PriorityQueueTests(BaseSpartsTestCase):
         self.assertFalse(queue.empty())
 
         # Remove stuff in sorted order
-        self.assertEquals(queue.get(), -21)
-        self.assertEquals(queue.get(), 0)
-        self.assertEquals(queue.get(), 0)
-        self.assertEquals(queue.get(), 1)
-        self.assertEquals(queue.get(), 3)
-        self.assertEquals(queue.get(), 3.14159)
-        self.assertEquals(queue.get(), 6)
+        self.assertEqual(queue.get(), -21)
+        self.assertEqual(queue.get(), 0)
+        self.assertEqual(queue.get(), 0)
+        self.assertEqual(queue.get(), 1)
+        self.assertEqual(queue.get(), 3)
+        self.assertEqual(queue.get(), 3.14159)
+        self.assertEqual(queue.get(), 6)
 
         # It should be empty again
         self.assertTrue(queue.empty())
@@ -65,9 +65,9 @@ class UniqueQueueTests(BaseSpartsTestCase):
         self.assertFalse(queue.empty())
 
         # Remove stuff
-        self.assertEquals(queue.get(), 2)
-        self.assertEquals(queue.get(), 0)
-        self.assertEquals(queue.get(), 1)
+        self.assertEqual(queue.get(), 2)
+        self.assertEqual(queue.get(), 0)
+        self.assertEqual(queue.get(), 1)
 
         # It should be empty again
         self.assertTrue(queue.empty())

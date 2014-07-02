@@ -49,7 +49,7 @@ class TestFB303(MultiTaskTestCase):
         server = self.service.requireTask(NBServerTask)
         client = ThriftClient.for_localhost(
                 server.bound_port, module=FacebookService)
-        self.assertEquals(client.getStatus(), fb_status.ALIVE)
+        self.assertEqual(client.getStatus(), fb_status.ALIVE)
 
     def testHTTPServerCommand(self):
         server = self.service.tasks.ThriftHTTPTask
@@ -64,4 +64,4 @@ class TestFB303(MultiTaskTestCase):
             client = ThriftClient.for_hostport(
                     host=host, port=bound_addr[1],
                     path='/thrift', module=FacebookService)
-            self.assertEquals(client.getStatus(), fb_status.ALIVE)
+            self.assertEqual(client.getStatus(), fb_status.ALIVE)

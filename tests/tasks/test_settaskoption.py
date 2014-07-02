@@ -17,6 +17,6 @@ class SetOptionTaskTests(SingleTaskTestCase):
     TASK = SetOptionTask
 
     def test_set_option(self):
-        self.assertEquals(0, self.task.getTaskOption('some_option'))
+        self.assertEqual(0, self.task.getTaskOption('some_option'))
         self.task.some_option = 5
-        self.assertEquals(5, self.task.getTaskOption('some_option'))
+        self.assertEqual(5, self.task.getTaskOption('some_option'))

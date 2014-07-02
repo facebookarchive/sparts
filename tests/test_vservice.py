@@ -8,11 +8,11 @@ from sparts.tests.base import ServiceTestCase
 
 class VServiceTests(ServiceTestCase):
     def test_verifyCustomName(self):
-        self.assertEquals(self.service.name, 'VService')
-        self.assertEquals(self.service._name, 'VService')
+        self.assertEqual(self.service.name, 'VService')
+        self.assertEqual(self.service._name, 'VService')
         self.service.name = 'MyService'
-        self.assertEquals(self.service.name, 'MyService')
-        self.assertEquals(self.service._name, 'MyService')
+        self.assertEqual(self.service.name, 'MyService')
+        self.assertEqual(self.service._name, 'MyService')
 
     def testRegisterClearWarnings(self):
         self.assertEmpty(self.service.getWarnings())
@@ -31,7 +31,7 @@ class VServiceTests(ServiceTestCase):
         service = self.service
 
         self.assertEmpty(service.getExportedValues())
-        self.assertEquals(service.getExportedValue('notexists'), '')
+        self.assertEqual(service.getExportedValue('notexists'), '')
 
         # Set some values
         service.setExportedValue('foo', 'bar')
@@ -42,19 +42,19 @@ class VServiceTests(ServiceTestCase):
         self.assertNotEmpty(service.getExportedValues())
 
         # Verify getExportedValue with real values
-        self.assertEquals(service.getExportedValue('foo'), 'bar')
-        self.assertEquals(service.getExportedValue('spam'), 'eggs')
+        self.assertEqual(service.getExportedValue('foo'), 'bar')
+        self.assertEqual(service.getExportedValue('spam'), 'eggs')
 
         # Verify Regex API
         k_v = service.getRegexExportedValues('.*am')
-        self.assertEquals(len(k_v), 2)
+        self.assertEqual(len(k_v), 2)
         self.assertNotContains('foo', k_v)
         self.assertContains('spam', k_v)
         self.assertContains('ham', k_v)
 
         # Verify Selected API
         k_v = service.getSelectedExportedValues(['notexists', 'ham', 'spam'])
-        self.assertEquals(len(k_v), 3)
+        self.assertEqual(len(k_v), 3)
         self.assertNotContains('foo', k_v)
 
         # Verify keys
@@ -63,15 +63,15 @@ class VServiceTests(ServiceTestCase):
         self.assertContains('ham', k_v)
 
         # Verify values
-        self.assertEquals(k_v['notexists'], '')
-        self.assertEquals(k_v['spam'], 'eggs')
-        self.assertEquals(k_v['ham'], 'eggs')
+        self.assertEqual(k_v['notexists'], '')
+        self.assertEqual(k_v['spam'], 'eggs')
+        self.assertEqual(k_v['ham'], 'eggs')
 
         # Verify deletion
         service.setExportedValue('ham', None)
         values = service.getExportedValues()
         self.assertNotEmpty(values)
-        self.assertEquals(len(values), 2)
+        self.assertEqual(len(values), 2)
         self.assertContains('foo', values)
         self.assertContains('spam', values)
         self.assertNotContains('ham', values)

@@ -47,14 +47,14 @@ class FutureTests(SingleTaskTestCase):
 
         # Wait for it to complete, check the result
         result = ctx.future.result(5.0)
-        self.assertEquals(result, 'foobar')
+        self.assertEqual(result, 'foobar')
 
         # Put a piece of work in the queue with the put API
         self.submit('ham')
         future = self.submit('spam')
         self.submit('eggs')
         result = future.result(5.0)
-        self.assertEquals(result, 'spambar')
+        self.assertEqual(result, 'spambar')
 
     def submit(self, item):
         return self.task.submit(item)
@@ -66,7 +66,7 @@ class FutureTests(SingleTaskTestCase):
         """Test out the futures-based map API"""
         inputs = map(str, range(5))
         results = self.map(inputs)
-        self.assertEquals(results, ['0bar', '1bar', '2bar', '3bar', '4bar'])
+        self.assertEqual(results, ['0bar', '1bar', '2bar', '3bar', '4bar'])
 
     def test_map_timeout(self):
         """Test out the futures-based map API"""
@@ -93,8 +93,8 @@ class FutureTests(SingleTaskTestCase):
             ctx.future.result(5.0)
 
         # Make sure these are the right exceptions
-        self.assertEquals(str(cm.exception), 'foobaz')
-        self.assertEquals(str(ctx.future.exception(5.0)), 'foobaz')
+        self.assertEqual(str(cm.exception), 'foobaz')
+        self.assertEqual(str(ctx.future.exception(5.0)), 'foobaz')
 
     def test_future_trylater(self):
         """Make sure starting the work marks the future as running"""
@@ -127,4 +127,4 @@ class FutureTests(SingleTaskTestCase):
 
         # Wait for it to complete, check the result
         result = ctx.future.result(5.0)
-        self.assertEquals(result, 'foobar')
+        self.assertEqual(result, 'foobar')
