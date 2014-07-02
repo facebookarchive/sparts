@@ -217,6 +217,31 @@ class ExecuteContext(object):
         unhandled.append(error)
         return None
 
+    def __cmp__(self, obj):
+        """Custom comparators for comparing contexts' work `item`s"""
+        lhs, rhs = id(self), obj
+        if isinstance(obj, ExecuteContext):
+            lhs, rhs = self.item, obj.item
+
+        return cmp(lhs, rhs)
+
+    def __lt__(self, obj):
+        """Override __lt__ explicitly for priority queue implementations"""
+        assert isinstance(obj, ExecuteContext)
+        return self.item < obj.item
+
+    def __eq__(self, obj):
+        assert isinstance(obj, ExecuteContext)
+        return self.item == obj.item
+
+    def __ne__(self, obj):
+        assert isinstance(obj, ExecuteContext)
+        return self.item != obj.item
+
+    def __gt__(self, obj):
+        assert isinstance(obj, ExecuteContext)
+        return self.item > obj.item
+
 class Tasks(object):
     """Collection class for dealing with service tasks.
 
