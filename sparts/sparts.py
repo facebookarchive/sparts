@@ -5,6 +5,8 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 """Module for common base classes and helpers, such as options and counters"""
+from __future__ import absolute_import
+
 from collections import namedtuple
 from functools import partial
 from six import iteritems

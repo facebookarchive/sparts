@@ -8,6 +8,7 @@
 
 For most standard library moves and discrepancies, you should use `six` instead
 """
+from __future__ import absolute_import
 
 try:
     from collections import OrderedDict
