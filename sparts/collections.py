@@ -21,9 +21,11 @@ class UniqueQueue(Queue):
     def _init(self, maxsize):
         Queue._init(self, maxsize)
         self._seen = set()
+        self._discards = 0
 
     def _put(self, item):
         if item in self._seen:
+            self._discards += 1
             return
 
         Queue._put(self, item)
