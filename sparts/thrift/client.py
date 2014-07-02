@@ -112,12 +112,20 @@ class ThriftClient(object):
         if self.path is None:
             self._socket = TSocket(self.host, self.port)
         else:
-            self._socket = THttpClient(self.host, self.port, self.path)
+            self._socket = THttpClient(self._makeConnectURI())
         self._socket.setTimeout(int(self.connect_timeout * 1000))
         self._transport = self.transport_class(self._socket)
         self._protocol = self.protocol_class(self._transport)
         self._client = self.module.Client(self._protocol)
         self._transport.open()
+
+    def _makeConnectURI(self):
+        assert self.path.startswith('/')
+        return 'http://{host}:{port}{path}'.format(
+            host=self.host,
+            port=self.port,
+            path=self.path,
+        )
 
     def _lazyCall(self, name, *args, **kwargs):
         if self._client is None:
