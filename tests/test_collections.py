@@ -4,7 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
-from sparts.collections import PriorityQueue, UniqueQueue
+from sparts.collections import PriorityQueue, UniqueQueue, Duplicate
 from sparts.tests.base import BaseSpartsTestCase
 
 
@@ -49,11 +49,17 @@ class UniqueQueueTests(BaseSpartsTestCase):
         # It should be empty
         self.assertTrue(queue.empty())
 
-        # Put some stuff in it.
+        # Put some stuff in it.  Use `silent` mode for brevity.
+        queue.silent = True
         queue.put(2)
         queue.put(0)
         queue.put(2)
         queue.put(1)
+
+        # Make sure the non-silent API causes the class to throw.
+        queue.silent = False
+        with self.assertRaises(Duplicate):
+            queue.put(0)
 
         # Not empty any more
         self.assertFalse(queue.empty())
