@@ -296,6 +296,7 @@ class VService(_SpartsObject):
     def initLogging(self):
         """Basic stderr logging.  Override this to do something else."""
         logging.basicConfig(level=self.loglevel, stream=sys.stderr)
+        logging.captureWarnings(True)
 
     @classmethod
     def _makeArgumentParser(cls):
