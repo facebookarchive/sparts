@@ -42,7 +42,7 @@ def send_signal(pid, signum, logger):
     os.kill(pid, signum)
 
 
-def daemonize(command, name, pidfile, logger):
+def daemonize(command, name, pidfile, logger, **kwargs):
     """Daemonizes the `command` function.
     
     Uses `name` for syslogging, `pidfile` for the pid file, and logs messages
@@ -58,7 +58,8 @@ def daemonize(command, name, pidfile, logger):
         app=name,
         pid=pidfile,
         action=command,
-        logger=logging.getLogger(logger.name + ".daemon")
+        logger=logging.getLogger(logger.name + ".daemon"),
+        **kwargs
     )
 
     # Daemonize.start() calls sys.exit() for parent thread, so nothing
