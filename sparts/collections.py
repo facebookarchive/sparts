@@ -31,6 +31,7 @@ class UniqueQueue(Queue):
         self._seen = set()
         self._discards = 0
         self.silent = False
+        self.explicit_unsee = False
 
     def _put(self, item):
         if item in self._seen:
@@ -47,5 +48,13 @@ class UniqueQueue(Queue):
 
     def _get(self):
         item = Queue._get(self)
-        self._seen.remove(item)
+        if not self.explicit_unsee:
+            self._seen.remove(item)
         return item
+
+    def unsee(self, item):
+        if not self.explicit_unsee:
+            return
+
+        with self.mutex:
+            self._seen.remove(item)

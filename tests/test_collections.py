@@ -71,3 +71,26 @@ class UniqueQueueTests(BaseSpartsTestCase):
 
         # It should be empty again
         self.assertTrue(queue.empty())
+
+        # Put an old duplicate back in it, make sure it's not empty again
+        queue.put(0)
+        self.assertFalse(queue.empty())
+
+        # Set "explicit_unsee" mode to verify some of that behavior, and go
+        # back to silent discards for brevity.
+        queue.silent = True
+        queue.explicit_unsee = True
+
+        # Remove the item we just inserted.  Things should be empty.
+        queue.get()
+        self.assertTrue(queue.empty())
+
+        # Because we didn't explicitly unsee, the 0 should be discarded
+        # instead of re-queued, and the queue should remain empty.
+        queue.put(0)
+        self.assertTrue(queue.empty())
+
+        # Now, explicitly unsee, and re-queue.  It should succeed.
+        queue.unsee(0)
+        queue.put(0)
+        self.assertFalse(queue.empty())
