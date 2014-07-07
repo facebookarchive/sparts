@@ -58,16 +58,26 @@ class TestMyTask(SingleTaskTestCase):
     def test_file_update(self):
         self.test_file_create()
 
+        self.task.execute()
         path = os.path.join(self.testpath, 'foo')
+
+        # Run once to make sure we detect the current time for the files
+        self.task.execute()
 
         # Forcibly update the atime/mtime of the file
         st = os.stat(path)
         self.task.stat = self.mock.Mock()
-        self.task.stat.return_value = self.mock.Mock(wraps=st)
+        self.task.stat.return_value = self.mock.NonCallableMock(wraps=st)
         self.task.stat.return_value.st_atime = st.st_atime - 10
         self.task.stat.return_value.st_mtime = st.st_mtime - 10
 
         self.task.execute()
+        self.task.stat.assert_called()
+
+        st2 = self.task.stat()
+        self.assertEqual(st2.st_atime, st.st_atime - 10)
+        self.assertEqual(st2.st_mtime, st.st_mtime - 10)
+
         self.assertTrue(self.task.onFileChanged.called)
         self.assertEqual(self.task.onFileChanged.call_count, 1)
         self.assertEqual(self.task.onFileChanged.call_args[0][0], 'foo',
