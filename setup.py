@@ -17,6 +17,7 @@ import sys
 
 THRIFT = find_executable('thrift')
 
+NAME = 'sparts'
 ROOT = os.path.abspath(os.path.dirname(__file__))
 
 def read(fname):
@@ -29,8 +30,8 @@ def exists(fname):
 
 def version():
     """Return the version number from sparts/__version__.py"""
-    file, pathname, description = imp.find_module('sparts', [ROOT])
-    return imp.load_module('sparts', file, pathname, description).__version__
+    file, pathname, description = imp.find_module(NAME, [ROOT])
+    return imp.load_module(NAME, file, pathname, description).__version__
 
 # Initialize custom command handlers
 cmdclass = {}
@@ -142,7 +143,7 @@ else:
 
 VERSION = version()
 setup(
-    name="sparts",
+    name=NAME,
     version=VERSION,
     packages=find_packages(exclude=['tests', 'tests.*']),
     description="Build services in python with as little code as possible",
