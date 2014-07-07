@@ -75,35 +75,63 @@ class QueueTask(VTask):
             if isinstance(item, ExecuteContext):
                 context = item
                 item = context.item
+                context.raw_wrapped = False
             else:
                 context = ExecuteContext(item=item)
+                context.raw_wrapped = True
 
             try:
                 context.start()
                 result = self.execute(item, context)
-                self.n_completed.increment()
-                self.execute_duration_ms.add(context.elapsed * 1000.0)
-                context.set_result(result)
+                self.work_success(context, result)
             except TryLater:
-                self.n_trylater.increment()
-                context.attempt += 1
-                self.queue.put(context)
+                self.work_retry(context)
             except Exception as ex:
-                self.n_unhandled.increment()
-                self.execute_duration_ms.add(context.elapsed * 1000.0)
-                handled = context.set_exception(ex)
-                if not handled:
-                    raise
+                self.work_fail(context, ex)
 
             finally:
                 self.queue.task_done()
 
+    def work_success(self, context, result):
+        self.n_completed.increment()
+        self.execute_duration_ms.add(context.elapsed * 1000.0)
+        context.set_result(result)
+        self.work_done(context)
+
+    def work_retry(self, context):
+        self.n_trylater.increment()
+        context.attempt += 1
+        self.work_done(context)
+        self.queue.put(context)
+
+    def work_fail(self, context, exception):
+        self.n_unhandled.increment()
+        self.execute_duration_ms.add(context.elapsed * 1000.0)
+        handled = context.set_exception(exception)
+        self.work_done(context)
+        if not handled:
+            raise
+
+    def work_done(self, context):
+        pass
 
 class PriorityQueueTask(QueueTask):
+    # TODO: There is a possible shutdown crash in python-3, when there is
+    # outstanding work in the queue, but the sentinel object is inserted:
+    # the sentinal object isn't generally of a comparable type.
     def _makeQueue(self):
         return PriorityQueue(maxsize=self.max_items)
 
 
 class UniqueQueueTask(QueueTask):
     def _makeQueue(self):
-        return UniqueQueue(maxsize=self.max_items)
+        q = UniqueQueue(maxsize=self.max_items)
+        q.explicit_unsee = True
+        return q
+
+    def work_done(self, context):
+        super(UniqueQueueTask, self).work_done(context)
+        if context.raw_wrapped:
+            self.queue.unsee(context.item)
+        else:
+            self.queue.unsee(context)
