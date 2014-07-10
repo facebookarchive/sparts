@@ -31,3 +31,49 @@ except ImportError:
         if returncode != 0:
             raise subprocess.CalledProcessError(returncode, cmd=args, output=output)
         return output
+
+import logging
+import sys
+
+if sys.version >= '2.7':
+    captureWarnings = logging.captureWarnings
+
+else:
+    import warnings
+
+    # captureWarnings implementaiton copied from python-2.7.5
+    _warnings_showwarning = None
+
+    def _showwarning(message, category, filename, lineno, file=None, line=None):
+        """
+        Implementation of showwarnings which redirects to logging, which will first
+        check to see if the file parameter is None. If a file is specified, it will
+        delegate to the original warnings implementation of showwarning. Otherwise,
+        it will call warnings.formatwarning and will log the resulting string to a
+        warnings logger named "py.warnings" with level logging.WARNING.
+        """
+        if file is not None:
+            if _warnings_showwarning is not None:
+                _warnings_showwarning(message, category, filename, lineno, file, line)
+        else:
+            s = warnings.formatwarning(message, category, filename, lineno, line)
+            logger = logging.getLogger("py.warnings")
+            if not logger.handlers:
+                logger.addHandler(logging.NullHandler())
+            logger.warning("%s", s)
+
+    def captureWarnings(capture):
+        """
+        If capture is true, redirect all warnings to the logging package.
+        If capture is False, ensure that warnings are not redirected to logging
+        but to their original destinations.
+        """
+        global _warnings_showwarning
+        if capture:
+            if _warnings_showwarning is None:
+                _warnings_showwarning = warnings.showwarning
+                warnings.showwarning = _showwarning
+        else:
+            if _warnings_showwarning is not None:
+                warnings.showwarning = _warnings_showwarning
+                _warnings_showwarning = None
