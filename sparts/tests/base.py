@@ -4,10 +4,14 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+import sys
+
 try:
     import unittest2 as unittest
 except ImportError:
+    assert sys.version >= '2.7', "unittest2 required for python < 2.7"
     import unittest
+
 import logging
 import os.path
 import warnings
