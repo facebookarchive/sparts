@@ -141,21 +141,21 @@ class CompileContext(object):
 
         args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
                ["--gen", self.getThriftOptions(**kwargs), '-v',
-                "-out", outdir.name, srcdir.join(pathbase)]
+                "-o", outdir.name, srcdir.join(pathbase)]
         check_output(args)
 
         args = [self.thrift_bin] + self.makeIncludeArgs(srcdir) + \
                ["--gen", self.getThriftOptions(**kwargs), '-v', '-r',
-                "-out", outdir_recurse.name, srcdir.join(pathbase)]
+                "-o", outdir_recurse.name, srcdir.join(pathbase)]
         check_output(args)
 
         # Prepend output directory to the path
-        with ctx.add_path(outdir_recurse.name, 0):
+        with ctx.add_path(outdir_recurse.join('gen-py'), 0):
 
             thriftname = os.path.splitext(pathbase)[0]
-            for dirpath, dirnames, filenames in os.walk(outdir.name):
+            for dirpath, dirnames, filenames in os.walk(outdir.join('gen-py')):
                 # Emulate relative imports badly
-                dirpath = os.path.abspath(os.path.join(outdir, dirpath))
+                dirpath = os.path.abspath(outdir.join('gen-py', dirpath))
                 with ctx.add_path(dirpath):
                     # Add types to module first
                     if 'ttypes.py' in filenames:
