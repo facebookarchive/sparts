@@ -5,10 +5,11 @@
 # of patent rights can be found in the PATENTS file in the same directory.
 #
 from __future__ import absolute_import
-from sparts.deps import HAS_THRIFT
 from sparts.tests.base import MultiTaskTestCase, Skip
 
-if not HAS_THRIFT:
+try:
+    import thrift
+except ImportError:
     raise Skip("thrift is required to run this test")
 
 from sparts.tasks.fb303 import FB303HandlerTask
