@@ -110,6 +110,7 @@ class PyTest(TestCommand):
         TestCommand.finalize_options(self)
         self.test_args = ['tests', '-rfEsx']
         self.test_suite = True
+
     def run_tests(self):
         #import here, cause outside the eggs aren't loaded
         import pytest
@@ -124,14 +125,18 @@ if sys.version < '2.7':
 
 tests_require = install_requires + [
     'pytest',
-    'mock',
     'tornado>=1.2',
 ]
 
 if sys.version < '2.7':
     tests_require.append('unittest2')
 
+if sys.version < '3.3':
+    # mock added to 3.3 as unittest.mock
+    tests_require.append('mock')
+
 if sys.version < '3.2':
+    # futures added to 3.2 as concurrent.futures
     tests_require.append('futures')
 
 if sys.version < '3.0':
@@ -140,6 +145,7 @@ if sys.version < '3.0':
 else:
     # Py3k requires Twisted >= 14.0
     tests_require.append('Twisted>=14.0.0')
+    # TODO: for py3k use fbthrift instead of thrift?
 
 VERSION = version()
 setup(

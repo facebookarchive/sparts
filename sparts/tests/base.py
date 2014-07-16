@@ -6,10 +6,13 @@
 #
 import sys
 
-try:
-    import unittest2 as unittest
-except ImportError:
-    assert sys.version >= '2.7', "unittest2 required for python < 2.7"
+if sys.version < '2.7':
+    try:
+        import unittest2 as unittest
+    except ImportError:
+        raise Exception("unittest2 required for unit testing on versions "
+                        "prior to Python 2.7")
+else:
     import unittest
 
 import logging
@@ -81,11 +84,15 @@ class BaseSpartsTestCase(unittest.TestCase):
 
     @property
     def mock(self, *args, **kwargs):
-        try:
-            import mock
-            return mock
-        except ImportError:
-            raise Skip("the mock module is required to run this test")
+        if sys.version < '3.3':
+            try:
+                import mock
+                return mock
+            except ImportError:
+                raise Skip("the mock module is required to run this test")
+        else:
+            import unittest.mock
+            return unittest.mock
 
 
 class ServiceTestCase(BaseSpartsTestCase):

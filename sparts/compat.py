@@ -77,3 +77,5 @@ else:
             if _warnings_showwarning is not None:
                 warnings.showwarning = _warnings_showwarning
                 _warnings_showwarning = None
+
+    # TODO: urlparse that isn't broken for python2.6?
