@@ -8,12 +8,11 @@ from __future__ import absolute_import
 from sparts.tests.base import MultiTaskTestCase, Skip
 
 try:
-    import thrift
+    from sparts.tasks.thrift import NBServerTask
 except ImportError:
     raise Skip("thrift is required to run this test")
 
 from sparts.tasks.fb303 import FB303HandlerTask
-from sparts.tasks.thrift import NBServerTask
 from sparts.tasks.tornado import TornadoHTTPTask
 from sparts.tasks.tornado_thrift import TornadoThriftHandler
 
