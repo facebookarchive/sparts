@@ -14,6 +14,8 @@ from thrift.protocol.TBinaryProtocol import TBinaryProtocol
 
 from functools import partial
 
+import sys
+
 
 class ThriftClient(object):
     """Base Class for easy interfacing with thrift services.
@@ -125,7 +127,9 @@ class ThriftClient(object):
         # If host is a v6 addr, we need to format the URI a little bit
         # differently in order to parse its port out according to spec
         if ':' in host:
-            host = '[{}]'.format(host)
+            assert sys.version >= '2.7', \
+                "Native v6 IP URLs not parseable on Python < 2.7"
+            host = '[{host}]'.format(host=host)
         return 'http://{host}:{port}{path}'.format(
             host=host,
             port=self.port,
