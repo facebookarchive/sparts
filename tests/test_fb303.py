@@ -21,6 +21,7 @@ from sparts.gen.fb303 import FacebookService
 from sparts.gen.fb303.ttypes import fb_status
 
 import socket
+import sys
 
 class ThriftHTTPTask(TornadoHTTPTask):
     def getApplicationConfig(self):
@@ -57,6 +58,10 @@ class TestFB303(MultiTaskTestCase):
 
         for bound_addr in server.bound_addrs:
             if ':' in bound_addr[0]:
+                # IPv6 addresses in URLs are not urlparseable by py2.6
+                # So we skip in this case.
+                if sys.version < '2.7':
+                    continue
                 host = '::1'
             else:
                 host = '127.0.0.1'
