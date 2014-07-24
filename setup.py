@@ -123,6 +123,9 @@ install_requires = ['six', 'daemonize']
 if sys.version < '2.7':
     install_requires.append('ordereddict')
 
+if sys.version < '3.2':
+    install_requires.append('futures')
+
 tests_require = install_requires + [
     'pytest',
     'tornado>=1.2',
@@ -134,10 +137,6 @@ if sys.version < '2.7':
 if sys.version < '3.3':
     # mock added to 3.3 as unittest.mock
     tests_require.append('mock')
-
-if sys.version < '3.2':
-    # futures added to 3.2 as concurrent.futures
-    tests_require.append('futures')
 
 if sys.version < '3.0':
     tests_require.append('Twisted')
