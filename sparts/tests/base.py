@@ -35,6 +35,11 @@ except ImportError:
 
 # Base test case for all sparts jonx
 class BaseSpartsTestCase(unittest.TestCase):
+    def assertEquals(self, a, b, msg=''):
+        super(BaseSpartsTestCase, self).assertEquals(a, b, msg)
+        warnings.warn("Deprecated in Python-3.x.  Use assertEqual instead.",
+                      DeprecationWarning)
+
     def assertNotNone(self, o, msg=''):
         self.assertTrue(o is not None, msg)
 
