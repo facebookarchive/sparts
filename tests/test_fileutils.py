@@ -7,6 +7,7 @@
 from sparts.tests.base import BaseSpartsTestCase
 from sparts import fileutils
 
+import errno
 import os.path
 import shutil
 
@@ -58,3 +59,17 @@ class NamedTemporaryDirTests(BaseSpartsTestCase):
         with fileutils.NamedTemporaryDirectory() as d:
             # Verify __repr__()
             self.assertIn(d.name, repr(d))
+
+class TestNonblock(BaseSpartsTestCase):
+    def test_nonblock(self):
+        rfd, wfd = os.pipe()
+        fileutils.set_nonblocking(rfd)
+
+        # Read on an nonblocking fd when no data is available, will
+        # result in an OSError with EAGAIN.  Confirm it.
+        with self.assertRaises(OSError) as cm:
+            os.read(rfd, 1)
+
+        # Check the exception's errno
+        self.assertEquals(cm.exception.errno,
+                          errno.EAGAIN)

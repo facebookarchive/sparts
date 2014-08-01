@@ -7,6 +7,7 @@
 """Helpers for commonly performed file operations"""
 from distutils.spawn import find_executable
 import errno
+import fcntl
 import logging
 import os.path
 import shutil
@@ -136,3 +137,8 @@ class NamedTemporaryDirectory(NamedTemporary):
 
     def join(self, *path):
         return os.path.join(self.name, *path)
+
+def set_nonblocking(fd):
+    """Sets O_NONBLOCK on the given `fd`"""
+    fl = fcntl.fcntl(fd, fcntl.F_GETFL)
+    fcntl.fcntl(fd, fcntl.F_SETFL, fl | os.O_NONBLOCK)
