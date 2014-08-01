@@ -60,6 +60,7 @@ class NamedTemporaryDirTests(BaseSpartsTestCase):
             # Verify __repr__()
             self.assertIn(d.name, repr(d))
 
+
 class TestNonblock(BaseSpartsTestCase):
     def test_nonblock(self):
         rfd, wfd = os.pipe()
@@ -71,5 +72,4 @@ class TestNonblock(BaseSpartsTestCase):
             os.read(rfd, 1)
 
         # Check the exception's errno
-        self.assertEquals(cm.exception.errno,
-                          errno.EAGAIN)
+        self.assertEqual(cm.exception.errno, errno.EAGAIN)
