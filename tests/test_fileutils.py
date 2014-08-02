@@ -10,6 +10,7 @@ from sparts import fileutils
 import errno
 import os.path
 import shutil
+import sys
 
 class NamedTemporaryDirTests(BaseSpartsTestCase):
     def testPathHelpers(self):
@@ -70,6 +71,14 @@ class TestNonblock(BaseSpartsTestCase):
         # result in an OSError with EAGAIN.  Confirm it.
         with self.assertRaises(OSError) as cm:
             os.read(rfd, 1)
+
+        # python-2.6's context manager implementation returns an incorrect
+        # value of `exc_value`.  Let's patch around this in the unittest for
+        # now, but it may be worth generalizing a better solution in the
+        # BaseSpartsTestCase wrapper long term.
+        # See http://bugs.python.org/issue7853 for details.
+        if sys.version < '2.7':
+            cm.exception = OSError(*cm.exception)
 
         # Check the exception's errno
         self.assertEqual(cm.exception.errno, errno.EAGAIN)
