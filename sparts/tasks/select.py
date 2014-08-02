@@ -26,34 +26,49 @@ class SelectTask(VTask):
         """Register `fd` for select.  Will `callback` when readable."""
         assert fd not in self._rcallbacks
         self._rcallbacks[fd] = callback
+        self.control(SelectTask.NEWFD)
+        self.logger.debug('Registered %s for read on %d', callback, fd)
 
     def register_write(self, fd, callback):
         """Register `fd` for select.  Will `callback` when writeable."""
         assert fd not in self._wcallbacks
         self._wcallbacks[fd] = callback
+        self.control(SelectTask.NEWFD)
+        self.logger.debug('Registered %s for write on %d', callback, fd)
 
-    def register_execute(self, fd, callback):
+    def register_except(self, fd, callback):
         """Register `fd` for select.  Will `callback` when executable."""
         assert fd not in self._xcallbacks
         self._xcallbacks[fd] = callback
+        self.control(SelectTask.NEWFD)
+        self.logger.debug('Registered %s for except on %d', callback, fd)
 
     def unregister_read(self, fd):
         """Unregister `fd` from select for read"""
-        self._rcallbacks.pop(fd, None)
+        callback = self._rcallbacks.pop(fd, None)
+        self.logger.debug('Unregistered %s from read on %d', callback, fd)
+        self.control(SelectTask.NEWFD)
+        return callback
 
     def unregister_write(self, fd):
         """Unregister `fd` from selecting for write"""
-        self._wcallbacks.pop(fd, None)
+        callback = self._wcallbacks.pop(fd, None)
+        self.logger.debug('Unregistered %s from write on %d', callback, fd)
+        self.control(SelectTask.NEWFD)
+        return callback
 
-    def unregister_execute(self, fd):
+    def unregister_except(self, fd):
         """Unregister `fd` from selecting for delete"""
-        self._xcallbacks.pop(fd, None)
+        callback = self._xcallbacks.pop(fd, None)
+        self.logger.debug('Unregistered %s from except on %d', callback, fd)
+        self.control(SelectTask.NEWFD)
+        return callback
 
     def unregister_all(self, fd):
         """Completely unregister `fd` with this event loop."""
         self.unregister_read(fd)
         self.unregister_write(fd)
-        self.unregister_execute(fd)
+        self.unregister_except(fd)
 
     def initTask(self):
         # Flag to check on each iteration
