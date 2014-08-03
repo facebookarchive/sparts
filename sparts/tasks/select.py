@@ -15,12 +15,13 @@ from sparts.fileutils import set_nonblocking
 
 import os
 import select
+import six
 
 
 class SelectTask(VTask):
     """A task that runs a select loop with fd registration APIs."""
-    DONE = "\x00"
-    NEWFD = "\x01"
+    DONE = 0
+    NEWFD = 1
 
     def register_read(self, fd, callback):
         """Register `fd` for select.  Will `callback` when readable."""
@@ -88,7 +89,7 @@ class SelectTask(VTask):
 
     def control(self, message):
         """Send a control `message` to the read select pipe"""
-        os.write(self.__wcontrol, message)
+        os.write(self.__wcontrol, six.int2byte(message))
 
     def stop(self):
         super(SelectTask, self).stop()
@@ -122,7 +123,7 @@ class SelectTask(VTask):
 
     def _on_control(self, fd):
         """Internal handler for control messages."""
-        for c in os.read(fd, 4096):
+        for c in six.iterbytes(os.read(fd, 4096)):
             if c == SelectTask.DONE:
                 self._select_running = False
 
