@@ -4,7 +4,7 @@ CHANGES
 master
 ------
 * `sparts.collections` introduces a PriorityQueue and UniqueQueue
-* `sparts.tasks.select` introduces a SelectTask
+* `sparts.tasks.select` introduces a SelectTask, helpers for working with Popen
 * `sparts.tasks.queue` introduces a PriorityQueueTask and UniqueQueueTask
 
 0.6.1
