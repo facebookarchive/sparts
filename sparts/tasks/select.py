@@ -17,6 +17,7 @@ import logging
 import os
 import select
 import six
+import sys
 
 
 class SelectTask(VTask):
@@ -132,7 +133,9 @@ class SelectTask(VTask):
 class ProcessStreamHandler(object):
     """Helper class for interfacing Popen objects with SelectTask"""
     def __init__(self, popen, select_task,
-                 on_stdout=None, on_stderr=None, on_exit=None):
+                 on_stdout=None, on_stderr=None, on_exit=None,
+                 encoding=None):
+
         # Configure a logger first
         self.logger = logging.getLogger('sparts.process_stream_handler')
 
@@ -145,6 +148,13 @@ class ProcessStreamHandler(object):
         self.stdout_callback = on_stdout
         self.exit_callback = on_exit
 
+        # Set up a sane default for decoding stdout
+        if encoding is None:
+            self.logger.debug('Using %s encoding from stdout as default',
+                              sys.stdout.encoding)
+            self.encoding = sys.stdout.encoding
+        else:
+            self.encoding = encoding
 
         # Prepare and connect FDs
         set_nonblocking(self._outfd)
@@ -159,7 +169,7 @@ class ProcessStreamHandler(object):
 
         if data:
             if callback is not None:
-                callback(data)
+                callback(data.decode(self.encoding))
 
         else:
             # If os.read() returns "", then there is an error condition
