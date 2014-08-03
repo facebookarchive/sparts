@@ -125,3 +125,66 @@ class SelectTask(VTask):
         for c in os.read(fd, 4096):
             if c == SelectTask.DONE:
                 self._select_running = False
+
+
+class ProcessStreamHandler(object):
+    """Helper class for interfacing Popen objects with SelectTask"""
+    def __init__(self, popen, select_task,
+                 on_stdout=None, on_stderr=None, on_exit=None):
+
+        # Keep track of inputs (callbacks, proc, fds, select loop, ...)
+        self.select_task = select_task
+        self._outfd = popen.stdout.fileno()
+        self._errfd = popen.stderr.fileno()
+        self._popen = popen
+        self.stderr_callback = on_stderr
+        self.stdout_callback = on_stdout
+        self.exit_callback = on_exit
+
+        # Maybe don't commit this?
+        self.logger = select_task.logger
+
+        # Prepare and connect FDs
+        set_nonblocking(self._outfd)
+        set_nonblocking(self._errfd)
+        self.select_task.register_read(self._outfd, self._on_stdout)
+        self.select_task.register_read(self._errfd, self._on_stderr)
+
+    def _on_read(self, callback, fd):
+        self.logger.debug('_on_read(%s, %s)', callback, fd)
+
+        data = os.read(fd, 4096)
+
+        if data:
+            if callback is not None:
+                callback(data)
+
+        else:
+            # If os.read() returns "", then there is an error condition
+            # e.g., the pipe has been closed
+            self._on_exit(fd)
+
+    def _on_stdout(self, fd):
+        self._on_read(self.stdout_callback, fd)
+
+    def _on_stderr(self, fd):
+        self._on_read(self.stderr_callback, fd)
+
+    def _on_exit(self, fd):
+        # Unregister the fd with the select loop
+        self.select_task.unregister_read(fd)
+
+        # And set the proper local fd to None
+        if fd == self._outfd:
+            self._outfd = None
+        elif fd == self._errfd:
+            self._errfd = None
+        else:
+            raise Exception("_onexit called with unknown fd, %d" % fd)
+
+        # If both fds have been set to None, it's safe to call the
+        # onexit callback (since we've notified the out/err callbacks for
+        # all available data)
+        if self._errfd is None and self._outfd is None:
+            if self.exit_callback:
+                self.exit_callback(self._popen.poll())
