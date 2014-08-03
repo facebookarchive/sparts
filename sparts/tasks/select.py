@@ -87,7 +87,7 @@ class SelectTask(VTask):
         super(SelectTask, self).initTask()
 
     def control(self, message):
-        # Send a control message to the read select pipe
+        """Send a control `message` to the read select pipe"""
         os.write(self.__wcontrol, message)
 
     def stop(self):
@@ -112,14 +112,13 @@ class SelectTask(VTask):
             self._runcallbacks(wfds, self._wcallbacks)
 
     def _runcallbacks(self, fds, callbacks):
-        # For `fds`, look in `callbacks` for the registered handlers,
-        # and execute them.
+        """Look in `callbacks` for `fds` registered handlers to execute."""
         for fd in fds:
             if fd in callbacks:
                 callbacks[fd](fd)
 
     def _on_control(self, fd):
-        # Internal handler for control messages.
+        """Internal handler for control messages."""
         for c in os.read(fd, 4096):
             if c == SelectTask.DONE:
                 self._select_running = False
