@@ -9,6 +9,7 @@ from sparts.tests.base import SingleTaskTestCase
 from sparts.tasks.select import SelectTask, ProcessStreamHandler
 
 import os
+import six
 import subprocess
 import threading
 
@@ -29,7 +30,7 @@ class TestSelectTask(SingleTaskTestCase):
 
             self.task.register_read(r, on_event)
 
-            os.write(w, '1')
+            os.write(w, six.b('1'))
 
             fired.wait(3.0)
             self.assertTrue(fired.is_set())
