@@ -111,6 +111,9 @@ class SelectTask(VTask):
             self._runcallbacks(rfds, self._rcallbacks)
             self._runcallbacks(wfds, self._wcallbacks)
 
+        os.close(self.__rcontrol)
+        os.close(self.__wcontrol)
+
     def _runcallbacks(self, fds, callbacks):
         """Look in `callbacks` for `fds` registered handlers to execute."""
         for fd in fds:
