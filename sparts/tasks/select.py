@@ -13,6 +13,7 @@ from __future__ import absolute_import
 from sparts.vtask import VTask
 from sparts.fileutils import set_nonblocking
 
+import logging
 import os
 import select
 import six
@@ -132,6 +133,8 @@ class ProcessStreamHandler(object):
     """Helper class for interfacing Popen objects with SelectTask"""
     def __init__(self, popen, select_task,
                  on_stdout=None, on_stderr=None, on_exit=None):
+        # Configure a logger first
+        self.logger = logging.getLogger('sparts.process_stream_handler')
 
         # Keep track of inputs (callbacks, proc, fds, select loop, ...)
         self.select_task = select_task
@@ -142,8 +145,6 @@ class ProcessStreamHandler(object):
         self.stdout_callback = on_stdout
         self.exit_callback = on_exit
 
-        # Maybe don't commit this?
-        self.logger = select_task.logger
 
         # Prepare and connect FDs
         set_nonblocking(self._outfd)
