@@ -6,7 +6,8 @@
 #
 from sparts.fileutils import set_nonblocking
 from sparts.tests.base import SingleTaskTestCase
-from sparts.tasks.select import SelectTask, ProcessStreamHandler
+from sparts.tasks.select import SelectTask, ProcessStreamHandler, \
+    ProcessFailed
 
 import os
 import six
@@ -81,6 +82,28 @@ class TestSelectTask(SingleTaskTestCase):
         finally:
             os.close(r)
             os.close(w)
+
+    def test_popen_communicate(self):
+        future = self.task.popen_communicate(
+            'echo hello', shell=True)
+        result = future.result(3.0)
+        self.assertEqual(result.stdout, 'hello\n')
+        self.assertEqual(result.returncode, 0)
+
+    def test_popen_communicate_fail(self):
+        future = self.task.popen_communicate(
+            'false', shell=True)
+
+        with self.assertRaises(ProcessFailed) as cm:
+            future.result(1.0)
+
+        self.assertEqual(cm.exception, future.exception(1.0))
+        exception = cm.exception
+        result = exception.result
+
+        self.assertEqual(result.stdout, '')
+        self.assertEqual(result.stderr, '')
+        self.assertNotEqual(result.returncode, 0)
 
 
 class TestSelectCommands(SingleTaskTestCase):

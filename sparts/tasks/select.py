@@ -19,6 +19,9 @@ import select
 import six
 import sys
 
+from concurrent.futures import Future
+from subprocess import Popen, PIPE
+
 
 class SelectTask(VTask):
     """A task that runs a select loop with fd registration APIs."""
@@ -129,6 +132,20 @@ class SelectTask(VTask):
             if c == SelectTask.DONE:
                 self._select_running = False
 
+    def _check_kwarg_pipe(self, kwargs, key):
+        if key in kwargs:
+            assert kwargs[key] == PIPE
+        else:
+            kwargs[key] = PIPE
+
+    def popen_communicate(self, *args, **kwargs):
+        self._check_kwarg_pipe(kwargs, 'stdout')
+        self._check_kwarg_pipe(kwargs, 'stderr')
+
+        proc = Popen(*args, **kwargs)
+        h = ProcessCommunicateHandler(proc, self)
+        return h.future
+
 
 class ProcessStreamHandler(object):
     """Helper class for interfacing Popen objects with SelectTask"""
@@ -200,3 +217,64 @@ class ProcessStreamHandler(object):
         if self._errfd is None and self._outfd is None:
             if self.exit_callback:
                 self.exit_callback(self._popen.poll())
+
+
+class ProcessResult(object):
+    """Wrapper for subprocess execution result"""
+    def __init__(self, stdout, stderr, returncode):
+        self.stdout = stdout
+        self.stderr = stderr
+        self.returncode = returncode
+
+
+class ProcessFailed(Exception):
+    """Wrapper for failed subprocess execution result"""
+    def __init__(self, stdout, stderr, returncode):
+        self.result = ProcessResult(stdout, stderr, returncode)
+
+    @property
+    def killed(self):
+        """Returns True if the process exited as a result of termination.
+
+        In this case, returncode will be equal to -SIGNUM."""
+        return self.result.returncode < 0
+
+
+class ProcessCommunicateHandler(object):
+    """SelectTask helper class to perform a Popen.communicate()"""
+    def __init__(self, popen, select_task):
+        self.popen = popen
+        self.select_task = select_task
+        self._stdout_data = []
+        self._stderr_data = []
+        self._returncode = None
+        self.future = Future()
+
+        ProcessStreamHandler(popen, select_task,
+            on_stdout=self._stdout_data.append,
+            on_stderr=self._stderr_data.append,
+            on_exit=self._on_exit,
+        )
+
+        # TODO: Consider instead of this, registering a done callback to
+        # kill the Popen if the process is cancelled
+        self.future.set_running_or_notify_cancel()
+
+    def _on_exit(self, returncode):
+        """Callback registered to handle process completion.
+
+        Checks `returncode` and marks the future as successful or failed
+        as appropriate."""
+        self._returncode = returncode
+        if returncode == 0:
+            self.future.set_result(ProcessResult(
+                ''.join(self._stdout_data),
+                ''.join(self._stderr_data),
+                returncode
+            ))
+        else:
+            self.future.set_exception(ProcessFailed(
+                ''.join(self._stdout_data),
+                ''.join(self._stderr_data),
+                returncode
+            ))
