@@ -6,7 +6,6 @@
 #
 from __future__ import absolute_import
 
-import time
 from sparts.counters import counter, samples, SampleType
 from sparts.sparts import option
 from sparts.timer import Timer
@@ -37,12 +36,15 @@ class PeriodicTask(VTask):
         self.logger.debug('execute')
 
     def initTask(self):
-        super(PeriodicTask, self).initTask()
-        assert self.interval is not None
-
         # Register an event that we can more smartly wait on in case shutdown
         # is requested while we would be `sleep()`ing
         self.stop_event = Event()
+
+        super(PeriodicTask, self).initTask()
+
+        assert self.interval is not None, \
+            "INTERVAL must be defined on %s or --%s-interval passed" % \
+            (self.name, self.name)
 
     def stop(self):
         self.stop_event.set()
