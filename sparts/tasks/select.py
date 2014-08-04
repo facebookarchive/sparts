@@ -33,40 +33,40 @@ class SelectTask(VTask):
         assert fd not in self._rcallbacks
         self._rcallbacks[fd] = callback
         self.control(SelectTask.NEWFD)
-        self.logger.debug('Registered %s for read on %d', callback, fd)
+        #self.logger.debug('Registered %s for read on %d', callback, fd)
 
     def register_write(self, fd, callback):
         """Register `fd` for select.  Will `callback` when writeable."""
         assert fd not in self._wcallbacks
         self._wcallbacks[fd] = callback
         self.control(SelectTask.NEWFD)
-        self.logger.debug('Registered %s for write on %d', callback, fd)
+        #self.logger.debug('Registered %s for write on %d', callback, fd)
 
     def register_except(self, fd, callback):
         """Register `fd` for select.  Will `callback` when executable."""
         assert fd not in self._xcallbacks
         self._xcallbacks[fd] = callback
         self.control(SelectTask.NEWFD)
-        self.logger.debug('Registered %s for except on %d', callback, fd)
+        #self.logger.debug('Registered %s for except on %d', callback, fd)
 
     def unregister_read(self, fd):
         """Unregister `fd` from select for read"""
         callback = self._rcallbacks.pop(fd, None)
-        self.logger.debug('Unregistered %s from read on %d', callback, fd)
+        #self.logger.debug('Unregistered %s from read on %d', callback, fd)
         self.control(SelectTask.NEWFD)
         return callback
 
     def unregister_write(self, fd):
         """Unregister `fd` from selecting for write"""
         callback = self._wcallbacks.pop(fd, None)
-        self.logger.debug('Unregistered %s from write on %d', callback, fd)
+        #self.logger.debug('Unregistered %s from write on %d', callback, fd)
         self.control(SelectTask.NEWFD)
         return callback
 
     def unregister_except(self, fd):
         """Unregister `fd` from selecting for delete"""
         callback = self._xcallbacks.pop(fd, None)
-        self.logger.debug('Unregistered %s from except on %d', callback, fd)
+        #self.logger.debug('Unregistered %s from except on %d', callback, fd)
         self.control(SelectTask.NEWFD)
         return callback
 
@@ -167,8 +167,6 @@ class ProcessStreamHandler(object):
 
         # Set up a sane default for decoding stdout
         if encoding is None:
-            self.logger.debug('Using %s encoding from stdout as default',
-                              sys.stdout.encoding)
             self.encoding = sys.stdout.encoding
         else:
             self.encoding = encoding
@@ -180,8 +178,6 @@ class ProcessStreamHandler(object):
         self.select_task.register_read(self._errfd, self._on_stderr)
 
     def _on_read(self, callback, fd):
-        self.logger.debug('_on_read(%s, %s)', callback, fd)
-
         data = os.read(fd, 4096)
 
         if data:
