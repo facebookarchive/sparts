@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* bugfix: VTask.OPT_PREFIX can now contain "-"
 * `sparts.collections` introduces a PriorityQueue and UniqueQueue
 * `sparts.tasks.select` introduces a SelectTask, helpers for working with Popen
 * `sparts.tasks.queue` introduces a PriorityQueueTask and UniqueQueueTask

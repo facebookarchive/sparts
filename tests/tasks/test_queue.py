@@ -15,6 +15,7 @@ class MyTask(QueueTask):
     def execute(self, item, context):
         self.counter += 1
 
+
 class TestMyTask(SingleTaskTestCase):
     TASK = MyTask
 
@@ -37,6 +38,7 @@ class MyRetryTask(QueueTask):
         else:
             self.completed += 1
 
+
 class TestRetries(SingleTaskTestCase):
     TASK = MyRetryTask
 
@@ -47,3 +49,12 @@ class TestRetries(SingleTaskTestCase):
         self.task.queue.join()
         self.assertEqual(self.task.retried, 30)
         self.assertEqual(self.task.completed, 3)
+
+
+class TestMultipleWorkers(SingleTaskTestCase):
+    class TASK(QueueTask):
+        WORKERS = 2
+        OPT_PREFIX = 'my-q'
+
+    def test_multiple_workers(self):
+        self.assertEqual(len(self.task.threads), 2)

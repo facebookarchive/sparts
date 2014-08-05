@@ -126,9 +126,8 @@ class VTask(_SpartsObject):
 
     @classmethod
     def _optName(cls, name):
-        parts = [cls.OPT_PREFIX or cls.__name__,
-                 name.replace('-', '_')]
-        return '_'.join(parts)
+        parts = [cls.OPT_PREFIX or cls.__name__, name]
+        return '_'.join(parts).replace('-', '_')
 
     def getTaskOption(self, opt, default=None):
         return getattr(self.service.options,
