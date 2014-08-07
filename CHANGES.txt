@@ -3,7 +3,12 @@ CHANGES
 
 master
 ------
+
+
+0.7.0
+-----
 * bugfix: VTask.OPT_PREFIX can now contain "-"
+* `sparts.tasks.tui` introduces a UITask suitable for building npycurses UIs that play nicely with sparts
 * `sparts.collections` introduces a PriorityQueue and UniqueQueue
 * `sparts.tasks.select` introduces a SelectTask, helpers for working with Popen
 * `sparts.tasks.queue` introduces a PriorityQueueTask and UniqueQueueTask
