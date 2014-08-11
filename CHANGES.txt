@@ -3,7 +3,7 @@ CHANGES
 
 master
 ------
-
+* bugfix: race condition in tasks.select popen helpers bay result in false negative result
 
 0.7.0
 -----
