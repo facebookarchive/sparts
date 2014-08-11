@@ -212,7 +212,15 @@ class ProcessStreamHandler(object):
         # all available data)
         if self._errfd is None and self._outfd is None:
             if self.exit_callback:
-                self.exit_callback(self._popen.poll())
+                # There is a *very* narrow race condition between both fds
+                # being closed by the child process and the exit code being
+                # properly set by the Popen abstractions.  As a result, we'll
+                # call wait() instead of poll() here.  99% of the time,
+                # this will return instantly, and the other 1% we'll slow
+                # down are select loop.  This is sufficiently rare, so it
+                # should be fine.
+                returncode = self._popen.wait()
+                self.exit_callback(returncode)
 
 
 class ProcessResult(object):
