@@ -34,6 +34,7 @@ from sparts import daemon
 class VService(_SpartsObject):
     """Core class for implementing services."""
     DEFAULT_LOGLEVEL = 'DEBUG'
+    DEFAULT_LOGFILE = None
     DEFAULT_PID = lambda cls: '/var/run/%s.pid' % cls.__name__
     REGISTER_SIGNAL_HANDLERS = True
     TASKS = []
@@ -41,6 +42,10 @@ class VService(_SpartsObject):
     _name = None
     dryrun = option(action='store_true', help='Run in "dryrun" mode')
     level = option(default=DEFAULT_LOGLEVEL, help='Log Level [%(default)s]')
+    logfile = option(default=lambda cls: cls.DEFAULT_LOGFILE,
+                     help='Log to this file instead of stderr.  None or "" '
+                          'logs to stderr [%(default)s]')
+
     register_tasks = option(name='tasks', default=None,
                             metavar='TASK', nargs='*',
                             help='Tasks to run.  Pass without args to see the '
@@ -295,7 +300,11 @@ class VService(_SpartsObject):
 
     def initLogging(self):
         """Basic stderr logging.  Override this to do something else."""
-        logging.basicConfig(level=self.loglevel, stream=sys.stderr)
+        if self.logfile:
+            logging.basicConfig(level=self.loglevel, filename=self.logfile)
+        else:
+            logging.basicConfig(level=self.loglevel, stream=sys.stderr)
+
         captureWarnings(True)
 
     @classmethod
