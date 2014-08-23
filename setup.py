@@ -4,6 +4,7 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+from distutils.command.upload import upload as UploadCommand
 from setuptools import setup, find_packages, Command
 from setuptools.command.build_py import build_py as _build_py
 from setuptools.command.test import test as TestCommand
@@ -12,6 +13,7 @@ from distutils.spawn import find_executable
 from glob import glob
 import os.path
 import imp
+import subprocess
 import sys
 
 
@@ -118,6 +120,25 @@ class PyTest(TestCommand):
         sys.exit(errno)
 
 cmdclass['test'] = PyTest
+
+
+class NoDirtyUpload(UploadCommand):
+    def run(self):
+        result = subprocess.check_output("git status -z", shell=True)
+        for fstat in result.split("\x00"):
+            stat = fstat[0:2]
+            fn = fstat[3:]
+
+            # New files are ok for now.
+            if stat == '??':
+                continue
+            
+            raise AssertionError("Unexpected git status (%s) for %s" %
+                (stat, fn))
+
+        UploadCommand.run(self)
+
+cmdclass['upload'] = NoDirtyUpload
 
 install_requires = ['six', 'daemonize']
 if sys.version < '2.7':
