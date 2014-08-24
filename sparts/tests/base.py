@@ -106,6 +106,9 @@ class ServiceTestCase(BaseSpartsTestCase):
     def getServiceClass(self):
         return VService
 
+    def getCreateArgs(self):
+        return []
+
     def setUp(self):
         super(ServiceTestCase, self).setUp()
 
@@ -113,7 +116,7 @@ class ServiceTestCase(BaseSpartsTestCase):
         TestService.test = self
 
         ap = TestService._buildArgumentParser()
-        ns = ap.parse_args(['--level', 'DEBUG'])
+        ns = ap.parse_args(['--level', 'DEBUG'] + self.getCreateArgs())
         self.service = TestService(ns)
         self.runloop = self.service.startBG()
 
