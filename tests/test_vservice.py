@@ -4,7 +4,9 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+from sparts.sparts import option
 from sparts.tests.base import ServiceTestCase
+from sparts.vservice import VService
 
 class VServiceTests(ServiceTestCase):
     def test_verifyCustomName(self):
@@ -75,3 +77,38 @@ class VServiceTests(ServiceTestCase):
         self.assertContains('foo', values)
         self.assertContains('spam', values)
         self.assertNotContains('ham', values)
+
+
+class VServiceOptionTests(ServiceTestCase):
+    def getServiceClass(self):
+        class MYSERVICE(VService):
+            basicopt = option(default="spam")
+            opt_uscore = option(default="eggs")
+            opt_uscore2 = option(name="opt_uscore2", default="ham")
+        return MYSERVICE
+
+    def test_options(self):
+        self.assertEqual(self.service.basicopt, "spam")
+        self.assertEqual(self.service.opt_uscore, "eggs")
+        self.assertEqual(self.service.opt_uscore2, "ham")
+
+
+class VServiceOptionOverrideTests(ServiceTestCase):
+    def getServiceClass(self):
+        class MYSERVICE(VService):
+            basicopt = option(default="spam")
+            opt_uscore = option(default="eggs")
+            opt_uscore2 = option(name="opt_uscore2", default="ham")
+        return MYSERVICE
+
+    def getCreateArgs(self):
+        return [
+            '--basicopt', 'foo',
+            '--opt-uscore', 'bar',
+            '--opt-uscore2', 'baz',
+        ]
+
+    def test_options(self):
+        self.assertEqual(self.service.basicopt, "foo")
+        self.assertEqual(self.service.opt_uscore, "bar")
+        self.assertEqual(self.service.opt_uscore2, "baz")
