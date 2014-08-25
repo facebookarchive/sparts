@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* bugfix: Unbreak default values for VService options with names with underscores
 
 0.7.1
 -----

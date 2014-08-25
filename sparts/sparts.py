@@ -131,7 +131,7 @@ class option(_Nameable):
         ap.add_argument(*optargs.opts, **optargs.kwargs)
 
     def _getNameForIdentifier(self, name):
-        return name.replace('_', '-')
+        return name
 
 
 class _NameHelper(type):
