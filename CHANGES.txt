@@ -4,6 +4,8 @@ CHANGES
 master
 ------
 * bugfix: Unbreak default values for VService options with names with underscores
+* PeriodicTask.execute_async(): returns a future that succeeds or raises upon successful
+  completion (or an exception occurs) in the next execute call.
 
 0.7.1
 -----

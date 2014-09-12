@@ -6,6 +6,9 @@
 #
 from __future__ import absolute_import
 
+from concurrent.futures import Future
+from six.moves import queue
+
 from sparts.counters import counter, samples, SampleType
 from sparts.sparts import option
 from sparts.timer import Timer
@@ -15,7 +18,7 @@ from threading import Event
 
 class PeriodicTask(VTask):
     """Task that executes `execute` at a specified interval
-    
+
     You must either override the `INTERVAL` (seconds) class attribute, or
     pass a --{OPT_PREFIX}-interval in order for your task to run.
     """
@@ -35,10 +38,29 @@ class PeriodicTask(VTask):
         """Override this to perform some custom action periodically."""
         self.logger.debug('execute')
 
+    def execute_async(self):
+        f = Future()
+
+        if self.running:
+            # There's a race condition here.  If the task has thrown but the
+            # thread(s) haven't stopped yet, you can enqueue a future that will
+            # never complete.
+            self.__futures.put(f)
+        else:
+            # If the task has stopped (e.g., due to a previous error),
+            # fail the future now and don't insert it into the queue.
+            f.set_exception(RuntimeError("Worker not running"))
+
+        return f
+
+    def has_pending(self):
+        return self.__futures.qsize() > 0
+
     def initTask(self):
         # Register an event that we can more smartly wait on in case shutdown
         # is requested while we would be `sleep()`ing
         self.stop_event = Event()
+        self.__futures = queue.Queue()
 
         super(PeriodicTask, self).initTask()
 
@@ -55,10 +77,24 @@ class PeriodicTask(VTask):
         timer.start()
         while not self.service._stop:
             try:
-                self.execute()
+                result = self.execute()
+
+                # On a successful result, notify all blocked futures.
+                # Use pop like this to avoid race conditions.
+                while self.__futures.qsize():
+                    f = self.__futures.get()
+                    f.set_result(result)
+
             except TryLater:
                 self.n_try_later.increment()
                 continue
+            except Exception as e:
+                # On unhandled exceptions, set the exception on any async
+                # blocked execute calls.
+                while self.__futures.qsize():
+                    f = self.__futures.get()
+                    f.set_exception(e)
+                raise
 
             self.n_iterations.increment()
             self.execute_duration_ms.add(timer.elapsed * 1000)

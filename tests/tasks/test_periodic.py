@@ -14,14 +14,20 @@ import threading
 class MyTask(PeriodicTask):
     INTERVAL = 0.1
     counter = 0
+    fail_async = False
 
     def initTask(self):
         super(MyTask, self).initTask()
         self.visit_threads = set()
 
     def execute(self):
+        if self.fail_async and self.has_pending():
+            raise Exception("fail_async")
+
         self.counter += 1
         self.visit_threads.add(threading.current_thread().ident)
+        return self.counter
+
 
 class TestMyTask(SingleTaskTestCase):
     TASK = MyTask
@@ -31,6 +37,32 @@ class TestMyTask(SingleTaskTestCase):
             while self.task.counter <= 0 and t.elapsed < 3.0:
                 time.sleep(0.101)
         self.assertGreater(self.task.counter, 0)
+
+    def test_execute_async(self):
+        f = self.task.execute_async()
+        res = f.result(3.0)
+        self.assertNotNone(res)
+        self.assertGreater(res, 0)
+
+        # Verify exception path
+        self.task.fail_async = True
+        f = self.task.execute_async()
+        with self.assertRaises(Exception) as ctx:
+            f.result()
+        self.assertEqual(ctx.exception.args[0], "fail_async")
+
+        # Wait until task shuts down
+        with Timer() as t:
+            while t.elapsed < 5.0:
+                if not self.task.running:
+                    break
+            self.assertFalse(self.task.running)
+
+        # Verify early exception on async_execute against shutdown tasks
+        f = self.task.execute_async()
+        with self.assertRaises(Exception) as ctx:
+            f.result()
+        self.assertEqual(ctx.exception.args[0], "Worker not running")
 
 
 class MyMultiTask(MyTask):
