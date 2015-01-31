@@ -7,14 +7,17 @@
 from sparts.tasks.periodic import PeriodicTask
 from sparts.tests.base import SingleTaskTestCase
 from sparts.timer import Timer
+from sparts.vtask import TryLater
+
 import time
 import threading
 
 
 class MyTask(PeriodicTask):
-    INTERVAL = 0.1
+    INTERVAL = 0.05
     counter = 0
     fail_async = False
+    trylater = False
 
     def initTask(self):
         super(MyTask, self).initTask()
@@ -23,7 +26,10 @@ class MyTask(PeriodicTask):
     def execute(self):
         if self.fail_async and self.has_pending():
             raise Exception("fail_async")
+        if self.trylater:
+            raise TryLater(str(self.trylater), after=self.trylater)
 
+        self.logger.debug("%s: Execute OK", time.time())
         self.counter += 1
         self.visit_threads.add(threading.current_thread().ident)
         return self.counter
@@ -64,6 +70,32 @@ class TestMyTask(SingleTaskTestCase):
             f.result()
         self.assertEqual(ctx.exception.args[0], "Worker not running")
 
+    def test_trylater_after(self):
+        t = self.task
+        # Set up some mocks
+        t._handle_try_later = self.mock.Mock(wraps=t._handle_try_later)
+        t.stop_event = self.mock.Mock(wraps=t.stop_event)
+
+        # Run once with no TryLater
+        t.execute_async().result()
+        self.assertFalse(t._handle_try_later.called)
+
+        # Run once with no TryLater
+        t.trylater = 0.01
+
+        # Wait for it to get called once
+        t0 = time.time()
+        while not t._handle_try_later.called and time.time() - t0 < 5.0:
+            time.sleep(0.01)
+        self.assertTrue(t._handle_try_later)
+
+        # Disable trylater and wait for one successful completion
+        t.trylater = None
+        t.execute_async().result(5.0)
+
+        # Make sure things were called with good values
+        self.assertTrue(t._handle_try_later)
+        self.task.stop_event.wait.assert_any_call(0.01)
 
 class MyMultiTask(MyTask):
     workers = 5

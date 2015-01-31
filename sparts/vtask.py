@@ -155,8 +155,14 @@ class TryLater(Exception):
     """Throw this in overridden tasks to defer execution.
 
     Can be used to temporarily suspend and restart execution, which is useful
-    for handling unexpected error conditions, or re-scheduling work."""
-    pass
+    for handling unexpected error conditions, or re-scheduling work.
+
+    Will retry the work `after` the number of seconds specified.
+    """
+    def __init__(self, message=None, after=None):
+        super(TryLater, self).__init__(message)
+        self.message = message
+        self.after = after
 
 
 class ExecuteContext(object):

@@ -85,8 +85,10 @@ class PeriodicTask(VTask):
                     f = self.__futures.get()
                     f.set_result(result)
 
-            except TryLater:
-                self.n_try_later.increment()
+            except TryLater as e:
+                if self._handle_try_later(e):
+                    return
+
                 continue
             except Exception as e:
                 # On unhandled exceptions, set the exception on any async
@@ -106,3 +108,13 @@ class PeriodicTask(VTask):
                 self.n_slow_iterations.increment()
 
             timer.start()
+
+    def _handle_try_later(self, e):
+        self.n_try_later.increment()
+        if e.after is not None:
+            self.logger.debug("TryLater (%s) thrown.  Retrying in %.2fs",
+                e.message, e.after)
+        else:
+            self.logger.debug("TryLater (%s) thrown.  Retrying now",
+                e.message)
+        return self.stop_event.wait(e.after)
