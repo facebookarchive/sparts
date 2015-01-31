@@ -88,7 +88,7 @@ class BaseSpartsTestCase(unittest.TestCase):
         return self.assertNotIn(item, arr, msg)
 
     @property
-    def mock(self, *args, **kwargs):
+    def mock(self):
         if sys.version < '3.3':
             try:
                 import mock
