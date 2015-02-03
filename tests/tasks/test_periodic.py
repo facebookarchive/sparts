@@ -52,9 +52,13 @@ class TestMyTask(SingleTaskTestCase):
 
         # Verify exception path
         self.task.fail_async = True
-        f = self.task.execute_async()
         with self.assertRaises(Exception) as ctx:
-            f.result()
+            # Call this twice, since there's a race condition where setting
+            # fail_async and getting the future from execute_async is called
+            # when execute is between the self.fail_async check and the return
+            self.task.execute_async().result(1.0)
+            self.task.execute_async().result(1.0)
+
         self.assertEqual(ctx.exception.args[0], "fail_async")
 
         # Wait until task shuts down
