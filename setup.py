@@ -140,7 +140,10 @@ class NoDirtyUpload(UploadCommand):
 
 cmdclass['upload'] = NoDirtyUpload
 
-install_requires = ['six', 'daemonize']
+install_requires = [
+    'six>=1.5',  # 1.5 required for bugfix in six.moves.queue import
+    'daemonize',
+]
 if sys.version < '2.7':
     install_requires.append('ordereddict')
 

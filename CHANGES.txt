@@ -8,6 +8,7 @@ master
   completion (or an exception occurs) in the next execute call.
 * dbus: Allow dbus to be used (e.g., for signal handling) even if thrift isn't installed
 * TryLater.after: implement after kwarg to TryLater to wait seconds before retrying (PeriodicTask)
+* Updated six dependency to require >= 1.5.0
 
 0.7.1
 -----
