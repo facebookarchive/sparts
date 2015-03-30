@@ -48,5 +48,3 @@ class TestSystemDBus(MultiTaskTestCase):
         self.assertNotNone(err)
 
         self.assertTrue(err.startswith('org.freedesktop.DBus.Error.AccessDenied'))
-
-
