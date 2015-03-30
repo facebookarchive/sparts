@@ -4,10 +4,14 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
-from sparts.tasks.dbus import DBusServiceTask, DBusMainLoopTask
-from sparts.tests.base import MultiTaskTestCase
+from sparts.tests.base import MultiTaskTestCase, Skip
+try:
+    import dbus
+    from sparts.tasks.dbus import DBusServiceTask, DBusMainLoopTask
+except ImportError:
+    raise Skip("dbus support is required to run this test")
+
 from sparts.sparts import option
-import dbus
 
 class TestDBusTask(DBusServiceTask):
     BUS_NAME = 'com.github.facebook.test'
