@@ -140,6 +140,7 @@ class DBusServiceTask(DBusTask):
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
     BUS_CLASS = VServiceDBusObject
+    USE_SYSTEM_BUS = False
 
     bus_name = option(default=lambda cls: cls.BUS_NAME, metavar='NAME',
                       help='Bus Name.  Should be something like '
@@ -150,7 +151,8 @@ class DBusServiceTask(DBusTask):
         default=False, help='If not --{task}-replace, will wait to take '
                             'this bus name')
     system_bus = option(action='store_true', type=bool,
-        default=False, help='Use system bus')
+                        default=lambda cls: cls.USE_SYSTEM_BUS,
+                        help='Use system bus')
 
     dbus_service = None
 

@@ -19,8 +19,7 @@ class TestDBusTask(DBusServiceTask):
 
 class TestDBusSystemTask(DBusServiceTask):
     BUS_NAME = 'com.github.facebook.systemtest'
-
-    system_bus = option(name='system_bus', default=True)
+    USE_SYSTEM_BUS = True
 
     def start(self):
         try:
@@ -42,7 +41,6 @@ class TestSystemDBus(MultiTaskTestCase):
 
     def test_system_bus(self):
         # expecting system task to fail due to missing DBus policy
-        # file
         t = self.service.getTask(TestDBusSystemTask)
         err = getattr(t, 'acquire_name_error', None)
         self.assertNotNone(err)
