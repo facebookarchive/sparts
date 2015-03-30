@@ -7,6 +7,7 @@ master
 * PeriodicTask.execute_async(): returns a future that succeeds or raises upon successful
   completion (or an exception occurs) in the next execute call.
 * dbus: Allow dbus to be used (e.g., for signal handling) even if thrift isn't installed
+* dbus: Added support for system bus by passing --{task}-system-bus
 * TryLater.after: implement after kwarg to TryLater to wait seconds before retrying (PeriodicTask)
 * Updated six dependency to require >= 1.5.0
 
