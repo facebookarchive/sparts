@@ -12,9 +12,11 @@ except ImportError:
     raise Skip("dbus support is required to run this test")
 
 from sparts.sparts import option
+from random import getrandbits
+
 
 class TestDBusTask(DBusServiceTask):
-    BUS_NAME = 'com.github.facebook.test'
+    BUS_NAME = 'com.github.facebook.test-{}'.format(getrandbits(32))
 
 
 class TestDBusSystemTask(DBusServiceTask):
