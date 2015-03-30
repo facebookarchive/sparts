@@ -149,6 +149,8 @@ class DBusServiceTask(DBusTask):
     queue = option(action='store_true', type=bool,
         default=False, help='If not --{task}-replace, will wait to take '
                             'this bus name')
+    system_bus = option(action='store_true', type=bool,
+        default=False, help='Use system bus')
 
     dbus_service = None
 
@@ -158,8 +160,13 @@ class DBusServiceTask(DBusTask):
         assert self.bus_name is not None, \
             "You must pass a --{task}-bus-name"
 
+    def getBus(self):
+        if self.system_bus:
+            return dbus.SystemBus(private=True)
+        return dbus.SessionBus(private=True)
+
     def start(self):
-        self.bus = dbus.SessionBus(private=True)
+        self.bus = self.getBus()
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
         self.addHandlers()
