@@ -160,13 +160,13 @@ class DBusServiceTask(DBusTask):
         assert self.bus_name is not None, \
             "You must pass a --{task}-bus-name"
 
-    def getBus(self):
+    def _makeBus(self):
         if self.system_bus:
             return dbus.SystemBus(private=True)
         return dbus.SessionBus(private=True)
 
     def start(self):
-        self.bus = self.getBus()
+        self.bus = self._makeBus()
         self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
             self.replace, self.replace, self.queue)
         self.addHandlers()
