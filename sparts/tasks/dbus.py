@@ -157,7 +157,7 @@ class DBusTask(VTask):
 
 
 class DBusServiceTask(DBusTask):
-    """Glue Task for exporting this VService over dbus"""
+    """Glue Task for exporting this VService over DBus"""
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
     BUS_CLASS = VServiceDBusObject
@@ -188,10 +188,24 @@ class DBusServiceTask(DBusTask):
             return dbus.SystemBus(private=True)
         return dbus.SessionBus(private=True)
 
-    def start(self):
+    def _asyncStartCb(self, res):
         self.bus = self._makeBus()
-        self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
-            self.replace, self.replace, self.queue)
+        try:
+            self.dbus_service = dbus.service.BusName(self.bus_name,
+                                                     self.bus,
+                                                     self.replace,
+                                                     self.replace,
+                                                     self.queue)
+        except Exception as e:
+            res.set_exception(e)
+        else:
+            res.set_result(True)
+
+    def _asyncStart(self):
+        self.asyncRun(self._asyncStartCb)
+
+    def start(self):
+        self._asyncStart()
         self.addHandlers()
         super(DBusServiceTask, self).start()
 
@@ -203,9 +217,19 @@ class DBusServiceTask(DBusTask):
                 self.fb303_dbus = FB303DbusService(
                     self.dbus_service, task, self.service.name)
 
-    def stop(self):
-        if self.dbus_service is not None:
-            self.dbus_service = None
+    def _asyncStopCb(self, res):
+        self.dbus_service = None
+        self.bus = None
+        res.set_result(True)
 
-        #self.bus.close()
+    def _asyncStop(self):
+        self.asyncRun(self._asyncStopCb)
+        # self.bus.close()
+
+    def stop(self):
+        """Run the bus cleanup code within the context of the main loop. The
+        task depends in DBusMainLoopTask, the stop() method will be called
+        before DBusMainLoopTask.stop() where loop.quit() is done.
+        """
         super(DBusServiceTask, self).stop()
+        self._asyncStop()
