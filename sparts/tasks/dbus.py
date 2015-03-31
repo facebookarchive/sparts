@@ -17,6 +17,7 @@ try:
 except ImportError:
     HAVE_FB303 = False
 
+from concurrent.futures import Future
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
 import dbus.service
@@ -89,7 +90,12 @@ class VServiceDBusObject(dbus.service.Object):
 
 
 class DBusMainLoopTask(VTask):
-    """Configure and run the DBus Main Loop in a sparts task"""
+    """Configure and run the DBus Main Loop in a sparts task. The loop is
+    run in separate thread. Keep in mind that dbus bindings are not
+    thread-safe. To avoid problems make sure to perform any dbus calls
+    wihin the context of the loop (use DBusTask.asyncRun() to perform
+    this in a safe manner)
+    """
     THREADS_INITED = False
     mainloop = None
 
@@ -135,6 +141,18 @@ class DBusTask(VTask):
     @property
     def mainloop(self):
         return self.mainloop_task.mainloop
+
+    def asyncRun(self, cb, *args):
+        """Helper call to run a callback `cb` within the task's main loop and
+        wait for it's result. The first parameter passed to the
+        callback is an instance of Future() that shall be used to
+        return the result of computation (or at least call
+        set_result(None)).
+        """
+        ft = Future()
+        glib.idle_add(cb, ft, *args)
+        res = ft.result()
+        return res
 
 
 class DBusServiceTask(DBusTask):
