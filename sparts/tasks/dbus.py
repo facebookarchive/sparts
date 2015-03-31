@@ -110,10 +110,14 @@ class DBusMainLoopTask(VTask):
             raise SkipTask("No DBusTasks found or enabled")
 
         self.dbus_loop = DBusGMainLoop(set_as_default=True)
+        # using main loop with default context
         self.mainloop = gobject.MainLoop()
 
     def _runloop(self):
         self.mainloop.run()
+        # loop.quit() was called, run() has returned, meaning that
+        # the loop no longer needed
+        self.mainloop = None
 
     def stop(self):
         super(DBusMainLoopTask, self).stop()
@@ -121,13 +125,10 @@ class DBusMainLoopTask(VTask):
         if self.mainloop is None:
             return
 
+        if not self.mainloop.is_running():
+            return
         self.mainloop.quit()
 
-        # OK!  Apparently, there is some wonky destructor event handling that
-        # seems to work better than just calling .quit() in order to properly
-        # return full control of signal handling, threads, etc to the actual
-        # main process.
-        self.mainloop = None
 
 class DBusTask(VTask):
     """Base Class for Tasks that depend on the DBus Main Loop"""
