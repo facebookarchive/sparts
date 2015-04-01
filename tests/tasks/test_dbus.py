@@ -13,7 +13,7 @@ except ImportError:
 
 from sparts.sparts import option
 from random import getrandbits
-import time
+
 
 class BaseTestDBusTask(DBusServiceTask):
     def start(self):
@@ -44,6 +44,35 @@ class TestDBus(MultiTaskTestCase):
         t = self.service.getTask(TestDBusSessionTask)
         err = getattr(t, 'acquire_name_error', None)
         self.assertEqual(err, None)
+
+    def test_async_run_ok(self):
+        # expecting async task to bump the magic number passed as it's
+        # argument
+        magic_value = 0xdeadbeef
+
+        def _in_loop_task(arg):
+            assert(arg == magic_value)
+            return magic_value + 1
+
+        t = self.service.getTask(TestDBusSessionTask)
+        ft = t.asyncRun(_in_loop_task, magic_value)
+        mod_value = ft.result(100)
+
+        self.assertEqual(mod_value, magic_value + 1)
+
+    def test_async_run_exc(self):
+        # expecting an exception to be passed from in loop callback to
+        # the caller
+        class InLoopException(Exception):
+            pass
+
+        def _in_loop_task():
+            raise InLoopException()
+
+        t = self.service.getTask(TestDBusSessionTask)
+        ft = t.asyncRun(_in_loop_task)
+
+        self.assertRaises(InLoopException, lambda: ft.result(100))
 
 
 class TestSystemDBus(MultiTaskTestCase):

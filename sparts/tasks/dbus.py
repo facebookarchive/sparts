@@ -17,6 +17,7 @@ try:
 except ImportError:
     HAVE_FB303 = False
 
+from functools import partial
 from concurrent.futures import Future
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
@@ -143,17 +144,31 @@ class DBusTask(VTask):
     def mainloop(self):
         return self.mainloop_task.mainloop
 
-    def asyncRun(self, cb, *args):
-        """Helper call to run a callback `cb` within the task's main loop and
-        wait for it's result. The first parameter passed to the
-        callback is an instance of Future() that shall be used to
-        return the result of computation (or at least call
-        set_result(None)).
+    def asyncRun(self, cb, *args, **kwargs):
+        """Helper call to run a callback `cb` within the task's main loop.
+        Returns an instance of Future() that can be waited for obtain
+        the result of computation. The callback will be run only once.
         """
-        ft = Future()
-        glib.idle_add(cb, ft, *args)
-        res = ft.result()
-        return res
+        def _future_execute(f, cb, *args, **kwargs):
+            try:
+                # Only execute `cb` if the future wasn't cancelled
+                if f.set_running_or_notify_cancel():
+                    f.set_result(cb(*args, **kwargs))
+            except Exception as e:
+                f.set_exception(e)
+            # return False so that glib will automatically remove the
+            # idle source
+            return False
+
+        def _future_cancel(handle, f):
+            if f.cancelled():
+                glib.source_remove(handle)
+
+        f = Future()
+        handle = glib.idle_add(partial(_future_execute, f,
+                                       cb, *args, **kwargs))
+        f.add_done_callback(partial(_future_cancel, handle))
+        return f
 
 
 class DBusServiceTask(DBusTask):
@@ -188,21 +203,18 @@ class DBusServiceTask(DBusTask):
             return dbus.SystemBus(private=True)
         return dbus.SessionBus(private=True)
 
-    def _asyncStartCb(self, res):
+    def _asyncStartCb(self):
         self.bus = self._makeBus()
-        try:
-            self.dbus_service = dbus.service.BusName(self.bus_name,
-                                                     self.bus,
-                                                     self.replace,
-                                                     self.replace,
-                                                     self.queue)
-        except Exception as e:
-            res.set_exception(e)
-        else:
-            res.set_result(True)
+        self.dbus_service = dbus.service.BusName(self.bus_name,
+                                                 self.bus,
+                                                 self.replace,
+                                                 self.replace,
+                                                 self.queue)
+        return True
 
     def _asyncStart(self):
-        self.asyncRun(self._asyncStartCb)
+        res = self.asyncRun(self._asyncStartCb)
+        res.result()
 
     def start(self):
         self._asyncStart()
@@ -217,13 +229,14 @@ class DBusServiceTask(DBusTask):
                 self.fb303_dbus = FB303DbusService(
                     self.dbus_service, task, self.service.name)
 
-    def _asyncStopCb(self, res):
+    def _asyncStopCb(self):
         self.dbus_service = None
         self.bus = None
-        res.set_result(True)
+        return True
 
     def _asyncStop(self):
-        self.asyncRun(self._asyncStopCb)
+        res = self.asyncRun(self._asyncStopCb)
+        res.result()
         # self.bus.close()
 
     def stop(self):
