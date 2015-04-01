@@ -48,16 +48,18 @@ class TestDBus(MultiTaskTestCase):
     def test_async_run_ok(self):
         # expecting async task to bump the magic number passed as it's
         # argument
-        magic_value = 0xdeadbeef
+        magic_value = 0xdeadcafe
 
-        def _in_loop_task(arg):
-            assert(arg == magic_value)
-            return magic_value + 1
+        job = self.mock.Mock(return_value=(magic_value + 1))
 
         t = self.service.getTask(TestDBusSessionTask)
-        ft = t.asyncRun(_in_loop_task, magic_value)
-        mod_value = ft.result(100)
+        ft = t.asyncRun(job, magic_value,
+                        other=(magic_value - 1))
+        mod_value = ft.result()
 
+        self.assertTrue(job.called)
+        self.assertEqual(job.call_args[0], (magic_value,))
+        self.assertEqual(job.call_args[1], {'other': magic_value - 1})
         self.assertEqual(mod_value, magic_value + 1)
 
     def test_async_run_exc(self):
@@ -66,13 +68,35 @@ class TestDBus(MultiTaskTestCase):
         class InLoopException(Exception):
             pass
 
-        def _in_loop_task():
-            raise InLoopException()
+        job = self.mock.Mock()
+        job.side_effect = InLoopException('test exception')
 
         t = self.service.getTask(TestDBusSessionTask)
-        ft = t.asyncRun(_in_loop_task)
+        ft = t.asyncRun(job)
 
-        self.assertRaises(InLoopException, lambda: ft.result(100))
+        self.assertRaises(InLoopException, lambda: ft.result())
+        self.assertTrue(job.called)
+
+    def test_async_run_once(self):
+        # the callback is expected to be called only once
+        job = self.mock.Mock(return_value=None)
+
+        t = self.service.getTask(TestDBusSessionTask)
+        ft = t.asyncRun(job)
+        ft.result()
+        self.assertEqual(job.call_count, 1)
+
+    def test_async_run_cancel(self):
+        # expecting an exception to be passed from in loop callback to
+        # the caller
+        job = self.mock.Mock(return_value=None)
+
+        t = self.service.getTask(TestDBusSessionTask)
+        ft = t.asyncRun(job)
+        ft.cancel()
+
+        self.assertFalse(job.called)
+        self.assertTrue(ft.cancelled())
 
 
 class TestSystemDBus(MultiTaskTestCase):
