@@ -26,11 +26,6 @@ import gobject
 import glib
 import time
 
-# always init threads before calling any dbus code
-glib.threads_init()
-gobject.threads_init()
-dbus.mainloop.glib.threads_init()
-
 
 class VServiceDBusObject(dbus.service.Object):
     """DBus interface implementation that exports common VService methods"""
@@ -109,6 +104,11 @@ class DBusMainLoopTask(VTask):
 
         if not needed:
             raise SkipTask("No DBusTasks found or enabled")
+
+        # always init threads before calling any dbus code
+        glib.threads_init()
+        gobject.threads_init()
+        dbus.mainloop.glib.threads_init()
 
         self.dbus_loop = DBusGMainLoop(set_as_default=True)
         # using main loop with default context
