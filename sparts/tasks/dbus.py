@@ -231,13 +231,13 @@ class DBusServiceTask(DBusTask):
 
     def _asyncStopCb(self):
         self.dbus_service = None
+        # self.bus.close()
         self.bus = None
         return True
 
     def _asyncStop(self):
         res = self.asyncRun(self._asyncStopCb)
         res.result()
-        # self.bus.close()
 
     def stop(self):
         """Run the bus cleanup code within the context of the main loop. The
