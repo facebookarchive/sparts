@@ -132,7 +132,7 @@ class NoDirtyUpload(UploadCommand):
             # New files are ok for now.
             if stat == '??':
                 continue
-            
+
             raise AssertionError("Unexpected git status (%s) for %s" %
                 (stat, fn))
 

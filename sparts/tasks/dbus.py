@@ -17,6 +17,8 @@ try:
 except ImportError:
     HAVE_FB303 = False
 
+from functools import partial
+from concurrent.futures import Future
 from dbus.mainloop.glib import DBusGMainLoop
 import dbus
 import dbus.service
@@ -84,7 +86,12 @@ class VServiceDBusObject(dbus.service.Object):
 
 
 class DBusMainLoopTask(VTask):
-    """Configure and run the DBus Main Loop in a sparts task"""
+    """Configure and run the DBus Main Loop in a sparts task. The loop is
+    run in separate thread. Keep in mind that dbus bindings are not
+    thread-safe. To avoid problems make sure to perform any dbus calls
+    wihin the context of the loop (use DBusTask.asyncRun() to perform
+    this in a safe manner)
+    """
     THREADS_INITED = False
     mainloop = None
 
@@ -98,14 +105,20 @@ class DBusMainLoopTask(VTask):
         if not needed:
             raise SkipTask("No DBusTasks found or enabled")
 
-        self.dbus_loop = DBusGMainLoop(set_as_default=True)
+        # always init threads before calling any dbus code
         glib.threads_init()
         gobject.threads_init()
         dbus.mainloop.glib.threads_init()
+
+        self.dbus_loop = DBusGMainLoop(set_as_default=True)
+        # using main loop with default context
         self.mainloop = gobject.MainLoop()
 
     def _runloop(self):
         self.mainloop.run()
+        # loop.quit() was called, run() has returned, meaning that
+        # the loop no longer needed
+        self.mainloop = None
 
     def stop(self):
         super(DBusMainLoopTask, self).stop()
@@ -113,13 +126,10 @@ class DBusMainLoopTask(VTask):
         if self.mainloop is None:
             return
 
+        if not self.mainloop.is_running():
+            return
         self.mainloop.quit()
 
-        # OK!  Apparently, there is some wonky destructor event handling that
-        # seems to work better than just calling .quit() in order to properly
-        # return full control of signal handling, threads, etc to the actual
-        # main process.
-        self.mainloop = None
 
 class DBusTask(VTask):
     """Base Class for Tasks that depend on the DBus Main Loop"""
@@ -134,9 +144,35 @@ class DBusTask(VTask):
     def mainloop(self):
         return self.mainloop_task.mainloop
 
+    def asyncRun(self, cb, *args, **kwargs):
+        """Helper call to run a callback `cb` within the task's main loop.
+        Returns an instance of Future() that can be waited for obtain
+        the result of computation. The callback will be run only once.
+        """
+        def _future_execute(f, cb, *args, **kwargs):
+            try:
+                # Only execute `cb` if the future wasn't cancelled
+                if f.set_running_or_notify_cancel():
+                    f.set_result(cb(*args, **kwargs))
+            except Exception as e:
+                f.set_exception(e)
+            # return False so that glib will automatically remove the
+            # idle source
+            return False
+
+        def _future_cancel(handle, f):
+            if f.cancelled():
+                glib.source_remove(handle)
+
+        f = Future()
+        handle = glib.idle_add(partial(_future_execute, f,
+                                       cb, *args, **kwargs))
+        f.add_done_callback(partial(_future_cancel, handle))
+        return f
+
 
 class DBusServiceTask(DBusTask):
-    """Glue Task for exporting this VService over dbus"""
+    """Glue Task for exporting this VService over DBus"""
     OPT_PREFIX = 'dbus'
     BUS_NAME = None
     BUS_CLASS = VServiceDBusObject
@@ -167,10 +203,21 @@ class DBusServiceTask(DBusTask):
             return dbus.SystemBus(private=True)
         return dbus.SessionBus(private=True)
 
-    def start(self):
+    def _asyncStartCb(self):
         self.bus = self._makeBus()
-        self.dbus_service = dbus.service.BusName(self.bus_name, self.bus,
-            self.replace, self.replace, self.queue)
+        self.dbus_service = dbus.service.BusName(self.bus_name,
+                                                 self.bus,
+                                                 self.replace,
+                                                 self.replace,
+                                                 self.queue)
+        return True
+
+    def _asyncStart(self):
+        res = self.asyncRun(self._asyncStartCb)
+        res.result()
+
+    def start(self):
+        self._asyncStart()
         self.addHandlers()
         super(DBusServiceTask, self).start()
 
@@ -182,9 +229,20 @@ class DBusServiceTask(DBusTask):
                 self.fb303_dbus = FB303DbusService(
                     self.dbus_service, task, self.service.name)
 
-    def stop(self):
-        if self.dbus_service is not None:
-            self.dbus_service = None
+    def _asyncStopCb(self):
+        self.dbus_service = None
+        # self.bus.close()
+        self.bus = None
+        return True
 
-        #self.bus.close()
+    def _asyncStop(self):
+        res = self.asyncRun(self._asyncStopCb)
+        res.result()
+
+    def stop(self):
+        """Run the bus cleanup code within the context of the main loop. The
+        task depends in DBusMainLoopTask, the stop() method will be called
+        before DBusMainLoopTask.stop() where loop.quit() is done.
+        """
         super(DBusServiceTask, self).stop()
+        self._asyncStop()
