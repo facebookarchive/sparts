@@ -126,6 +126,10 @@ class NoDirtyUpload(UploadCommand):
     def run(self):
         result = subprocess.check_output("git status -z", shell=True)
         for fstat in result.split("\x00"):
+            # Skip empty line (potentially at the end of the output)
+            if not len(fstat):
+                continue
+
             stat = fstat[0:2]
             fn = fstat[3:]
 
