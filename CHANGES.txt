@@ -3,7 +3,11 @@ CHANGES
 
 master
 ------
+
+0.7.2
+------
 * bugfix: Unbreak default values for VService options with names with underscores
+* bugfix: Improve stability of dbus implementation with multithreading
 * PeriodicTask.execute_async(): returns a future that succeeds or raises upon successful
   completion (or an exception occurs) in the next execute call.
 * dbus: Allow dbus to be used (e.g., for signal handling) even if thrift isn't installed
