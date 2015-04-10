@@ -125,7 +125,7 @@ cmdclass['test'] = PyTest
 class NoDirtyUpload(UploadCommand):
     def run(self):
         result = subprocess.check_output("git status -z", shell=True)
-        for fstat in result.split("\x00"):
+        for fstat in result.split(b"\x00"):
             # Skip empty line (potentially at the end of the output)
             if not len(fstat):
                 continue
@@ -134,7 +134,7 @@ class NoDirtyUpload(UploadCommand):
             fn = fstat[3:]
 
             # New files are ok for now.
-            if stat == '??':
+            if stat == b'??':
                 continue
 
             raise AssertionError("Unexpected git status (%s) for %s" %
