@@ -3,6 +3,7 @@ CHANGES
 
 master
 ------
+* PATENTS: Updated to version 2 (http://fb.me/patents2)
 
 0.7.2
 ------
