@@ -167,7 +167,9 @@ class ProcessStreamHandler(object):
 
         # Set up a sane default for decoding stdout
         if encoding is None:
-            self.encoding = sys.stdout.encoding
+            self.encoding = getattr(sys.stdout, 'encoding')
+            if self.encoding is None:
+                self.encoding = sys.getdefaultencoding()
         else:
             self.encoding = encoding
 
