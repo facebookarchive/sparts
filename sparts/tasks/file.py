@@ -40,9 +40,18 @@ class DirectoryWatcherTask(PollerTask):
 
     def fetch(self):
         """Overridden to stat a particular filesystem path"""
-        d = {}
         root = self.path
-        contents = self.listdir(root)
+        try:
+            contents = self.listdir(root)
+        except OSError as e:
+            # If the path we're trying to lookup doesn't exist, treat it like
+            # an empty directory.  Otherwise, this is a legitimate exception.
+            if e.errno != errno.ENOENT:
+                raise
+            self.logger.warning("Unable to read directory, '%s' (ENOENT)", root)
+            contents = []
+
+        d = {}
         for name in contents:
             try:
                 d[name] = self.stat(os.path.join(root, name))
