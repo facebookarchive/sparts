@@ -17,15 +17,23 @@ logger = logging.getLogger('sparts.fileutils')
 
 
 def readfile(path):
-    """Return the contents of the file at `path`"""
+    """Return the contents of the file at `path`, as a string"""
+    return readfilebytes(path).decode('UTF-8')
+
+def readfilebytes(path):
+    """Return the contents of the file at `path`, as bytes"""
     with open(path, mode='rb') as f:
-        return f.read().decode('UTF-8')
+        return f.read()
 
 def writefile(path, contents):
-    """Write `contents` to the file at `path`"""
-    logger.debug('writefile("%s", ...)', path)
+    """Write string `contents` to the file at `path`"""
+    writefilebytes(path, contents.encode('UTF-8'))
+
+def writefilebytes(path, contents):
+    """Write bytes `contents` to the file at `path`"""
+    logger.debug('writefilebytes("%s", ...)', path)
     with open(path, mode='wb') as f:
-        return f.write(contents.encode('UTF-8'))
+        return f.write(contents)
 
 def makedirs(path, *args, **kwargs):
     """Create necessary directory heirarchy to `path` if it doesn't exist"""

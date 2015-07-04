@@ -4,6 +4,7 @@ CHANGES
 master
 ------
 * PATENTS: Updated to version 2 (http://fb.me/patents2)
+* fileutils: added `readfilebytes`, `writefilebytes` for raw binary bulk IO
 * SelectTask: play more nicely with frameworks that steal sys.stdout
 
 0.7.2
