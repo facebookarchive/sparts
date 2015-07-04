@@ -4,9 +4,9 @@
 # LICENSE file in the root directory of this source tree. An additional grant
 # of patent rights can be found in the PATENTS file in the same directory.
 #
+from sparts.fileutils import NamedTemporaryDirectory
 from sparts.tests.base import SingleTaskTestCase
 from sparts.tasks.file import DirectoryWatcherTask
-from tempfile import mkdtemp
 from shutil import rmtree
 
 import errno
@@ -24,18 +24,18 @@ class TestMyTask(SingleTaskTestCase):
     TASK = MyTask
 
     def setUp(self):
-        self.testpath = mkdtemp()
-        MyTask.PATH = self.testpath
+        self.testpath = NamedTemporaryDirectory()
+        MyTask.PATH = self.testpath.name
         MyTask.INTERVAL = 0.25
         super(TestMyTask, self).setUp()
         self.task.execute()
 
     def tearDown(self):
-        rmtree(self.testpath)
+        self.testpath.close()
         super(TestMyTask, self).tearDown()
 
     def test_file_create(self):
-        fn = os.path.join(self.testpath, 'foo')
+        fn = self.testpath.join('foo')
         with open(fn, mode='w'):
             pass
         os.utime(fn, None)
@@ -47,7 +47,7 @@ class TestMyTask(SingleTaskTestCase):
 
     def test_file_delete(self):
         self.test_file_create()
-        os.remove(os.path.join(self.testpath, 'foo'))
+        os.remove(self.testpath.join('foo'))
         self.task.execute()
 
         self.assertTrue(self.task.onFileDeleted.called)
@@ -59,7 +59,7 @@ class TestMyTask(SingleTaskTestCase):
         self.test_file_create()
 
         self.task.execute()
-        path = os.path.join(self.testpath, 'foo')
+        path = self.testpath.join('foo')
 
         # Run once to make sure we detect the current time for the files
         self.task.execute()
