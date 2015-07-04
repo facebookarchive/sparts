@@ -91,3 +91,10 @@ class TestMyTask(SingleTaskTestCase):
         self.task.execute()
 
         self.assertTrue(self.task.onFileDeleted.called)
+
+    def test_nodirectory_ok(self):
+        # Call close() on the named directory to cleanup the directory
+        self.testpath.close()
+
+        # Then, call execute() and make sure nothing blows up
+        self.task.execute()
