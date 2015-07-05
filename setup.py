@@ -171,7 +171,11 @@ if sys.version < '3.0':
     tests_require.append('thrift')
 else:
     # Py3k requires Twisted >= 14.0
-    tests_require.append('Twisted>=14.0.0')
+    twisted_version = 'Twisted>=14.0.0'
+    if sys.version < '3.3':
+        # Twisted-15.2 breaks support for python3.2 in a lot of ways
+        twisted_version += ', <15.2'
+    tests_require.append(twisted_version)
     # TODO: for py3k use fbthrift instead of thrift?
 
 VERSION = version()
