@@ -29,7 +29,7 @@ def compile(path, root='.', debug=False, **kwargs):
     - slots [default:True]: Use __slots__ in generated structs
     """
     comp = CompileContext(root=root, debug=debug)
-    return comp.compileThriftFileAt(path, **kwargs)
+    return comp.importThrift(path, **kwargs)
 
 
 def _require_executable(name):
