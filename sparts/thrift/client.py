@@ -105,6 +105,11 @@ class ThriftClient(object):
 
         assert self.module is not None, "You must define a thrift module!"
 
+        # TODO: if self.module does not have a Client, but there is only one
+        # service moudule inside it, use that instead.
+        assert hasattr(self.module, 'Client'), \
+            "Module %s requires 'Client' class." % (self.module)
+
         if self.lazy:
             self._client = None
         else:
@@ -145,3 +150,5 @@ class ThriftClient(object):
     def __getattr__(self, name):
         getattr(self.module.Client, name)
         return partial(self._lazyCall, name)
+
+    # TODO: Implement __dir__
