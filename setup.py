@@ -17,7 +17,9 @@ import subprocess
 import sys
 
 
-THRIFT = find_executable('thrift')
+THRIFT = find_executable('thrift1')
+if THRIFT is None:
+    THRIFT = find_executable('thrift')
 
 NAME = 'sparts'
 ROOT = os.path.abspath(os.path.dirname(__file__))

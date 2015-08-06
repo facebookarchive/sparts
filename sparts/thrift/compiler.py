@@ -32,17 +32,21 @@ def compile(path, root='.', debug=False, **kwargs):
     return comp.importThrift(path, **kwargs)
 
 
-def _require_executable(name):
+def _require_executable(name, fallback):
     """Given `name`, assert on and return the path to that binary."""
     path = distutils.spawn.find_executable(name)
-    assert path is not None, 'Unable to find %s in PATH' % repr(name)
+    if path is None:
+        path = distutils.spawn.find_executable(fallback)
+
+    assert path is not None, \
+        'Unable to find %s or %s in PATH' % (name, fallback)
     return path
 
 
 class CompileContext(object):
     def __init__(self, root='.', debug=False):
         self.root = root
-        self.thrift_bin = _require_executable('thrift')
+        self.thrift_bin = _require_executable('thrift1', 'thrift')
         self.include_dirs = OrderedDict()
         self.dep_files = {}
         self.dep_contents = {}
