@@ -12,6 +12,12 @@ from sparts.tasks.thrift.handler import ThriftHandlerTask
 
 
 class ThriftServerTask(VTask):
+    """Base class for various thrift server implementations."""
+
+    # If self.MODULE is specified, it means that we specifically want this
+    # server to route requests to a matching ThriftHandler.  This is done
+    # so that we can have multiple ThriftServers handling requests for
+    # different services within the same process.
     MODULE = None
 
     def initTask(self):
@@ -33,9 +39,20 @@ class ThriftServerTask(VTask):
         if not isinstance(task, ThriftHandlerTask):
             return False
 
-        # If self.MODULE is None, then connect *any* ThriftHandlerTask
+        # If self.MODULE is None, then connect *any* ThriftHandlerTask.
         if self.MODULE is None:
             return True
+
+        # Otherwise, if this is the same thrift module as the handler, we have
+        # a match
+        if self.MODULE is task.MODULE:
+            return True
+
+        # If they did not match, there's a chance that we used in-process
+        # thrift compilation to produce separate instances of equivalent
+        # modules.  Check the individual methods on the handler to make sure
+        # are sort of similar (though the args may differ...).
+        # TODO: Consider re-evaluating this strategy longer-term.
 
         iface = self.MODULE.Iface
         # Verify task has all the Iface methods.
