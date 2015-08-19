@@ -4,11 +4,15 @@ CHANGES
 master
 ------
 * PATENTS: Updated to version 2 (http://fb.me/patents2)
+* CPPServerTask: new module sparts.tasks.thrift.cppserver uses TCppServer wrapper from fbthrift
+* ThriftServer: support for TMultiplexedProcessor in server via MULTIPLEX=True
+* ThriftClient: support for TMultiplexedProtocol in client via `multiplex_service` kwarg
 * fileutils: added `readfilebytes`, `writefilebytes` for raw binary bulk IO
 * SelectTask: play more nicely with frameworks that steal sys.stdout
 * DirectoryWatcherTask: log warning instead of crash if directory doesn't exist
 * ThriftClient: detect usage errors in constructor more easily
 * bugfix: fix sparts.thrift.compiler.compile() convenience method
+* Split sparts.tasks.thrift into submodules, handler, server, nbserver
 
 0.7.2
 ------
