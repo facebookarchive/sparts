@@ -18,6 +18,9 @@ class ThriftHandlerTask(VTask):
     LOOPLESS = True
     MODULE = None
 
+    # Override the service name to use if this is a multiplexed service
+    SERVICE_NAME = None
+
     _processor = None
 
     def initTask(self):
@@ -48,3 +51,9 @@ class ThriftHandlerTask(VTask):
         if self._processor is None:
             self._processor = self._makeProcessor()
         return self._processor
+
+    @property
+    def service_name(self):
+        if self.SERVICE_NAME is not None:
+            return self.SERVICE_NAME
+        return self.name

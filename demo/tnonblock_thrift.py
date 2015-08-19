@@ -7,8 +7,28 @@
 from sparts.vservice import VService
 from sparts.tasks.thrift import NBServerTask
 from sparts.tasks.fb303 import FB303HandlerTask
+from sparts.tasks.thrift.handler import ThriftHandlerTask
+
+from sparts.gen.sparts_examples import SpartsFooService, SpartsBarService
+
+class FooServiceHandler(ThriftHandlerTask):
+    MODULE = SpartsFooService
+    def foo(self):
+        return "foo is better!"
+
+FooServiceHandler.register()
+
+class BarServiceHandler(ThriftHandlerTask):
+    MODULE = SpartsBarService
+    def bar(self):
+        return "bar is better!"
+
+BarServiceHandler.register()
+
 
 NBServerTask.register()
+NBServerTask.MULTIPLEX = True
+
 FB303HandlerTask.register()
 
 

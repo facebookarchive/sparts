@@ -9,6 +9,7 @@ from __future__ import absolute_import
 
 from sparts.vtask import VTask
 from sparts.tasks.thrift.handler import ThriftHandlerTask
+from thrift.TMultiplexedProcessor import TMultiplexedProcessor
 
 
 class ThriftServerTask(VTask):
@@ -19,19 +20,29 @@ class ThriftServerTask(VTask):
     # so that we can have multiple ThriftServers handling requests for
     # different services within the same process.
     MODULE = None
+    MULTIPLEX = False
 
     def initTask(self):
         super(ThriftServerTask, self).initTask()
         processors = self._findProcessors()
         assert len(processors) > 0, \
                 "No processors found for %s" % (self.MODULE)
-        assert len(processors) == 1, "Too many processors found for %s" % \
-                (self.MODULE)
-        self.processorTask = processors[0]
 
-    @property
-    def processor(self):
-        return self.processorTask.processor
+        if not self.MULTIPLEX:
+            # For non-multiplexed services, we can only have one processor
+            # that matches the module name.
+            assert len(processors) == 1, "Too many processors found for %s" % \
+                    (self.MODULE)
+            self.processor = processors[0].processor
+        else:
+            # For multiplexed services, register all that match.
+            self.processor = TMultiplexedProcessor()
+            for processor_task in processors:
+                self.logger.info("Registering %s as Multiplexed Service, '%s'",
+                                 processor_task.processor,
+                                 processor_task.service_name)
+                self.processor.registerProcessor(processor_task.service_name,
+                                                 processor_task.processor)
 
     def _checkTaskModule(self, task):
         """Returns True if `task` implements the appropriate MODULE Iface"""

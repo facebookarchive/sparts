@@ -11,6 +11,7 @@ from thrift.transport.TSocket import TSocket
 from thrift.transport.TTransport import TFramedTransport, TBufferedTransport
 from thrift.transport.THttpClient import THttpClient
 from thrift.protocol.TBinaryProtocol import TBinaryProtocol
+from thrift.protocol.TMultiplexedProtocol import TMultiplexedProtocol
 
 from functools import partial
 
@@ -45,6 +46,7 @@ class ThriftClient(object):
         `connect_timeout` - Socket connection timeout
         `transport_class` - Thrift transport class
         `protocol_class` - Thrift protocol class
+        `multiplex_service` - Query `multiplex_service`-specific service name.
 
     Additional features are configurable with other arguments:
 
@@ -61,6 +63,7 @@ class ThriftClient(object):
     TRANSPORT_CLASS = None
     PROTOCOL_CLASS = TBinaryProtocol
     CONNECT_TIMEOUT = 3.0
+    MULTIPLEX_SERVICE = None
 
     @classmethod
     def for_hostport(cls, host=None, port=None, **kwargs):
@@ -82,7 +85,7 @@ class ThriftClient(object):
 
     def __init__(self, host=None, port=None, module=None, lazy=True,
                  connect_timeout=None, transport_class=None,
-                 protocol_class=None, path=None):
+                 protocol_class=None, path=None, multiplex_service=None):
 
         self._initAttribute('host', host, self.HOST)
         self._initAttribute('port', port, self.PORT)
@@ -90,6 +93,8 @@ class ThriftClient(object):
         self._initAttribute('module', module, self.MODULE)
         self._initAttribute('connect_timeout', connect_timeout,
                             self.CONNECT_TIMEOUT)
+        self._initAttribute('multiplex_service', multiplex_service,
+                            self.MULTIPLEX_SERVICE)
 
         # For non-http, default should be TFramed, for http, default TBuffered
         if self.path is None:
@@ -123,6 +128,12 @@ class ThriftClient(object):
         self._socket.setTimeout(int(self.connect_timeout * 1000))
         self._transport = self.transport_class(self._socket)
         self._protocol = self.protocol_class(self._transport)
+        if self.multiplex_service is not None:
+            self._protocol = TMultiplexedProtocol(
+                self._protocol,
+                self.multiplex_service,
+            )
+
         self._client = self.module.Client(self._protocol)
         self._transport.open()
 
