@@ -3,6 +3,9 @@ CHANGES
 
 master
 ------
+
+0.7.3
+-----
 * PATENTS: Updated to version 2 (http://fb.me/patents2)
 * CPPServerTask: new module sparts.tasks.thrift.cppserver uses TCppServer wrapper from fbthrift
 * ThriftServer: support for TMultiplexedProcessor in server via MULTIPLEX=True
