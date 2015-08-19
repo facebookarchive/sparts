@@ -30,9 +30,10 @@ class ThriftServerTask(VTask):
 
         if not self.MULTIPLEX:
             # For non-multiplexed services, we can only have one processor
-            # that matches the module name.
-            assert len(processors) == 1, "Too many processors found for %s" % \
-                    (self.MODULE)
+            # that matches the module.
+            assert len(processors) == 1, (
+                "Too many processors found for %s.  Did you mean to set " 
+                "MULTIPLEX = True on your server?" % (self.MODULE))
             self.processor = processors[0].processor
         else:
             # For multiplexed services, register all that match.
