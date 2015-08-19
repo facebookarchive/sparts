@@ -8,12 +8,12 @@ from __future__ import absolute_import
 
 from sparts.tests.base import MultiTaskTestCase, Skip
 from sparts.thrift import compiler
-from sparts.thrift.client import ThriftClient
 
 # Make sure we have the thrift-runtime related sparts tasks
 try:
     from sparts.tasks.thrift.handler import ThriftHandlerTask
     from sparts.tasks.thrift.nbserver import NBServerTask
+    from sparts.thrift.client import ThriftClient
 except ImportError:
     raise Skip("Need thrift language bindings to run this test")
 
