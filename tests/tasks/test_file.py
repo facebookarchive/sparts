@@ -72,7 +72,7 @@ class TestMyTask(SingleTaskTestCase):
         self.task.stat.return_value.st_mtime = st.st_mtime - 10
 
         self.task.execute()
-        self.task.stat.assert_called()
+        self.task.stat.assert_called_with(path)
 
         st2 = self.task.stat()
         self.assertEqual(st2.st_atime, st.st_atime - 10)
