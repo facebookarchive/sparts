@@ -122,7 +122,7 @@ class CompileContext(object):
 
     def importThriftStr(self, payload, **kwargs):
         """Compiles a thrift file from string `payload`"""
-        with tempfile.NamedTemporaryFile(suffix='.thrift') as f:
+        with tempfile.NamedTemporaryFile(suffix='.thrift', mode='w') as f:
             if self.debug:
                 f.delete = False
             f.write(payload)
@@ -229,7 +229,7 @@ class CompileContext(object):
         # Generate a new module object, and assign the modified locals
         # as attributes on it.
         result = imp.new_module(path)
-        for k, v in exec_locals.iteritems():
+        for k, v in iteritems(exec_locals):
             setattr(result, k, v)
 
-        return result
+        return result 
