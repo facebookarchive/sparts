@@ -7,14 +7,9 @@
 from sparts.tests.base import BaseSpartsTestCase, Skip
 from sparts.thrift import compiler
 
-import distutils.spawn
-import sys
-
 # Only run thrift compiler test if the thrift compiler was found.
-if distutils.spawn.find_executable('thrift') is None:
+if compiler.get_executable() is None:
     raise Skip("Unable to find thrift binary on this system")
-if sys.version >= '3':
-    raise Skip("Thrift compiler is currently incompatible with py3k")
 
 
 class ContextTests(BaseSpartsTestCase):

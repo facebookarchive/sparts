@@ -18,9 +18,7 @@ except ImportError:
     raise Skip("Need thrift language bindings to run this test")
 
 # Make sure we have the thrift compiler
-try:
-    compiler._require_executable('thrift1', 'thrift')
-except AssertionError:
+if compiler.get_executable() is None:
     raise Skip("Need thrift compiler to run this test")
 
 # String containing .thrift file contents for some example services
