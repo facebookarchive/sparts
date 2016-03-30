@@ -82,14 +82,23 @@ class option(_Nameable):
         if value is None:
             return value
 
-        if self.type is not None:
-            value = self.type(value)
+        value = self._sanitize_value(value)
         return value
 
     def __set__(self, obj, value):
-        if self.type is not None:
-            value = self.type(value)
+        value = self._sanitize_value(value)
         self._setter(obj)(self.name, value)
+
+    def _sanitize_value(self, value):
+        '''
+        Given a value, make sure it is of the right type.
+        '''
+        if self.type is not None:
+            if self.nargs is not None:
+                value = [self.type(v) for v in value]
+            else:
+                value = self.type(value)
+        return value
 
     def _getter(self, obj):
         getter = getattr(obj, 'getTaskOption', None)
