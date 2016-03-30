@@ -169,7 +169,11 @@ if sys.version < '3.3':
     tests_require.append('mock')
 
 if sys.version < '3.0':
-    tests_require.append('Twisted')
+    twisted_version = 'Twisted'
+    # twisted > 15.1 stop supporting python 2.6
+    if sys.version < '2.7':
+        twisted_version += '<15.5.0'
+    tests_require.append(twisted_version)
     tests_require.append('thrift')
 else:
     # Py3k requires Twisted >= 14.0
