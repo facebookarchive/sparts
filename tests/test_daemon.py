@@ -65,24 +65,30 @@ class SimpleTestCase(BaseSpartsTestCase):
             self.fail()
 
         with NamedTemporaryFile() as tf:
-            try:
-                daemon.daemonize(daemon_helper, name='sparts_unittest',
-                                 pidfile=tf.name, logger=self.logger)
-            except SystemExit:
-                # Catch the daemonize library's attempt to sys.exit() 
-                pass
-
-            def checkdaemon():
+            # Fork so daemonizing the current process does not mess up with the
+            # test suite.
+            child_pid = os.fork()
+            if child_pid == 0:
                 try:
-                    return daemon.status(tf.name, self.logger)
-                except ValueError:
-                    return False
+                    daemon.daemonize(daemon_helper, name='sparts_unittest',
+                                     pidfile=tf.name, logger=self.logger)
+                except SystemExit:
+                    # Catch the daemonize library's attempt to sys.exit()
+                    pass
+            else:
 
-            # Eliminate the race condition waiting for daemonize.Daemonize()
-            # to create *and* write the pid to the the pidfile.
-            timer.run_until_true(checkdaemon, timeout=1.0)
+                def checkdaemon():
+                    try:
+                        return daemon.status(tf.name, self.logger)
+                    except ValueError:
+                        return False
 
-            self.assertTrue(daemon.status(tf.name, self.logger))
-            self.assertTrue(daemon.kill(tf.name, self.logger))
+                # Eliminate the race condition waiting for
+                # daemonize.Daemonize() to create *and* write the pid to the
+                # pidfile.
+                timer.run_until_true(checkdaemon, timeout=1.0)
+
+                self.assertTrue(daemon.status(tf.name, self.logger))
+                self.assertTrue(daemon.kill(tf.name, self.logger))
 
         self.assertFalse(daemon.status(tf.name, self.logger))
