@@ -256,15 +256,15 @@ class ProcessCommunicateHandler(object):
         self._returncode = None
         self.future = Future()
 
+        # TODO: Consider instead of this, registering a done callback to
+        # kill the Popen if the process is cancelled
+        self.future.set_running_or_notify_cancel()
+
         ProcessStreamHandler(popen, select_task,
             on_stdout=self._stdout_data.append,
             on_stderr=self._stderr_data.append,
             on_exit=self._on_exit,
         )
-
-        # TODO: Consider instead of this, registering a done callback to
-        # kill the Popen if the process is cancelled
-        self.future.set_running_or_notify_cancel()
 
     def _on_exit(self, returncode):
         """Callback registered to handle process completion.
