@@ -128,3 +128,19 @@ class FutureTests(SingleTaskTestCase):
         # Wait for it to complete, check the result
         result = ctx.future.result(5.0)
         self.assertEqual(result, 'foobar')
+
+    def test_future_runloop_raises(self):
+        """Unhandled exception does not kill the whole loop."""
+        self.task.do_raise = True
+
+        fut = self.task.submit('not-an-actual-task')
+
+        # This should not raise an exception even if - wait for the main thread
+        # for half a second
+        self.runloop.join(0.5)
+
+        # The main thread should still be alive...
+        self.assertTrue(self.runloop.isAlive())
+
+        # The future should have an exception set on it
+        self.assertTrue(fut.exception())
