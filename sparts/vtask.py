@@ -202,6 +202,13 @@ class ExecuteContext(object):
         if self.future is not None:
             self.future.set_exception(exception)
 
+            # For future-based work, let's allow the submitter to handle the
+            # exception gracefully. Since we can't know if that was successful,
+            # just assume the exception will be handled (or re-raised) by
+            # someone awaiting the future.
+            # This isn't guaranteed, but is a reasonable assumption.
+            handled = True
+
         if self.deferred is not None:
             unhandled = []
             self.deferred.addErrback(self._unhandledErrback, unhandled)
