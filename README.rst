@@ -9,7 +9,7 @@ Design Goals
 ============
 
 -  Be able to implement services with as little code as possible
--  Support as many RPC transports as possible (thrift, http, dbus, etc)
+-  Support as many RPC transports as possible (thrift, HTTP, dbus, etc)
 -  Make it painless to integrate services that require custom IO loops
    (twisted, tornado, glib, etc)
 
@@ -17,7 +17,7 @@ HOWTO
 =====
 
 A sparts service typically consists of two parts, the core "service",
-and its "tasks".  Background and offline processing is generally done
+and its "tasks".  Background and offline processing are generally done
 by tasks, while common or shared functionality belongs to the service.
 
 Service
@@ -85,14 +85,14 @@ Now running it emits:
     INFO:VService.TornadoHTTPTask:TornadoHTTPTask Server Started on :: (port 8000)
     DEBUG:MyService:All tasks started
 
-And as you can see, you can curl the webserver:
+And as you can see, you can curl the web server:
 
 ::
 
     > curl localhost:8000
     Hello, world
 
-Tasks can be subclassed to do all kinds of things.  This one prints the current unix
+Tasks can be subclassed to do all kinds of things.  This one prints the current Unix
 timestamp every second:
 
 ::
